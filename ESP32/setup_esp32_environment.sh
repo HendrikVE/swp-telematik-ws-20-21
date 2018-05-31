@@ -40,6 +40,7 @@ echo "export PATH=\"\$PATH:\$HOME/$dir_name/xtensa-esp32-elf/bin\"" >> ~/.profil
 
 # setup esp-idf
 git clone --recursive https://github.com/espressif/esp-idf.git
+git submodule add https://github.com/tuanpmt/espmqtt.git components/espmqtt
 echo "export IDF_PATH=\"\$HOME/$dir_name/esp-idf\"" >> ~/.profile
 
 echo "You need to log out to make the changes effective"
