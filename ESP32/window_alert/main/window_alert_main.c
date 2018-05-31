@@ -8,6 +8,7 @@
 #include "esp_system.h"
 #include "esp_wifi.h"
 #include "esp_log.h"
+#include "esp_timer.h"
 #include "nvs_flash.h"
 
 #include "lwip/err.h"
@@ -22,6 +23,8 @@ static EventGroupHandle_t wifi_event_group;
    but we only care about one event - are we connected
    to the AP with an IP? */
 const int WIFI_CONNECTED_BIT = BIT0;
+
+static xQueueHandle gpio_evt_queue = NULL;
 
 static esp_err_t event_handler(void *ctx, system_event_t *event) {
 
@@ -89,8 +92,6 @@ void wifi_init_softap() {
     ESP_LOGI(TAG, "wifi_init_softap finished.SSID:%s", BOARD_WIFI_SSID);
 }
 
-static xQueueHandle gpio_evt_queue = NULL;
-
 static void IRAM_ATTR gpio_isr_handler(void* arg) {
 
     uint32_t gpio_num = (uint32_t) arg;
@@ -99,9 +100,20 @@ static void IRAM_ATTR gpio_isr_handler(void* arg) {
 
 static void gpio_task_example(void* arg) {
 
+    unsigned long timestamp_last_interrupt = 0;
+
     uint32_t io_num;
     while (1) {
         if(xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY)) {
+
+            unsigned long current_time = (unsigned long) esp_timer_get_time() / 1000;
+
+            unsigned long time_diff = current_time - timestamp_last_interrupt;
+
+            if (time_diff < WINDOW_INTERRUPT_DEBOUNCE_MS) {
+                // not within debounce time -> ignore interrupt
+                continue;
+            }
 
             if (gpio_get_level(io_num) == LOW) {
                 println("window has been opened");
@@ -110,6 +122,7 @@ static void gpio_task_example(void* arg) {
                 println("window has been closed");
             }
 
+            timestamp_last_interrupt = current_time;
         }
     }
 }

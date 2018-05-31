@@ -13,6 +13,8 @@
 #define LOW 0
 #define HIGH 1
 
+#define WINDOW_INTERRUPT_DEBOUNCE_MS 100
+
 #define ESP_INTR_FLAG_DEFAULT 0
 
 static const char *TAG = "window alert";
