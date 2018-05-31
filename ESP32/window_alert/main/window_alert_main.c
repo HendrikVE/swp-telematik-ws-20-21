@@ -127,11 +127,9 @@ static void gpio_task_example(void* arg) {
             }
 
             if (gpio_get_level(io_num) == LOW) {
-                println("window has been opened");
                 esp_mqtt_client_publish(client, "/topic/qos0", "window has been opened", 0, 0, 0);
             }
             else if (gpio_get_level(io_num) == HIGH) {
-                println("window has been closed");
                 esp_mqtt_client_publish(client, "/topic/qos0", "window has been closed", 0, 0, 0);
             }
 
@@ -235,6 +233,7 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event) {
 
     esp_mqtt_client_handle_t client = event->client;
     int msg_id;
+    int gpio_pin;
     // your_context_t *context = event->context;
     switch (event->event_id) {
 
@@ -258,6 +257,10 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event) {
             ESP_LOGI(TAG, "MQTT_EVENT_SUBSCRIBED, msg_id=%d", event->msg_id);
             msg_id = esp_mqtt_client_publish(client, "/topic/qos0", "data", 0, 0, 0);
             ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
+
+            // initial fake interrupt
+            gpio_pin = GPIO_OUTPUT_MAGNETIC_SENSOR;
+            gpio_isr_handler(&gpio_pin);
             break;
 
         case MQTT_EVENT_UNSUBSCRIBED:
@@ -307,8 +310,4 @@ void app_main() {
     init_magnetic_sensor();
 
     mqtt_app_start();
-
-    // initial fake interrupt
-    int gpio_pin = GPIO_OUTPUT_MAGNETIC_SENSOR;
-    gpio_isr_handler(&gpio_pin);
 }
