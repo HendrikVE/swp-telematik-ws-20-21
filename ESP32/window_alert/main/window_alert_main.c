@@ -27,6 +27,8 @@ const int WIFI_CONNECTED_BIT = BIT0;
 
 static xQueueHandle gpio_evt_queue = NULL;
 
+static esp_mqtt_client_handle_t client;
+
 static esp_err_t event_handler(void *ctx, system_event_t *event) {
 
     switch(event->event_id) {
@@ -126,9 +128,11 @@ static void gpio_task_example(void* arg) {
 
             if (gpio_get_level(io_num) == LOW) {
                 println("window has been opened");
+                esp_mqtt_client_publish(client, "/topic/qos0", "window has been opened", 0, 0, 0);
             }
             else if (gpio_get_level(io_num) == HIGH) {
                 println("window has been closed");
+                esp_mqtt_client_publish(client, "/topic/qos0", "window has been closed", 0, 0, 0);
             }
 
             timestamp_last_interrupt = current_time;
@@ -151,7 +155,6 @@ void init_magnetic_sensor() {
 
     // output always on to detect changes on input
     gpio_set_level(GPIO_OUTPUT_MAGNETIC_SENSOR, HIGH);
-
 }
 
 void set_gpio_output(int gpio_pin) {
@@ -288,7 +291,7 @@ static void mqtt_app_start(void) {
     };
 
     ESP_LOGI(TAG, "[APP] Free memory: %d bytes", esp_get_free_heap_size());
-    esp_mqtt_client_handle_t client = esp_mqtt_client_init(&mqtt_cfg);
+    client = esp_mqtt_client_init(&mqtt_cfg);
     esp_mqtt_client_start(client);
 }
 
@@ -303,9 +306,9 @@ void app_main() {
     ESP_LOGI(TAG, "init_magnetic_sensor()");
     init_magnetic_sensor();
 
+    mqtt_app_start();
+
     // initial fake interrupt
     int gpio_pin = GPIO_OUTPUT_MAGNETIC_SENSOR;
     gpio_isr_handler(&gpio_pin);
-
-    mqtt_app_start();
 }
