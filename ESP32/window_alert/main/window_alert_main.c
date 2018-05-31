@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -8,23 +7,13 @@
 #include "freertos/event_groups.h"
 #include "esp_system.h"
 #include "esp_wifi.h"
-#include "esp_event_loop.h"
 #include "esp_log.h"
 #include "nvs_flash.h"
-#include "driver/gpio.h"
 
 #include "lwip/err.h"
 #include "lwip/sys.h"
 
-#define BOARD_WIFI_MODE_AP CONFIG_ESP_WIFI_MODE_AP //TRUE:AP FALSE:STA
-#define BOARD_WIFI_SSID    CONFIG_ESP_WIFI_SSID
-#define BOARD_WIFI_PASS    CONFIG_ESP_WIFI_PASSWORD
-#define BOARD_MAX_STA_CONN CONFIG_MAX_STA_CONN
-
-#define GPIO_OUTPUT_MAGNETIC_SENSOR 18
-#define GPIO_INPUT_MAGNETIC_SENSOR  4
-
-#define ESP_INTR_FLAG_DEFAULT 0
+#include "window_alert_main.h"
 
 /* FreeRTOS event group to signal when we are connected*/
 static EventGroupHandle_t wifi_event_group;
@@ -33,12 +22,6 @@ static EventGroupHandle_t wifi_event_group;
    but we only care about one event - are we connected
    to the AP with an IP? */
 const int WIFI_CONNECTED_BIT = BIT0;
-
-static const char *TAG = "window alert";
-
-void set_gpio_output(int gpio_pin);
-void set_gpio_input(int gpio_pin, bool pull_down, bool pull_up, gpio_int_type_t intr_type);
-
 
 static esp_err_t event_handler(void *ctx, system_event_t *event) {
 
@@ -125,10 +108,10 @@ static void gpio_task_example(void* arg) {
 }
 
 void init_magnetic_sensor() {
-	
+
 	set_gpio_output(GPIO_OUTPUT_MAGNETIC_SENSOR);
 	set_gpio_input(GPIO_INPUT_MAGNETIC_SENSOR, true, false, GPIO_INTR_ANYEDGE);
-	
+
     //create a queue to handle gpio event from isr
     gpio_evt_queue = xQueueCreate(10, sizeof(uint32_t));
     //start gpio task
@@ -143,7 +126,7 @@ void init_magnetic_sensor() {
 }
 
 void set_gpio_output(int gpio_pin) {
-	
+
 	gpio_config_t io_conf;
     io_conf.intr_type = GPIO_PIN_INTR_DISABLE;
     io_conf.mode = GPIO_MODE_OUTPUT;
@@ -155,7 +138,7 @@ void set_gpio_output(int gpio_pin) {
 }
 
 void set_gpio_input(int gpio_pin, bool pull_down, bool pull_up, gpio_int_type_t intr_type) {
-	
+
 	gpio_config_t io_conf;
 	//interrupt of rising edge
     io_conf.intr_type = intr_type;
