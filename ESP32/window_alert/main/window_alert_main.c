@@ -239,5 +239,6 @@ void app_main() {
     init_magnetic_sensor();
 
     // initial fake interrupt
-    gpio_isr_handler(GPIO_INPUT_MAGNETIC_SENSOR);
+    int gpio_pin = GPIO_OUTPUT_MAGNETIC_SENSOR;
+    gpio_isr_handler(&gpio_pin);
 }
