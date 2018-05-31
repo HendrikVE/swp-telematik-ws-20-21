@@ -1,12 +1,17 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "freertos/queue.h"
 #include "freertos/event_groups.h"
 #include "esp_system.h"
 #include "esp_wifi.h"
 #include "esp_event_loop.h"
 #include "esp_log.h"
 #include "nvs_flash.h"
+#include "driver/gpio.h"
 
 #include "lwip/err.h"
 #include "lwip/sys.h"
@@ -15,6 +20,11 @@
 #define BOARD_WIFI_SSID    CONFIG_ESP_WIFI_SSID
 #define BOARD_WIFI_PASS    CONFIG_ESP_WIFI_PASSWORD
 #define BOARD_MAX_STA_CONN CONFIG_MAX_STA_CONN
+
+#define GPIO_OUTPUT_MAGNETIC_SENSOR 18
+#define GPIO_INPUT_MAGNETIC_SENSOR  4
+
+#define ESP_INTR_FLAG_DEFAULT 0
 
 /* FreeRTOS event group to signal when we are connected*/
 static EventGroupHandle_t wifi_event_group;
@@ -26,6 +36,10 @@ const int WIFI_CONNECTED_BIT = BIT0;
 
 static const char *TAG = "window alert";
 
+void set_gpio_output(int gpio_pin);
+void set_gpio_input(int gpio_pin, bool pull_down, bool pull_up, gpio_int_type_t intr_type);
+
+
 static esp_err_t event_handler(void *ctx, system_event_t *event) {
 
     switch(event->event_id) {
@@ -35,8 +49,6 @@ static esp_err_t event_handler(void *ctx, system_event_t *event) {
             break;
 
         case SYSTEM_EVENT_STA_GOT_IP:
-            ESP_LOGI(TAG, "got ip:%s",
-                     ip4addr_ntoa(&event->event_info.got_ip.ip_info.ip));
             xEventGroupSetBits(wifi_event_group, WIFI_CONNECTED_BIT);
             break;
 
@@ -94,6 +106,67 @@ void wifi_init_softap() {
     ESP_LOGI(TAG, "wifi_init_softap finished.SSID:%s", BOARD_WIFI_SSID);
 }
 
+static xQueueHandle gpio_evt_queue = NULL;
+
+static void IRAM_ATTR gpio_isr_handler(void* arg) {
+
+    uint32_t gpio_num = (uint32_t) arg;
+    xQueueSendFromISR(gpio_evt_queue, &gpio_num, NULL);
+}
+
+static void gpio_task_example(void* arg) {
+
+    uint32_t io_num;
+    while (1) {
+        if(xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY)) {
+            printf("GPIO[%d] intr, val: %d\n", io_num, gpio_get_level(io_num));
+        }
+    }
+}
+
+void init_magnetic_sensor() {
+	
+	set_gpio_output(GPIO_OUTPUT_MAGNETIC_SENSOR);
+	set_gpio_input(GPIO_INPUT_MAGNETIC_SENSOR, true, false, GPIO_INTR_ANYEDGE);
+	
+    //create a queue to handle gpio event from isr
+    gpio_evt_queue = xQueueCreate(10, sizeof(uint32_t));
+    //start gpio task
+    xTaskCreate(gpio_task_example, "gpio_task_example", 2048, NULL, 10, NULL);
+
+    gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT);
+    gpio_isr_handler_add(GPIO_INPUT_MAGNETIC_SENSOR, gpio_isr_handler, (void*) GPIO_INPUT_MAGNETIC_SENSOR);
+
+    // output always on to detect changes on input
+    gpio_set_level(GPIO_OUTPUT_MAGNETIC_SENSOR, 1);
+
+}
+
+void set_gpio_output(int gpio_pin) {
+	
+	gpio_config_t io_conf;
+    io_conf.intr_type = GPIO_PIN_INTR_DISABLE;
+    io_conf.mode = GPIO_MODE_OUTPUT;
+    //bit mask of the pins that you want to set
+    io_conf.pin_bit_mask = (1ULL << gpio_pin);
+    io_conf.pull_down_en = 0;
+    io_conf.pull_up_en = 0;
+    gpio_config(&io_conf);
+}
+
+void set_gpio_input(int gpio_pin, bool pull_down, bool pull_up, gpio_int_type_t intr_type) {
+	
+	gpio_config_t io_conf;
+	//interrupt of rising edge
+    io_conf.intr_type = intr_type;
+    //bit mask of the pins
+    io_conf.pin_bit_mask = (1ULL << gpio_pin);
+    io_conf.mode = GPIO_MODE_INPUT;
+	io_conf.pull_down_en = pull_down;
+    io_conf.pull_up_en = pull_up;
+    gpio_config(&io_conf);
+}
+
 void wifi_init_sta() {
 
     wifi_event_group = xEventGroupCreate();
@@ -118,22 +191,35 @@ void wifi_init_sta() {
     ESP_LOGI(TAG, "connect to ap SSID:%s", BOARD_WIFI_SSID);
 }
 
-void app_main() {
+void init_nvs() {
 
-    //Initialize NVS
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES) {
       ESP_ERROR_CHECK(nvs_flash_erase());
       ret = nvs_flash_init();
     }
     ESP_ERROR_CHECK(ret);
+}
 
-#if BOARD_WIFI_MODE_AP
-    ESP_LOGI(TAG, "ESP_WIFI_MODE_AP");
-    wifi_init_softap();
-#else
-    ESP_LOGI(TAG, "ESP_WIFI_MODE_STA");
-    wifi_init_sta();
-#endif /*BOARD_WIFI_MODE_AP*/
+void init_wifi() {
 
+    #if BOARD_WIFI_MODE_AP
+        ESP_LOGI(TAG, "ESP_WIFI_MODE_AP");
+        wifi_init_softap();
+    #else
+        ESP_LOGI(TAG, "ESP_WIFI_MODE_STA");
+        wifi_init_sta();
+    #endif /*BOARD_WIFI_MODE_AP*/
+}
+
+void app_main() {
+
+    ESP_LOGI(TAG, "init_nvs()");
+    init_nvs();
+
+    ESP_LOGI(TAG, "init_wifi()");
+    init_wifi();
+
+    ESP_LOGI(TAG, "init_magnetic_sensor()");
+    init_magnetic_sensor();
 }
