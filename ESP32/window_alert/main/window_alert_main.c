@@ -102,7 +102,14 @@ static void gpio_task_example(void* arg) {
     uint32_t io_num;
     while (1) {
         if(xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY)) {
-            printf("GPIO[%d] intr, val: %d\n", io_num, gpio_get_level(io_num));
+
+            if (gpio_get_level(io_num) == 0) {
+                println("window has been opened");
+            }
+            else if (gpio_get_level(io_num) == 1) {
+                println("window has been closed");
+            }
+
         }
     }
 }
@@ -193,6 +200,10 @@ void init_wifi() {
         ESP_LOGI(TAG, "ESP_WIFI_MODE_STA");
         wifi_init_sta();
     #endif /*BOARD_WIFI_MODE_AP*/
+}
+
+void println(char* text) {
+    printf("%s\n", text);
 }
 
 void app_main() {
