@@ -229,4 +229,7 @@ void app_main() {
 
     ESP_LOGI(TAG, "init_magnetic_sensor()");
     init_magnetic_sensor();
+
+    // initial fake interrupt
+    gpio_isr_handler(GPIO_INPUT_MAGNETIC_SENSOR);
 }
