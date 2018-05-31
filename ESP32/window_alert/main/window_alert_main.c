@@ -108,9 +108,17 @@ static void gpio_task_example(void* arg) {
 
             unsigned long current_time = (unsigned long) esp_timer_get_time() / 1000;
 
-            unsigned long time_diff = current_time - timestamp_last_interrupt;
+            unsigned long time_diff = 0;
 
-            if (time_diff < WINDOW_INTERRUPT_DEBOUNCE_MS) {
+            if (current_time < timestamp_last_interrupt) {
+                // catch overflow
+                time_diff = WINDOW_INTERRUPT_DEBOUNCE_MS + 1;
+            }
+            else {
+                time_diff = current_time - timestamp_last_interrupt;
+            }
+
+            if (time_diff <= WINDOW_INTERRUPT_DEBOUNCE_MS) {
                 // not within debounce time -> ignore interrupt
                 continue;
             }
