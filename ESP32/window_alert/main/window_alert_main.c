@@ -103,10 +103,10 @@ static void gpio_task_example(void* arg) {
     while (1) {
         if(xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY)) {
 
-            if (gpio_get_level(io_num) == 0) {
+            if (gpio_get_level(io_num) == LOW) {
                 println("window has been opened");
             }
-            else if (gpio_get_level(io_num) == 1) {
+            else if (gpio_get_level(io_num) == HIGH) {
                 println("window has been closed");
             }
 
