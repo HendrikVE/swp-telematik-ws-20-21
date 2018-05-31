@@ -19,12 +19,12 @@ arch=$(uname -m)
 if [ $arch == "x86_64" ]
 then
     echo "0"
-    file=xtensa-esp32-elf-linux64-1.22.0-61-gab8375a-5.2.0.tar.gz
+    file=xtensa-esp32-elf-linux64-1.22.0-80-g6c4433a-5.2.0.tar.gz
 
 elif [ $arch == "i686" ] || [ $arch == "i386" ]
 then
     echo "1"
-    file=xtensa-esp32-elf-linux32-1.22.0-61-gab8375a-5.2.0.tar.gz
+    file=xtensa-esp32-elf-linux32-1.22.0-80-g6c4433a-5.2.0.tar.gz
 
 else
     >&2 echo "system not supported"
@@ -33,7 +33,7 @@ fi
 
 wget "https://dl.espressif.com/dl/$file" || exit 1
 
-tar -xzf $file
+tar -xzf $file && rm $file
 
 echo "# ESP32" >> ~/.profile
 echo "export PATH=\"\$PATH:\$HOME/$dir_name/xtensa-esp32-elf/bin\"" >> ~/.profile
