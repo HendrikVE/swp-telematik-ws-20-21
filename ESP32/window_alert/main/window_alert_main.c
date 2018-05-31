@@ -103,7 +103,7 @@ static void gpio_task_example(void* arg) {
     unsigned long timestamp_last_interrupt = 0;
 
     uint32_t io_num;
-    while (1) {
+    while (true) {
         if(xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY)) {
 
             unsigned long current_time = (unsigned long) esp_timer_get_time() / 1000;
@@ -149,7 +149,7 @@ void init_magnetic_sensor() {
     gpio_isr_handler_add(GPIO_INPUT_MAGNETIC_SENSOR, gpio_isr_handler, (void*) GPIO_INPUT_MAGNETIC_SENSOR);
 
     // output always on to detect changes on input
-    gpio_set_level(GPIO_OUTPUT_MAGNETIC_SENSOR, 1);
+    gpio_set_level(GPIO_OUTPUT_MAGNETIC_SENSOR, HIGH);
 
 }
 
