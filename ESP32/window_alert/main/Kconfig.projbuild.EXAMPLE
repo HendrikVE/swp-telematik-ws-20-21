@@ -35,3 +35,27 @@ config MAX_STA_CONN
     help
 		Max number of the STA connects to AP.
 endmenu
+
+
+
+menu "MQTT Configuration"
+
+config MQTT_USER
+    string "MQTT Username"
+    default "your_username"
+    help
+		MQTT Username
+
+config MQTT_PASSWORD
+    string "MQTT Password"
+    default "your_password"
+    help
+		MQTT Password
+
+config MQTT_TOPIC
+    string "MQTT Topic"
+    default "your_topic"
+    help
+        MQTT topic you want to publish to
+
+endmenu

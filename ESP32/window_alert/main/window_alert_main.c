@@ -127,10 +127,10 @@ static void gpio_task_example(void* arg) {
             }
 
             if (gpio_get_level(io_num) == LOW) {
-                esp_mqtt_client_publish(client, "/topic/qos0", "window has been opened", 0, 0, 0);
+                esp_mqtt_client_publish(client, MQTT_TOPIC, "open", 0, 0, 0);
             }
             else if (gpio_get_level(io_num) == HIGH) {
-                esp_mqtt_client_publish(client, "/topic/qos0", "window has been closed", 0, 0, 0);
+                esp_mqtt_client_publish(client, MQTT_TOPIC, "closed", 0, 0, 0);
             }
 
             timestamp_last_interrupt = current_time;
@@ -239,14 +239,8 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event) {
 
         case MQTT_EVENT_CONNECTED:
             ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
-            msg_id = esp_mqtt_client_subscribe(client, "/topic/qos0", 0);
+            msg_id = esp_mqtt_client_subscribe(client, MQTT_TOPIC, 0);
             ESP_LOGI(TAG, "sent subscribe successful, msg_id=%d", msg_id);
-
-            msg_id = esp_mqtt_client_subscribe(client, "/topic/qos1", 1);
-            ESP_LOGI(TAG, "sent subscribe successful, msg_id=%d", msg_id);
-
-            msg_id = esp_mqtt_client_unsubscribe(client, "/topic/qos1");
-            ESP_LOGI(TAG, "sent unsubscribe successful, msg_id=%d", msg_id);
             break;
 
         case MQTT_EVENT_DISCONNECTED:
@@ -255,7 +249,7 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event) {
 
         case MQTT_EVENT_SUBSCRIBED:
             ESP_LOGI(TAG, "MQTT_EVENT_SUBSCRIBED, msg_id=%d", event->msg_id);
-            msg_id = esp_mqtt_client_publish(client, "/topic/qos0", "data", 0, 0, 0);
+            msg_id = esp_mqtt_client_publish(client, MQTT_TOPIC, "data", 0, 0, 0);
             ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
 
             // initial fake interrupt
@@ -288,9 +282,12 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event) {
 static void mqtt_app_start(void) {
 
     const esp_mqtt_client_config_t mqtt_cfg = {
-        .uri = "mqtts://iot.eclipse.org:8883",
+        //.uri = "mqtts://iot.eclipse.org:8883",
+        .uri = "mqtt://192.168.178.119:1883",
         .event_handle = mqtt_event_handler,
-        .cert_pem = (const char *)iot_eclipse_org_pem_start,
+        .username = MQTT_USER,
+        .password = MQTT_PASSWORD,
+        //.cert_pem = (const char *)iot_eclipse_org_pem_start,
     };
 
     ESP_LOGI(TAG, "[APP] Free memory: %d bytes", esp_get_free_heap_size());
