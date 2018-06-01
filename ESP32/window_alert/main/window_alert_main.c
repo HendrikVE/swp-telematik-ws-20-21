@@ -115,13 +115,13 @@ static void gpio_task_example(void* arg) {
 
             if (current_time < timestamp_last_interrupt) {
                 // catch overflow
-                time_diff = WINDOW_INTERRUPT_DEBOUNCE_MS + 1;
+                time_diff = CONFIG_SENSOR_WINDOW_INTERRUPT_DEBOUNCE_MS + 1;
             }
             else {
                 time_diff = current_time - timestamp_last_interrupt;
             }
 
-            if (time_diff <= WINDOW_INTERRUPT_DEBOUNCE_MS) {
+            if (time_diff <= CONFIG_SENSOR_WINDOW_INTERRUPT_DEBOUNCE_MS) {
                 // not within debounce time -> ignore interrupt
                 continue;
             }
@@ -142,8 +142,8 @@ static void gpio_task_example(void* arg) {
 
 void init_magnetic_sensor() {
 
-	set_gpio_output(GPIO_OUTPUT_MAGNETIC_SENSOR);
-	set_gpio_input(GPIO_INPUT_MAGNETIC_SENSOR, true, false, GPIO_INTR_ANYEDGE);
+	set_gpio_output(CONFIG_SENSOR_WINDOW_GPIO_OUTPUT);
+	set_gpio_input(CONFIG_SENSOR_WINDOW_GPIO_INPUT, true, false, GPIO_INTR_ANYEDGE);
 
     //create a queue to handle gpio event from isr
     gpio_evt_queue = xQueueCreate(10, sizeof(uint32_t));
@@ -151,10 +151,10 @@ void init_magnetic_sensor() {
     xTaskCreate(gpio_task_example, "gpio_task_example", 2048, NULL, 10, NULL);
 
     gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT);
-    gpio_isr_handler_add(GPIO_INPUT_MAGNETIC_SENSOR, gpio_isr_handler, (void*) GPIO_INPUT_MAGNETIC_SENSOR);
+    gpio_isr_handler_add(CONFIG_SENSOR_WINDOW_GPIO_INPUT, gpio_isr_handler, (void*) CONFIG_SENSOR_WINDOW_GPIO_INPUT);
 
     // output always on to detect changes on input
-    gpio_set_level(GPIO_OUTPUT_MAGNETIC_SENSOR, HIGH);
+    gpio_set_level(CONFIG_SENSOR_WINDOW_GPIO_OUTPUT, HIGH);
 }
 
 void set_gpio_output(int gpio_pin) {
@@ -243,7 +243,7 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event) {
             ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
 
             // initial fake interrupt
-            gpio_pin = GPIO_OUTPUT_MAGNETIC_SENSOR;
+            gpio_pin = CONFIG_SENSOR_WINDOW_GPIO_OUTPUT;
             gpio_isr_handler(&gpio_pin);
             break;
 

@@ -2,13 +2,8 @@
 #include "driver/gpio.h"
 #include "esp_event_loop.h"
 
-#define GPIO_OUTPUT_MAGNETIC_SENSOR 18
-#define GPIO_INPUT_MAGNETIC_SENSOR  4
-
 #define LOW 0
 #define HIGH 1
-
-#define WINDOW_INTERRUPT_DEBOUNCE_MS 100
 
 #define ESP_INTR_FLAG_DEFAULT 0
 

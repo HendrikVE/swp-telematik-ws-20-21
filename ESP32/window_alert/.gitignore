@@ -1,5 +1,4 @@
 build/
 .idea/
 sdkconfig*
-Kconfig.projbuild
 
