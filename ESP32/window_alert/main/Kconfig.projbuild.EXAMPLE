@@ -58,4 +58,16 @@ config MQTT_TOPIC
     help
         MQTT topic you want to publish to
 
+config MQTT_SERVER_IP
+    string "MQTT server ip"
+    default "your_ip"
+    help
+        IP of the MQTT server
+
+config MQTT_SERVER_PORT
+    string "MQTT server port"
+    default "your_port"
+    help
+        Port of the MQTT server
+
 endmenu
