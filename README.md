@@ -1,5 +1,5 @@
 # smarthome2
-Arndt, Robert, Leonie und Hendrik
+Arndt, Robert und Hendrik
 
 # Links
 - Setup toolchain for ESP32 on Linux: https://esp-idf.readthedocs.io/en/v2.0/linux-setup.html
