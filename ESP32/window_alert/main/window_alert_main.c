@@ -76,15 +76,15 @@ void wifi_init_softap() {
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
     wifi_config_t wifi_config = {
         .ap = {
-            .ssid = BOARD_WIFI_SSID,
-            .ssid_len = strlen(BOARD_WIFI_SSID),
-            .password = BOARD_WIFI_PASS,
-            .max_connection = BOARD_MAX_STA_CONN,
+            .ssid = CONFIG_ESP_WIFI_SSID,
+            .ssid_len = strlen(CONFIG_ESP_WIFI_SSID),
+            .password = CONFIG_ESP_WIFI_PASSWORD,
+            .max_connection = CONFIG_MAX_STA_CONN,
             .authmode = WIFI_AUTH_WPA_WPA2_PSK
         },
     };
 
-    if (strlen(BOARD_WIFI_PASS) == 0) {
+    if (strlen(CONFIG_ESP_WIFI_PASSWORD) == 0) {
         wifi_config.ap.authmode = WIFI_AUTH_OPEN;
     }
 
@@ -92,7 +92,7 @@ void wifi_init_softap() {
     ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_AP, &wifi_config));
     ESP_ERROR_CHECK(esp_wifi_start());
 
-    ESP_LOGI(TAG, "wifi_init_softap finished.SSID:%s", BOARD_WIFI_SSID);
+    ESP_LOGI(TAG, "wifi_init_softap finished.SSID:%s", CONFIG_ESP_WIFI_SSID);
 }
 
 static void IRAM_ATTR gpio_isr_handler(void* arg) {
@@ -128,11 +128,11 @@ static void gpio_task_example(void* arg) {
 
             if (gpio_get_level(io_num) == LOW) {
                 println("open");
-                esp_mqtt_client_publish(client, MQTT_TOPIC, "OPEN", 0, 0, 0);
+                esp_mqtt_client_publish(client, CONFIG_MQTT_TOPIC, "OPEN", 0, 0, 0);
             }
             else if (gpio_get_level(io_num) == HIGH) {
                 println("closed");
-                esp_mqtt_client_publish(client, MQTT_TOPIC, "CLOSED", 0, 0, 0);
+                esp_mqtt_client_publish(client, CONFIG_MQTT_TOPIC, "CLOSED", 0, 0, 0);
             }
 
             timestamp_last_interrupt = current_time;
@@ -193,8 +193,8 @@ void wifi_init_sta() {
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
     wifi_config_t wifi_config = {
         .sta = {
-            .ssid = BOARD_WIFI_SSID,
-            .password = BOARD_WIFI_PASS
+            .ssid = CONFIG_ESP_WIFI_SSID,
+            .password = CONFIG_ESP_WIFI_PASSWORD
         },
     };
 
@@ -203,7 +203,7 @@ void wifi_init_sta() {
     ESP_ERROR_CHECK(esp_wifi_start() );
 
     ESP_LOGI(TAG, "wifi_init_sta finished.");
-    ESP_LOGI(TAG, "connect to ap SSID:%s", BOARD_WIFI_SSID);
+    ESP_LOGI(TAG, "connect to ap SSID:%s", CONFIG_ESP_WIFI_SSID);
 }
 
 void init_nvs() {
@@ -218,13 +218,13 @@ void init_nvs() {
 
 void init_wifi() {
 
-    #if BOARD_WIFI_MODE_AP
+    #if CONFIG_ESP_WIFI_MODE_AP
         ESP_LOGI(TAG, "ESP_WIFI_MODE_AP");
         wifi_init_softap();
     #else
         ESP_LOGI(TAG, "ESP_WIFI_MODE_STA");
         wifi_init_sta();
-    #endif /*BOARD_WIFI_MODE_AP*/
+    #endif /*CONFIG_ESP_WIFI_MODE_AP*/
 }
 
 void println(char* text) {
@@ -279,16 +279,16 @@ static void mqtt_app_start(void) {
 
     char server_uri[128];
     strcpy(server_uri, "mqtt://");
-    strcat(server_uri, MQTT_SERVER_IP);
+    strcat(server_uri, CONFIG_MQTT_SERVER_IP);
     strcat(server_uri, ":");
-    strcat(server_uri, MQTT_SERVER_PORT);
+    strcat(server_uri, CONFIG_MQTT_SERVER_PORT);
 
     const esp_mqtt_client_config_t mqtt_cfg = {
         //.uri = "mqtts://iot.eclipse.org:8883",
         .uri = server_uri,
         .event_handle = mqtt_event_handler,
-        .username = MQTT_USER,
-        .password = MQTT_PASSWORD,
+        .username = CONFIG_MQTT_USER,
+        .password = CONFIG_MQTT_PASSWORD,
         //.cert_pem = (const char *)iot_eclipse_org_pem_start,
     };
 
