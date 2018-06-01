@@ -1,4 +1,4 @@
-menu "WiFi Configuration"
+menu "WiFi config"
 
 choice ESP_WIFI_MODE
     prompt "AP or STA"
@@ -37,8 +37,7 @@ config MAX_STA_CONN
 endmenu
 
 
-
-menu "MQTT Configuration"
+menu "MQTT config"
 
 config MQTT_USER
     string "MQTT Username"
