@@ -27,7 +27,7 @@ static void mqtt_app_start(void);
 void wifi_init_softap();
 void wifi_init_sta();
 
-void init_magnetic_sensor();
+void init_window_sensor();
 void init_nvs();
 void init_wifi();
 

@@ -140,7 +140,7 @@ static void gpio_task_example(void* arg) {
     }
 }
 
-void init_magnetic_sensor() {
+void init_window_sensor() {
 
 	set_gpio_output(CONFIG_SENSOR_WINDOW_GPIO_OUTPUT);
 	set_gpio_input(CONFIG_SENSOR_WINDOW_GPIO_INPUT, true, false, GPIO_INTR_ANYEDGE);
@@ -304,8 +304,10 @@ void app_main() {
     ESP_LOGI(TAG, "init_wifi()");
     init_wifi();
 
-    ESP_LOGI(TAG, "init_magnetic_sensor()");
-    init_magnetic_sensor();
+    #if CONFIG_SENSOR_WINDOW_ENABLED
+        ESP_LOGI(TAG, "init_window_sensor()");
+        init_window_sensor();
+    #endif /*CONFIG_SENSOR_WINDOW_ENABLED*/
 
     ESP_LOGI(TAG, "mqtt_app_start()");
     mqtt_app_start();

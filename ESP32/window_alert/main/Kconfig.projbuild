@@ -77,65 +77,41 @@ menu "Sensor config"
 
     menu "Battery check"
 
-        choice BATTERY_CHECK
-            prompt "enable/ disable battery level check"
-            default BATTERY_CHECK_DISABLED
+        config BATTERY_CHECK_ENABLED
+            bool "enable sensor"
+            default n
             help
                 Whether the battery level should be checked or not
-
-        config BATTERY_CHECK_ENABLED
-            bool "enabled"
-        config BATTERY_CHECK_DISABLED
-            bool "disabled"
-        endchoice
 
     endmenu
 
     menu "Humidity sensor"
 
-        choice SENSOR_HUMIDITY
-            prompt "enable/ disable humidity sensor"
-            default SENSOR_HUMIDITY_DISABLED
+        config SENSOR_HUMIDITY_ENABLED
+            bool "enable sensor"
+            default n
             help
                 Whether the humidity sensor should be enabled or disabled
-
-        config SENSOR_HUMIDITY_ENABLED
-            bool "enabled"
-        config SENSOR_HUMIDITY_DISABLED
-            bool "disabled"
-        endchoice
 
     endmenu
 
     menu "Temperature sensor"
 
-        choice SENSOR_TEMPERATURE
-            prompt "enable/ disable temperature sensor"
-            default SENSOR_TEMPERATURE_DISABLED
+        config SENSOR_TEMPERATURE_ENABLED
+            bool "enable sensor"
+            default n
             help
                 Whether the temperature sensor should be enabled or disabled
-
-        config SENSOR_TEMPERATURE_ENABLED
-            bool "enabled"
-        config SENSOR_TEMPERATURE_DISABLED
-            bool "disabled"
-        endchoice
 
     endmenu
 
     menu "Window sensor"
 
-        choice SENSOR_WINDOW
-            prompt "enable/ disable window sensor"
-            default SENSOR_WINDOW_DISABLED
-            help
-                Whether the battery level should be checked or not
-
         config SENSOR_WINDOW_ENABLED
-            bool "enabled"
-        config SENSOR_WINDOW_DISABLED
-            bool "disabled"
-        endchoice
+            bool "enable sensor"
+            default y
+            help
+                Whether the window sensor should be enabled or disabled
 
         config SENSOR_WINDOW_GPIO_INPUT
             int "GPIO pin"
