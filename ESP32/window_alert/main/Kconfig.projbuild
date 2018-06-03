@@ -105,27 +105,55 @@ menu "Sensor config"
 
     endmenu
 
-    menu "Window sensor"
+    menu "Window sensor 1"
 
-        config SENSOR_WINDOW_ENABLED
+        config SENSOR_WINDOW_1_ENABLED
             bool "enable sensor"
             default y
             help
-                Whether the window sensor should be enabled or disabled
+                Whether the window sensor 1 should be enabled or disabled
 
-        config SENSOR_WINDOW_GPIO_INPUT
+        config SENSOR_WINDOW_1_GPIO_INPUT
             int "GPIO pin"
             default 4
             help
                 GPIO input pin number
 
-        config SENSOR_WINDOW_GPIO_OUTPUT
+        config SENSOR_WINDOW_1_GPIO_OUTPUT
             int "GPIO pin"
             default 18
             help
                 GPIO output pin number
 
-        config SENSOR_WINDOW_INTERRUPT_DEBOUNCE_MS
+        config SENSOR_WINDOW_1_INTERRUPT_DEBOUNCE_MS
+            int "Interrupt debounce"
+            default 100
+            help
+                debounce interval for interrupt in ms
+
+    endmenu
+
+    menu "Window sensor 2"
+
+        config SENSOR_WINDOW_2_ENABLED
+            bool "enable sensor"
+            default y
+            help
+                Whether the window sensor 2 should be enabled or disabled
+
+        config SENSOR_WINDOW_2_GPIO_INPUT
+            int "GPIO pin"
+            default 0
+            help
+                GPIO input pin number
+
+        config SENSOR_WINDOW_2_GPIO_OUTPUT
+            int "GPIO pin"
+            default 21
+            help
+                GPIO output pin number
+
+        config SENSOR_WINDOW_2_INTERRUPT_DEBOUNCE_MS
             int "Interrupt debounce"
             default 100
             help
