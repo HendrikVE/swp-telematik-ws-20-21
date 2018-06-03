@@ -85,23 +85,23 @@ menu "Sensor config"
 
     endmenu
 
-    menu "Humidity sensor"
+    menu "Bosch BME280"
 
-        config SENSOR_HUMIDITY_ENABLED
+        config SENSOR_BME280_ENABLED
             bool "enable sensor"
             default n
             help
-                Whether the humidity sensor should be enabled or disabled
+                Whether the BME280 sensor should be enabled or disabled
 
     endmenu
 
-    menu "Temperature sensor"
+    menu "Bosch BME680"
 
-        config SENSOR_TEMPERATURE_ENABLED
+        config SENSOR_BME680_ENABLED
             bool "enable sensor"
             default n
             help
-                Whether the temperature sensor should be enabled or disabled
+                Whether the BME680 sensor should be enabled or disabled
 
     endmenu
 
