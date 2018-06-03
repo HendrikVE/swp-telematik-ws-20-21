@@ -52,12 +52,6 @@ menu "MQTT config"
         help
             MQTT Password
 
-    config MQTT_TOPIC
-        string "MQTT Topic"
-        default "your_topic"
-        help
-            MQTT topic you want to publish to
-
     config MQTT_SERVER_IP
         string "MQTT server ip"
         default "your_ip"
@@ -131,25 +125,31 @@ menu "Sensor config"
             help
                 debounce interval for interrupt in ms
 
+        config SENSOR_WINDOW_1_MQTT_TOPIC
+            string "MQTT topic"
+            default ""
+            help
+                MQTT topic for this sensor
+
     endmenu
 
     menu "Window sensor 2"
 
         config SENSOR_WINDOW_2_ENABLED
             bool "enable sensor"
-            default y
+            default n
             help
                 Whether the window sensor 2 should be enabled or disabled
 
         config SENSOR_WINDOW_2_GPIO_INPUT
             int "GPIO pin"
-            default 0
+            default -1
             help
                 GPIO input pin number
 
         config SENSOR_WINDOW_2_GPIO_OUTPUT
             int "GPIO pin"
-            default 21
+            default -1
             help
                 GPIO output pin number
 
@@ -158,6 +158,12 @@ menu "Sensor config"
             default 100
             help
                 debounce interval for interrupt in ms
+
+        config SENSOR_WINDOW_2_MQTT_TOPIC
+            string "MQTT topic"
+            default ""
+            help
+                MQTT topic for this sensor
 
     endmenu
 
