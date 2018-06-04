@@ -10,6 +10,14 @@
 extern const uint8_t iot_eclipse_org_pem_start[] asm("_binary_iot_eclipse_org_pem_start");
 extern const uint8_t iot_eclipse_org_pem_end[] asm("_binary_iot_eclipse_org_pem_end");
 
+struct WindowSensor {
+    int gpio_input;
+    int gpio_output;
+    int interrupt_debounce;
+    char mqtt_topic[128];
+    unsigned long timestamp_last_interrupt;
+};
+
 static const char *TAG = "window alert";
 
 void set_gpio_output(int gpio_pin);
@@ -27,7 +35,7 @@ static void mqtt_app_start(void);
 void wifi_init_softap();
 void wifi_init_sta();
 
-void init_window_sensor();
+void init_window_sensor(struct WindowSensor window_sensor);
 void init_nvs();
 void init_wifi();
 

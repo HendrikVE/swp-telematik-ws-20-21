@@ -29,6 +29,8 @@ static xQueueHandle gpio_evt_queue = NULL;
 
 static esp_mqtt_client_handle_t client = NULL;
 
+struct WindowSensor window_sensor_1, window_sensor_2;
+
 static esp_err_t event_handler(void *ctx, system_event_t *event) {
 
     switch(event->event_id) {
@@ -103,58 +105,64 @@ static void IRAM_ATTR gpio_isr_handler(void* arg) {
 
 static void gpio_task_example(void* arg) {
 
-    unsigned long timestamp_last_interrupt = 0;
-
-    uint32_t io_num;
+    struct WindowSensor* window_sensor;
+    uint32_t gpio_num;
     while (true) {
-        if(xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY)) {
+        if (xQueueReceive(gpio_evt_queue, &gpio_num, portMAX_DELAY)) {
+
+            if (gpio_num == window_sensor_1.gpio_input) {
+                println("window sensor 1");
+                window_sensor = &window_sensor_1;
+            }
+            else if (gpio_num == window_sensor_2.gpio_input) {
+                println("window sensor 2");
+                window_sensor = &window_sensor_2;
+            }
+            else {
+                // ignore unkown source
+                continue;
+            }
 
             unsigned long current_time = (unsigned long) esp_timer_get_time() / 1000;
 
             unsigned long time_diff = 0;
 
-            if (current_time < timestamp_last_interrupt) {
+            if (current_time < window_sensor->timestamp_last_interrupt) {
                 // catch overflow
-                time_diff = CONFIG_SENSOR_WINDOW_1_INTERRUPT_DEBOUNCE_MS + 1;
+                time_diff = window_sensor->interrupt_debounce + 1;
             }
             else {
-                time_diff = current_time - timestamp_last_interrupt;
+                time_diff = current_time - window_sensor->timestamp_last_interrupt;
             }
 
-            if (time_diff <= CONFIG_SENSOR_WINDOW_1_INTERRUPT_DEBOUNCE_MS) {
+            if (time_diff <= window_sensor->interrupt_debounce) {
                 // not within debounce time -> ignore interrupt
                 continue;
             }
 
-            if (gpio_get_level(io_num) == LOW) {
+            if (gpio_get_level(window_sensor->gpio_input) == LOW) {
                 println("open");
-                esp_mqtt_client_publish(client, CONFIG_SENSOR_WINDOW_1_MQTT_TOPIC, "OPEN", 0, 0, 0);
+                esp_mqtt_client_publish(client, window_sensor->mqtt_topic, "OPEN", 0, 0, 0);
             }
-            else if (gpio_get_level(io_num) == HIGH) {
+            else if (gpio_get_level(window_sensor->gpio_input) == HIGH) {
                 println("closed");
-                esp_mqtt_client_publish(client, CONFIG_SENSOR_WINDOW_1_MQTT_TOPIC, "CLOSED", 0, 0, 0);
+                esp_mqtt_client_publish(client, window_sensor->mqtt_topic, "CLOSED", 0, 0, 0);
             }
 
-            timestamp_last_interrupt = current_time;
+            window_sensor->timestamp_last_interrupt = current_time;
         }
     }
 }
 
-void init_window_sensor() {
+void init_window_sensor(struct WindowSensor window_sensor) {
 
-	set_gpio_output(CONFIG_SENSOR_WINDOW_1_GPIO_OUTPUT);
-	set_gpio_input(CONFIG_SENSOR_WINDOW_1_GPIO_INPUT, true, false, GPIO_INTR_ANYEDGE);
+	set_gpio_output(window_sensor.gpio_output);
+	set_gpio_input(window_sensor.gpio_input, true, false, GPIO_INTR_ANYEDGE);
 
-    //create a queue to handle gpio event from isr
-    gpio_evt_queue = xQueueCreate(10, sizeof(uint32_t));
-    //start gpio task
-    xTaskCreate(gpio_task_example, "gpio_task_example", 2048, NULL, 10, NULL);
-
-    gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT);
-    gpio_isr_handler_add(CONFIG_SENSOR_WINDOW_1_GPIO_INPUT, gpio_isr_handler, (void*) CONFIG_SENSOR_WINDOW_1_GPIO_INPUT);
+    gpio_isr_handler_add(window_sensor.gpio_input, gpio_isr_handler, (void*) window_sensor.gpio_input);
 
     // output always on to detect changes on input
-    gpio_set_level(CONFIG_SENSOR_WINDOW_1_GPIO_OUTPUT, HIGH);
+    gpio_set_level(window_sensor.gpio_output, HIGH);
 }
 
 void set_gpio_output(int gpio_pin) {
@@ -235,7 +243,6 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event) {
 
     esp_mqtt_client_handle_t client = event->client;
     int msg_id;
-    int gpio_pin;
     // your_context_t *context = event->context;
     switch (event->event_id) {
 
@@ -243,8 +250,14 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event) {
             ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
 
             // initial fake interrupt
-            gpio_pin = CONFIG_SENSOR_WINDOW_1_GPIO_OUTPUT;
-            gpio_isr_handler(&gpio_pin);
+            #if CONFIG_SENSOR_WINDOW_1_ENABLED
+                gpio_isr_handler(&(window_sensor_1.gpio_input));
+            #endif /*CONFIG_SENSOR_WINDOW_1_ENABLED*/
+
+            #if CONFIG_SENSOR_WINDOW_2_ENABLED
+                gpio_isr_handler(&(window_sensor_2.gpio_input));
+            #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
+
             break;
 
         case MQTT_EVENT_DISCONNECTED:
@@ -304,10 +317,35 @@ void app_main() {
     ESP_LOGI(TAG, "init_wifi()");
     init_wifi();
 
+    gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT);
+    //create a queue to handle gpio event from isr
+    gpio_evt_queue = xQueueCreate(10, sizeof(uint32_t));
+    //start gpio task
+    xTaskCreate(gpio_task_example, "gpio_task_example", 2048, NULL, 10, NULL);
+
     #if CONFIG_SENSOR_WINDOW_1_ENABLED
-        ESP_LOGI(TAG, "init_window_sensor()");
-        init_window_sensor();
+        ESP_LOGI(TAG, "init_window_sensor(1)");
+
+        window_sensor_1.gpio_input = CONFIG_SENSOR_WINDOW_1_GPIO_INPUT;
+        window_sensor_1.gpio_output = CONFIG_SENSOR_WINDOW_1_GPIO_OUTPUT;
+        window_sensor_1.interrupt_debounce = CONFIG_SENSOR_WINDOW_1_INTERRUPT_DEBOUNCE_MS;
+        strcpy(window_sensor_1.mqtt_topic, CONFIG_SENSOR_WINDOW_1_MQTT_TOPIC);
+        window_sensor_1.timestamp_last_interrupt = 0;
+
+        init_window_sensor(window_sensor_1);
     #endif /*CONFIG_SENSOR_WINDOW_1_ENABLED*/
+
+    #if CONFIG_SENSOR_WINDOW_2_ENABLED
+        ESP_LOGI(TAG, "init_window_sensor(2)");
+
+        window_sensor_2.gpio_input = CONFIG_SENSOR_WINDOW_2_GPIO_INPUT;
+        window_sensor_2.gpio_output = CONFIG_SENSOR_WINDOW_2_GPIO_OUTPUT;
+        window_sensor_2.interrupt_debounce = CONFIG_SENSOR_WINDOW_2_INTERRUPT_DEBOUNCE_MS;
+        strcpy(window_sensor_2.mqtt_topic, CONFIG_SENSOR_WINDOW_2_MQTT_TOPIC);
+        window_sensor_2.timestamp_last_interrupt = 0;
+
+        init_window_sensor(window_sensor_2);
+    #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
 
     ESP_LOGI(TAG, "mqtt_app_start()");
     mqtt_app_start();
