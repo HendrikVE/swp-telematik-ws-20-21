@@ -111,11 +111,9 @@ static void gpio_task_example(void* arg) {
         if (xQueueReceive(gpio_evt_queue, &gpio_num, portMAX_DELAY)) {
 
             if (gpio_num == window_sensor_1.gpio_input) {
-                println("window sensor 1");
                 window_sensor = &window_sensor_1;
             }
             else if (gpio_num == window_sensor_2.gpio_input) {
-                println("window sensor 2");
                 window_sensor = &window_sensor_2;
             }
             else {
