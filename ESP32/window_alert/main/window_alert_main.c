@@ -140,11 +140,11 @@ static void gpio_task_example(void* arg) {
 
             if (gpio_get_level(window_sensor->gpio_input) == LOW) {
                 println("open");
-                esp_mqtt_client_publish(client, window_sensor->mqtt_topic, "OPEN", 0, 0, 0);
+                esp_mqtt_client_publish(client, window_sensor->mqtt_topic, "OPEN", 0, 1, 0);
             }
             else if (gpio_get_level(window_sensor->gpio_input) == HIGH) {
                 println("closed");
-                esp_mqtt_client_publish(client, window_sensor->mqtt_topic, "CLOSED", 0, 0, 0);
+                esp_mqtt_client_publish(client, window_sensor->mqtt_topic, "CLOSED", 0, 1, 0);
             }
 
             window_sensor->timestamp_last_interrupt = current_time;
