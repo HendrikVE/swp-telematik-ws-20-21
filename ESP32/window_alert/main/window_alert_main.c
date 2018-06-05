@@ -18,6 +18,7 @@
 
 #include "window_alert_main.h"
 #include "common.h"
+#include "gpio.h"
 
 static xQueueHandle gpio_evt_queue = NULL;
 
