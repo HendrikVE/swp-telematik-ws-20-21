@@ -1,4 +1,5 @@
 #include <stdbool.h>
+
 #include "driver/gpio.h"
 #include "esp_event_loop.h"
 
@@ -17,8 +18,6 @@ struct WindowSensor {
     char mqtt_topic[128];
     unsigned long timestamp_last_interrupt;
 };
-
-static const char *TAG = "window alert";
 
 void set_gpio_output(int gpio_pin);
 void set_gpio_input(int gpio_pin, bool pull_down, bool pull_up, gpio_int_type_t intr_type);

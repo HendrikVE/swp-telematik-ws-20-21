@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
@@ -16,86 +17,13 @@
 #include "mqtt_client.h"
 
 #include "window_alert_main.h"
-
-/* FreeRTOS event group to signal when we are connected*/
-static EventGroupHandle_t wifi_event_group;
-
-/* The event group allows multiple bits for each event,
-   but we only care about one event - are we connected
-   to the AP with an IP? */
-const int WIFI_CONNECTED_BIT = BIT0;
+#include "common.h"
 
 static xQueueHandle gpio_evt_queue = NULL;
 
 static esp_mqtt_client_handle_t client = NULL;
 
 struct WindowSensor window_sensor_1, window_sensor_2;
-
-static esp_err_t event_handler(void *ctx, system_event_t *event) {
-
-    switch(event->event_id) {
-
-        case SYSTEM_EVENT_STA_START:
-            esp_wifi_connect();
-            break;
-
-        case SYSTEM_EVENT_STA_GOT_IP:
-            xEventGroupSetBits(wifi_event_group, WIFI_CONNECTED_BIT);
-            break;
-
-        case SYSTEM_EVENT_AP_STACONNECTED:
-            ESP_LOGI(TAG, "station:"MACSTR" join, AID=%d",
-                     MAC2STR(event->event_info.sta_connected.mac),
-                     event->event_info.sta_connected.aid);
-            break;
-
-        case SYSTEM_EVENT_AP_STADISCONNECTED:
-            ESP_LOGI(TAG, "station:"MACSTR"leave, AID=%d",
-                     MAC2STR(event->event_info.sta_disconnected.mac),
-                     event->event_info.sta_disconnected.aid);
-            break;
-
-        case SYSTEM_EVENT_STA_DISCONNECTED:
-            esp_wifi_connect();
-            xEventGroupClearBits(wifi_event_group, WIFI_CONNECTED_BIT);
-            break;
-
-        default:
-            break;
-    }
-
-    return ESP_OK;
-}
-
-void wifi_init_softap() {
-
-    wifi_event_group = xEventGroupCreate();
-
-    tcpip_adapter_init();
-    ESP_ERROR_CHECK(esp_event_loop_init(event_handler, NULL));
-
-    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
-    wifi_config_t wifi_config = {
-        .ap = {
-            .ssid = CONFIG_ESP_WIFI_SSID,
-            .ssid_len = strlen(CONFIG_ESP_WIFI_SSID),
-            .password = CONFIG_ESP_WIFI_PASSWORD,
-            .max_connection = CONFIG_MAX_STA_CONN,
-            .authmode = WIFI_AUTH_WPA_WPA2_PSK
-        },
-    };
-
-    if (strlen(CONFIG_ESP_WIFI_PASSWORD) == 0) {
-        wifi_config.ap.authmode = WIFI_AUTH_OPEN;
-    }
-
-    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
-    ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_AP, &wifi_config));
-    ESP_ERROR_CHECK(esp_wifi_start());
-
-    ESP_LOGI(TAG, "wifi_init_softap finished.SSID:%s", CONFIG_ESP_WIFI_SSID);
-}
 
 static void IRAM_ATTR gpio_isr_handler(void* arg) {
 
@@ -228,30 +156,6 @@ void set_gpio_input(int gpio_pin, bool pull_down, bool pull_up, gpio_int_type_t 
     gpio_config(&io_conf);
 }
 
-void wifi_init_sta() {
-
-    wifi_event_group = xEventGroupCreate();
-
-    tcpip_adapter_init();
-    ESP_ERROR_CHECK(esp_event_loop_init(event_handler, NULL) );
-
-    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
-    wifi_config_t wifi_config = {
-        .sta = {
-            .ssid = CONFIG_ESP_WIFI_SSID,
-            .password = CONFIG_ESP_WIFI_PASSWORD
-        },
-    };
-
-    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
-    ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config) );
-    ESP_ERROR_CHECK(esp_wifi_start() );
-
-    ESP_LOGI(TAG, "wifi_init_sta finished.");
-    ESP_LOGI(TAG, "connect to ap SSID:%s", CONFIG_ESP_WIFI_SSID);
-}
-
 void init_nvs() {
 
     esp_err_t ret = nvs_flash_init();
@@ -260,21 +164,6 @@ void init_nvs() {
       ret = nvs_flash_init();
     }
     ESP_ERROR_CHECK(ret);
-}
-
-void init_wifi() {
-
-    #if CONFIG_ESP_WIFI_MODE_AP
-        ESP_LOGI(TAG, "ESP_WIFI_MODE_AP");
-        wifi_init_softap();
-    #else
-        ESP_LOGI(TAG, "ESP_WIFI_MODE_STA");
-        wifi_init_sta();
-    #endif /*CONFIG_ESP_WIFI_MODE_AP*/
-}
-
-void println(char* text) {
-    printf("%s\n", text);
 }
 
 static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event) {
@@ -347,6 +236,10 @@ static void mqtt_app_start(void) {
 
     client = esp_mqtt_client_init(&mqtt_cfg);
     esp_mqtt_client_start(client);
+}
+
+void println(char* text) {
+    printf("%s\n", text);
 }
 
 void app_main() {
