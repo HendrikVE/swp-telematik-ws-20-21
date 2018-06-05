@@ -22,8 +22,6 @@ struct WindowSensor {
 static void IRAM_ATTR gpio_isr_handler(void* arg);
 static void gpio_task_example(void* arg);
 
-static esp_err_t event_handler(void *ctx, system_event_t *event);
-
 static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event);
 static void mqtt_app_start(void);
 

@@ -4,9 +4,18 @@
 #include "esp_wifi.h"
 #include "esp_log.h"
 #include "esp_event_loop.h"
+#include "freertos/event_groups.h"
 
 #include "wifi.h"
 #include "common.h"
+
+/* FreeRTOS event group to signal when we are connected*/
+static EventGroupHandle_t wifi_event_group;
+
+/* The event group allows multiple bits for each event,
+   but we only care about one event - are we connected
+   to the AP with an IP? */
+const int WIFI_CONNECTED_BIT = BIT0;
 
 static esp_err_t event_handler(void *ctx, system_event_t *event) {
 
@@ -54,13 +63,13 @@ void wifi_init_softap() {
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
     wifi_config_t wifi_config = {
-            .ap = {
-                    .ssid = CONFIG_ESP_WIFI_SSID,
-                    .ssid_len = strlen(CONFIG_ESP_WIFI_SSID),
-                    .password = CONFIG_ESP_WIFI_PASSWORD,
-                    .max_connection = CONFIG_MAX_STA_CONN,
-                    .authmode = WIFI_AUTH_WPA_WPA2_PSK
-            },
+        .ap = {
+            .ssid = CONFIG_ESP_WIFI_SSID,
+            .ssid_len = strlen(CONFIG_ESP_WIFI_SSID),
+            .password = CONFIG_ESP_WIFI_PASSWORD,
+            .max_connection = CONFIG_MAX_STA_CONN,
+            .authmode = WIFI_AUTH_WPA_WPA2_PSK
+        },
     };
 
     if (strlen(CONFIG_ESP_WIFI_PASSWORD) == 0) {
@@ -84,10 +93,10 @@ void wifi_init_sta() {
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
     wifi_config_t wifi_config = {
-            .sta = {
-                    .ssid = CONFIG_ESP_WIFI_SSID,
-                    .password = CONFIG_ESP_WIFI_PASSWORD
-            },
+        .sta = {
+            .ssid = CONFIG_ESP_WIFI_SSID,
+            .password = CONFIG_ESP_WIFI_PASSWORD
+        },
     };
 
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );

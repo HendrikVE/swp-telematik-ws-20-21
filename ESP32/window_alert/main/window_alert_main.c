@@ -19,6 +19,7 @@
 #include "window_alert_main.h"
 #include "common.h"
 #include "gpio.h"
+#include "wifi.h"
 
 static xQueueHandle gpio_evt_queue = NULL;
 
@@ -136,8 +137,8 @@ void init_nvs() {
 
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES) {
-      ESP_ERROR_CHECK(nvs_flash_erase());
-      ret = nvs_flash_init();
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        ret = nvs_flash_init();
     }
     ESP_ERROR_CHECK(ret);
 }
@@ -153,15 +154,6 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event) {
             ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
 
             init_window_sensor_system();
-
-            // initial fake interrupt
-            #if CONFIG_SENSOR_WINDOW_1_ENABLED
-                gpio_isr_handler(&(window_sensor_1.gpio_input));
-            #endif /*CONFIG_SENSOR_WINDOW_1_ENABLED*/
-
-            #if CONFIG_SENSOR_WINDOW_2_ENABLED
-                gpio_isr_handler(&(window_sensor_2.gpio_input));
-            #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
 
             break;
 
