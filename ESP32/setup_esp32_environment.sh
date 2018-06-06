@@ -2,18 +2,20 @@
 # script was designed for Ubuntu
 # based on https://esp-idf.readthedocs.io/en/v2.0/linux-setup.html
 
-# get necessary software
+set -e
+
+printf "\nget necessary software\n"
 sudo apt-get install git wget make libncurses-dev flex bison gperf python python-serial
 
-# setup working directory
+printf "\nsetup working directory\n"
 dir_name=esp32
 wd=~/$dir_name
 
-mkdir $wd || exit 1
+mkdir $wd
 
 cd $wd
 
-# download correct file corresponding to system architecture
+printf "\ndownload correct file corresponding to system architecture\n"
 arch=$(uname -m)
 
 if [ $arch == "x86_64" ]
@@ -25,20 +27,21 @@ then
     file=xtensa-esp32-elf-linux32-1.22.0-80-g6c4433a-5.2.0.tar.gz
 
 else
-    >&2 echo "system not supported"
-    exit
+    >&2 printf "system not supported\n"
+    exit 1
 fi
 
-wget "https://dl.espressif.com/dl/$file" || exit 1
+wget "https://dl.espressif.com/dl/$file"
 
 tar -xzf $file && rm $file
 
-echo "# ESP32" >> ~/.profile
-echo "export PATH=\"\$PATH:\$HOME/$dir_name/xtensa-esp32-elf/bin\"" >> ~/.profile
-
-# setup esp-idf
+printf "\nsetup esp-idf\n"
 git clone --recursive https://github.com/espressif/esp-idf.git
 git submodule add https://github.com/tuanpmt/espmqtt.git components/espmqtt
+
+printf "\nupdate ~/.profile\n"
+echo "# ESP32" >> ~/.profile
+echo "export PATH=\"\$PATH:\$HOME/$dir_name/xtensa-esp32-elf/bin\"" >> ~/.profile
 echo "export IDF_PATH=\"\$HOME/$dir_name/esp-idf\"" >> ~/.profile
 
-echo "You need to log out to make the changes effective"
+source ~/.profile
