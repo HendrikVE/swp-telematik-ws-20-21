@@ -1,0 +1,10 @@
+//Test Window Sensor Is Open
+rule "Test Window Sensor"
+when
+   Item WindowSensor1 received update OPEN
+then
+       if(SecuritySystem.state == ON)
+       {
+           sendBroadcastNotification("SECURITY SYSTEM: SIDE DOOR OPEN")
+       }
+end
