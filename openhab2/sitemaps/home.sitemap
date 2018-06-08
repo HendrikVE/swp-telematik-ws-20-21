@@ -1,0 +1,11 @@
+
+sitemap home label="Test"
+{
+	Frame label="Security"
+	{
+		Switch item=SecuritySystem
+		Text item=WindowSensor1
+		Text item=WindowSensor2
+	}
+}
+

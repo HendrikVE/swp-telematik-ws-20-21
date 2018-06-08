@@ -1,0 +1,5 @@
+// security items
+Switch SecuritySystem "Security System"
+Contact WindowSensor1 "Fenster 1 [%s]" <door> { mqtt="<[<broker>:fulabswp18/security/WindowSensor1:state:default]" } 
+Contact WindowSensor2 "Fenster 2 [%s]" <door> { mqtt="<[<broker>:fulabswp18/security/WindowSensor2:state:default]" }
+
