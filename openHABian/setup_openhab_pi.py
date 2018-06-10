@@ -12,9 +12,13 @@ env.host_string = config.SERVER_IP
 env.user = config.SSH_USERNAME
 
 @task
-def setup():
+def setup(install_display=False):
     execute(add_sudo_user)
     execute(copy_openhab_files)
+
+    if install_display:
+        execute(install_adafruit_display)
+
 
 @task
 def add_sudo_user():
@@ -33,6 +37,7 @@ def add_sudo_user():
 
 @task
 def copy_openhab_files():
+    run('echo "copy config files for openhab2"')
 
     def put_as_openhab(src, dest):
         put(src, dest, use_sudo=True)
@@ -45,3 +50,16 @@ def copy_openhab_files():
     put_as_openhab(os.path.join(res_path, 'rules'), dest_path)
     put_as_openhab(os.path.join(res_path, 'services'), dest_path)
     put_as_openhab(os.path.join(res_path, 'sitemaps'), dest_path)
+
+
+@task
+def install_adafruit_display():
+    run('echo "install adafruit display"')
+
+    home_dir = os.path.join(os.sep, 'home', 'openhabian')
+
+    with cd(home_dir):
+        sudo('wget https://raw.githubusercontent.com/adafruit/Raspberry-Pi-Installer-Scripts/master/adafruit-pitft.sh')
+        sudo('chmod +x adafruit-pitft.sh')
+        sudo('./adafruit-pitft.sh -u %s' % home_dir)
+        sudo('rm adafruit-pitft.sh')
