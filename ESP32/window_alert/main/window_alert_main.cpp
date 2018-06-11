@@ -19,6 +19,8 @@
 
 #include "Arduino.h"
 #include "WiFi.h"
+#include "BME280I2C.h"
+#include "Wire.h"
 
 #include "driver/gpio.h"
 #include "esp_event_loop.h"
@@ -76,16 +78,52 @@ void initWiFi() {
     WiFi.onEvent(WiFiEvent);
     checkWiFiConnection();
 }
+
+void initBME() {
+
+    Wire.begin();
+
+    while(!bme.begin()) {
+        Serial.println("Could not find BME280 sensor!");
+        delay(1000);
+    }
+}
+
 void setup(){
 
     Serial.begin(115200);
 
     initWiFi();
+    initBME();
+}
+
+void printBME280Data(Stream* client) {
+
+    float temp(NAN), hum(NAN), pres(NAN);
+
+    BME280::TempUnit tempUnit(BME280::TempUnit_Celsius);
+    BME280::PresUnit presUnit(BME280::PresUnit_Pa);
+
+    bme.read(pres, temp, hum, tempUnit, presUnit);
+
+    client->print("Temp: ");
+    client->print(temp);
+    client->print("°"+ String(tempUnit == BME280::TempUnit_Celsius ? 'C' :'F'));
+    client->print("\t\tHumidity: ");
+    client->print(hum);
+    client->print("% RH");
+    client->print("\t\tPressure: ");
+    client->print(pres);
+    client->println("Pa");
+
+    delay(1000);
 }
 
 void loop(){
     Serial.println("loop");
     checkWiFiConnection();
+
+    printBME280Data(&Serial);
 
     delay(1000);
 }
