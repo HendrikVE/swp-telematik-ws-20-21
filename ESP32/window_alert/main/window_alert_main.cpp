@@ -11,6 +11,7 @@
 
 #include "Arduino.h"
 #include "WiFi.h"
+#include "MQTT.h"
 #include "BME280I2C.h"
 #include "Wire.h"
 
@@ -26,7 +27,9 @@ struct WindowSensor {
 } window_sensor_1, window_sensor_2;
 
 static xQueueHandle gpio_evt_queue = NULL;
-static esp_mqtt_client_handle_t client = NULL;
+
+WiFiClient net;
+MQTTClient client;
 
 BME280I2C bme;
 
@@ -129,17 +132,17 @@ static void gpio_task_example(void* arg) {
                 continue;
             }
 
-            Serial.print("windowSensorNum = ");
-            Serial.print(windowSensorNum);
-            Serial.print("\n");
+            char output[128];
+            sprintf(output, "window sensor #%i", windowSensorNum);
+            Serial.print(output);
 
             if (digitalRead(window_sensor->gpio_input) == LOW) {
                 Serial.println("open");
-                esp_mqtt_client_publish(client, window_sensor->mqtt_topic, "OPEN", 0, 1, 0);
+                client.publish(window_sensor->mqtt_topic, "OPEN", false, 1);
             }
             else if (digitalRead(window_sensor->gpio_input) == HIGH) {
                 Serial.println("closed");
-                esp_mqtt_client_publish(client, window_sensor->mqtt_topic, "CLOSED", 0, 1, 0);
+                client.publish(window_sensor->mqtt_topic, "CLOSED", false, 1);
             }
 
             window_sensor->timestamp_last_interrupt = current_time;
@@ -195,101 +198,31 @@ void initWindowSensorSystem() {
     #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
 }
 
-static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event) {
+void checkMQTTConnection() {
 
-    esp_mqtt_client_handle_t client = event->client;
-    int msg_id;
-    // your_context_t *context = event->context;
-    switch (event->event_id) {
+    if (!client.connected()) {
+        Serial.println("Trying to connect to MQTT broker...");
 
-        case MQTT_EVENT_CONNECTED:
-            Serial.println("MQTT_EVENT_CONNECTED");
-            initWindowSensorSystem();
-
-            #if CONFIG_SENSOR_BME280_ENABLED
-                initBME();
-            #endif /*CONFIG_SENSOR_BME280_ENABLED*/
-
-            break;
-
-        case MQTT_EVENT_DISCONNECTED:
-            Serial.println("MQTT_EVENT_DISCONNECTED");
-            break;
-
-        case MQTT_EVENT_SUBSCRIBED:
-            Serial.println("MQTT_EVENT_SUBSCRIBED");
-            break;
-
-        case MQTT_EVENT_UNSUBSCRIBED:
-            Serial.println("MQTT_EVENT_UNSUBSCRIBED");
-            break;
-
-        case MQTT_EVENT_PUBLISHED:
-            Serial.println("MQTT_EVENT_PUBLISHED");
-            break;
-
-        case MQTT_EVENT_DATA:
-            Serial.println("MQTT_EVENT_DATA");
-            break;
-
-        case MQTT_EVENT_ERROR:
-            Serial.println("MQTT_EVENT_ERROR");
-            break;
+        while (!client.connect("esp32", CONFIG_MQTT_USER, CONFIG_MQTT_PASSWORD)) {
+            Serial.print(".");
+            delay(1000);
+        }
     }
-
-    return ESP_OK;
 }
 
-static void mqtt_app_start(void) {
+void initMQTT() {
 
-    char server_uri[128];
-    strcpy(server_uri, "mqtt://");
-    strcat(server_uri, CONFIG_MQTT_SERVER_IP);
-    strcat(server_uri, ":");
-    strcat(server_uri, CONFIG_MQTT_SERVER_PORT);
+    client.begin(CONFIG_MQTT_SERVER_IP, (int) CONFIG_MQTT_SERVER_PORT, net);
+    checkMQTTConnection();
 
-    /*const esp_mqtt_client_config_t mqtt_cfg = {
-            .uri = server_uri,
-            .event_handle = mqtt_event_handler,
-            .username = CONFIG_MQTT_USER,
-            .password = CONFIG_MQTT_PASSWORD,
-            //.cert_pem = (const char *)iot_eclipse_org_pem_start,
-    };*/
+    initWindowSensorSystem();
 
-    // we need to fill out all unused fields with default values
-    // (error: "sorry, unimplemented: non-trivial designated initializers not supported")
-    const esp_mqtt_client_config_t mqtt_cfg = {
-            mqtt_event_handler,//mqtt_event_callback_t event_handle;
-            nullptr,//const char *host;
-            server_uri,//const char *uri;
-            (uint32_t) CONFIG_MQTT_SERVER_PORT,//uint32_t port;
-            "ESP",//const char *client_id;
-            CONFIG_MQTT_USER,//const char *username;
-            CONFIG_MQTT_PASSWORD,//const char *password;
-            NULL,//const char *lwt_topic;
-            NULL,//const char *lwt_msg;
-            NULL,//int lwt_qos;
-            NULL,//int lwt_retain;
-            NULL,//int lwt_msg_len;
-            true,//int disable_clean_session;
-            120,//int keepalive;
-            false,//bool disable_auto_reconnect;
-            nullptr,//void *user_context;
-            5,//int task_prio;
-            6144,//int task_stack;
-            1024,//int buffer_size;
-            NULL,//const char *cert_pem;
-            esp_mqtt_transport_t {},// esp_mqtt_transport_t transport;
-            //.cert_pem = (const char *)iot_eclipse_org_pem_start,
-    };
-
-    client = esp_mqtt_client_init(&mqtt_cfg);
-    esp_mqtt_client_start(client);
+    #if CONFIG_SENSOR_BME280_ENABLED
+        initBME();
+    #endif /*CONFIG_SENSOR_BME280_ENABLED*/
 }
 
 void publishBME280Data() {
-
-    Serial.println("publishBME280Data()");
 
     float temperature(NAN), humidity(NAN), pressure(NAN);
 
@@ -307,6 +240,7 @@ void publishBME280Data() {
     char strPressure[32];
     sprintf(strPressure, "%f Pa", pressure);
 
+    Serial.println("");
     Serial.print("temperature: ");
     Serial.println(strTemperature);
 
@@ -315,10 +249,11 @@ void publishBME280Data() {
 
     Serial.print("pressure: ");
     Serial.println(strPressure);
+    Serial.println("");
 
-    esp_mqtt_client_publish(client, CONFIG_SENSOR_BME280_MQTT_TOPIC_TEMPERATURE, strTemperature, 0, 1, 0);
-    esp_mqtt_client_publish(client, CONFIG_SENSOR_BME280_MQTT_TOPIC_HUMIDITY, strHumidity, 0, 1, 0);
-    esp_mqtt_client_publish(client, CONFIG_SENSOR_BME280_MQTT_TOPIC_PRESSURE, strPressure, 0, 1, 0);
+    client.publish(CONFIG_SENSOR_BME280_MQTT_TOPIC_TEMPERATURE, strTemperature, false, 1);
+    client.publish(CONFIG_SENSOR_BME280_MQTT_TOPIC_HUMIDITY, strHumidity, false, 1);
+    client.publish(CONFIG_SENSOR_BME280_MQTT_TOPIC_PRESSURE, strPressure, false ,1);
 }
 
 void setup(){
@@ -326,12 +261,16 @@ void setup(){
     Serial.begin(115200);
 
     initWiFi();
-    mqtt_app_start();
+    initMQTT();
 }
 
 void loop(){
 
+    client.loop();
+    delay(10); // <- fixes some issues with WiFi stability
+
     checkWiFiConnection();
+    checkMQTTConnection();
 
     #if CONFIG_SENSOR_BME280_ENABLED
         publishBME280Data();
