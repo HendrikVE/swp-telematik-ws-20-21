@@ -212,7 +212,7 @@ void checkMQTTConnection() {
 
 void initMQTT() {
 
-    client.begin(CONFIG_MQTT_SERVER_IP, (int) CONFIG_MQTT_SERVER_PORT, net);
+    client.begin(CONFIG_MQTT_SERVER_IP, atoi(CONFIG_MQTT_SERVER_PORT), net);
     checkMQTTConnection();
 
     initWindowSensorSystem();
@@ -276,5 +276,5 @@ void loop(){
         publishBME280Data();
     #endif /*CONFIG_SENSOR_BME280_ENABLED*/
 
-    delay(1000);
+    delay(5000);
 }
