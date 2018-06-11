@@ -138,11 +138,11 @@ static void gpio_task_example(void* arg) {
 
             if (digitalRead(window_sensor->gpio_input) == LOW) {
                 Serial.println("open");
-                client.publish(window_sensor->mqtt_topic, "OPEN", false, 1);
+                client.publish(window_sensor->mqtt_topic, "OPEN", false, 2);
             }
             else if (digitalRead(window_sensor->gpio_input) == HIGH) {
                 Serial.println("closed");
-                client.publish(window_sensor->mqtt_topic, "CLOSED", false, 1);
+                client.publish(window_sensor->mqtt_topic, "CLOSED", false, 2);
             }
 
             window_sensor->timestamp_last_interrupt = current_time;
@@ -251,9 +251,9 @@ void publishBME280Data() {
     Serial.println(strPressure);
     Serial.println("");
 
-    client.publish(CONFIG_SENSOR_BME280_MQTT_TOPIC_TEMPERATURE, strTemperature, false, 1);
-    client.publish(CONFIG_SENSOR_BME280_MQTT_TOPIC_HUMIDITY, strHumidity, false, 1);
-    client.publish(CONFIG_SENSOR_BME280_MQTT_TOPIC_PRESSURE, strPressure, false ,1);
+    client.publish(CONFIG_SENSOR_BME280_MQTT_TOPIC_TEMPERATURE, strTemperature, false, 2);
+    client.publish(CONFIG_SENSOR_BME280_MQTT_TOPIC_HUMIDITY, strHumidity, false, 2);
+    client.publish(CONFIG_SENSOR_BME280_MQTT_TOPIC_PRESSURE, strPressure, false ,2);
 }
 
 void setup(){
