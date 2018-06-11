@@ -6,32 +6,24 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
-#include "freertos/event_groups.h"
-#include "esp_system.h"
-#include "esp_wifi.h"
-#include "esp_log.h"
-#include "esp_timer.h"
-#include "nvs_flash.h"
-
-#include "lwip/err.h"
-#include "lwip/sys.h"
-#include "mqtt_client.h"
 
 #include "Arduino.h"
 #include "WiFi.h"
 #include "BME280I2C.h"
 #include "Wire.h"
 
-#include "driver/gpio.h"
-#include "esp_event_loop.h"
-
-#define LOW 0
-#define HIGH 1
-
-#define ESP_INTR_FLAG_DEFAULT 0
-
 extern const uint8_t iot_eclipse_org_pem_start[] asm("_binary_iot_eclipse_org_pem_start");
 extern const uint8_t iot_eclipse_org_pem_end[] asm("_binary_iot_eclipse_org_pem_end");
+
+struct WindowSensor {
+    int gpio_input;
+    int gpio_output;
+    int interrupt_debounce;
+    char mqtt_topic[128];
+    unsigned long timestamp_last_interrupt;
+} window_sensor_1, window_sensor_2;
+
+static xQueueHandle gpio_evt_queue = NULL;
 
 BME280I2C bme;
 
@@ -89,14 +81,6 @@ void initBME() {
     }
 }
 
-void setup(){
-
-    Serial.begin(115200);
-
-    initWiFi();
-    initBME();
-}
-
 void printBME280Data(Stream* client) {
 
     float temp(NAN), hum(NAN), pres(NAN);
@@ -119,11 +103,129 @@ void printBME280Data(Stream* client) {
     delay(1000);
 }
 
-void loop(){
-    Serial.println("loop");
-    checkWiFiConnection();
+void IRAM_ATTR isrWindowSensor1() {
+    uint32_t windowSensorNum = 1;
+    xQueueSendFromISR(gpio_evt_queue, &windowSensorNum, NULL);
+}
 
-    printBME280Data(&Serial);
+void IRAM_ATTR isrWindowSensor2() {
+    uint32_t windowSensorNum = 2;
+    xQueueSendFromISR(gpio_evt_queue, &windowSensorNum, NULL);
+}
+
+static void gpio_task_example(void* arg) {
+
+    struct WindowSensor* window_sensor;
+    uint32_t windowSensorNum;
+    while (true) {
+        if (xQueueReceive(gpio_evt_queue, &windowSensorNum, portMAX_DELAY)) {
+
+            if (windowSensorNum == 1) {
+                window_sensor = &window_sensor_1;
+            }
+            else if (windowSensorNum == 2) {
+                window_sensor = &window_sensor_2;
+            }
+            else {
+                // ignore unkown source
+                continue;
+            }
+
+            unsigned long current_time = (unsigned long) esp_timer_get_time() / 1000;
+
+            unsigned long time_diff = 0;
+
+            if (current_time < window_sensor->timestamp_last_interrupt) {
+                // catch overflow
+                time_diff = window_sensor->interrupt_debounce + 1;
+            }
+            else {
+                time_diff = current_time - window_sensor->timestamp_last_interrupt;
+            }
+
+            if (time_diff <= window_sensor->interrupt_debounce) {
+                // not within debounce time -> ignore interrupt
+                continue;
+            }
+
+            Serial.print("windowSensorNum = ");
+            Serial.print(windowSensorNum);
+            Serial.print("\n");
+
+            if (digitalRead(window_sensor->gpio_input) == LOW) {
+                Serial.println("open");
+                //esp_mqtt_client_publish(client, window_sensor->mqtt_topic, "OPEN", 0, 1, 0);
+            }
+            else if (digitalRead(window_sensor->gpio_input) == HIGH) {
+                Serial.println("closed");
+                //esp_mqtt_client_publish(client, window_sensor->mqtt_topic, "CLOSED", 0, 1, 0);
+            }
+
+            window_sensor->timestamp_last_interrupt = current_time;
+        }
+    }
+}
+
+void init_window_sensor(struct WindowSensor window_sensor, void (*isr)()) {
+
+    pinMode(window_sensor.gpio_output, OUTPUT);
+    pinMode(window_sensor.gpio_input, INPUT_PULLDOWN);
+
+    attachInterrupt(digitalPinToInterrupt(window_sensor.gpio_input), isr, CHANGE);
+
+    // output always on to detect changes on input
+    digitalWrite(window_sensor.gpio_output, HIGH);
+}
+
+void initWindowSensorSystem() {
+
+    Serial.println("init task queue");
+    gpio_evt_queue = xQueueCreate(10, sizeof(uint32_t));
+    xTaskCreate(gpio_task_example, "gpio_task_example", 2048, NULL, 10, NULL);
+
+#if CONFIG_SENSOR_WINDOW_1_ENABLED
+    Serial.println("init_window_sensor(1)");
+
+        window_sensor_1.gpio_input = CONFIG_SENSOR_WINDOW_1_GPIO_INPUT;
+        window_sensor_1.gpio_output = CONFIG_SENSOR_WINDOW_1_GPIO_OUTPUT;
+        window_sensor_1.interrupt_debounce = CONFIG_SENSOR_WINDOW_1_INTERRUPT_DEBOUNCE_MS;
+        strcpy(window_sensor_1.mqtt_topic, CONFIG_SENSOR_WINDOW_1_MQTT_TOPIC);
+        window_sensor_1.timestamp_last_interrupt = 0;
+
+        init_window_sensor(window_sensor_1, &isrWindowSensor1);
+
+        // initial fake interrupt
+        isrWindowSensor1();
+#endif /*CONFIG_SENSOR_WINDOW_1_ENABLED*/
+
+#if CONFIG_SENSOR_WINDOW_2_ENABLED
+    Serial.println("init_window_sensor(2)");
+
+        window_sensor_2.gpio_input = CONFIG_SENSOR_WINDOW_2_GPIO_INPUT;
+        window_sensor_2.gpio_output = CONFIG_SENSOR_WINDOW_2_GPIO_OUTPUT;
+        window_sensor_2.interrupt_debounce = CONFIG_SENSOR_WINDOW_2_INTERRUPT_DEBOUNCE_MS;
+        strcpy(window_sensor_2.mqtt_topic, CONFIG_SENSOR_WINDOW_2_MQTT_TOPIC);
+        window_sensor_2.timestamp_last_interrupt = 0;
+
+        init_window_sensor(window_sensor_2, &isrWindowSensor2);
+
+        // initial fake interrupt
+        isrWindowSensor2();
+#endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
+}
+
+void setup(){
+
+    Serial.begin(115200);
+
+    initWiFi();
+    initBME();
+    initWindowSensorSystem();
+}
+
+void loop(){
+
+    checkWiFiConnection();
 
     delay(1000);
 }
