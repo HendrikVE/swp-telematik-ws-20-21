@@ -7,6 +7,8 @@
 #include "freertos/task.h"
 #include "freertos/queue.h"
 
+#include "mqtt_client.h"
+
 #include "Arduino.h"
 #include "WiFi.h"
 #include "BME280I2C.h"
@@ -24,6 +26,7 @@ struct WindowSensor {
 } window_sensor_1, window_sensor_2;
 
 static xQueueHandle gpio_evt_queue = NULL;
+static esp_mqtt_client_handle_t client = NULL;
 
 BME280I2C bme;
 
@@ -154,11 +157,11 @@ static void gpio_task_example(void* arg) {
 
             if (digitalRead(window_sensor->gpio_input) == LOW) {
                 Serial.println("open");
-                //esp_mqtt_client_publish(client, window_sensor->mqtt_topic, "OPEN", 0, 1, 0);
+                esp_mqtt_client_publish(client, window_sensor->mqtt_topic, "OPEN", 0, 1, 0);
             }
             else if (digitalRead(window_sensor->gpio_input) == HIGH) {
                 Serial.println("closed");
-                //esp_mqtt_client_publish(client, window_sensor->mqtt_topic, "CLOSED", 0, 1, 0);
+                esp_mqtt_client_publish(client, window_sensor->mqtt_topic, "CLOSED", 0, 1, 0);
             }
 
             window_sensor->timestamp_last_interrupt = current_time;
@@ -214,13 +217,101 @@ void initWindowSensorSystem() {
 #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
 }
 
+static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event) {
+
+    esp_mqtt_client_handle_t client = event->client;
+    int msg_id;
+    // your_context_t *context = event->context;
+    switch (event->event_id) {
+
+        case MQTT_EVENT_CONNECTED:
+            Serial.println("MQTT_EVENT_CONNECTED");
+            initWindowSensorSystem();
+            initBME();
+
+            break;
+
+        case MQTT_EVENT_DISCONNECTED:
+            Serial.println("MQTT_EVENT_DISCONNECTED");
+            break;
+
+        case MQTT_EVENT_SUBSCRIBED:
+            Serial.println("MQTT_EVENT_SUBSCRIBED");
+            break;
+
+        case MQTT_EVENT_UNSUBSCRIBED:
+            Serial.println("MQTT_EVENT_UNSUBSCRIBED");
+            break;
+
+        case MQTT_EVENT_PUBLISHED:
+            Serial.println("MQTT_EVENT_PUBLISHED");
+            break;
+
+        case MQTT_EVENT_DATA:
+            Serial.println("MQTT_EVENT_DATA");
+            break;
+
+        case MQTT_EVENT_ERROR:
+            Serial.println("MQTT_EVENT_ERROR");
+            break;
+    }
+
+    return ESP_OK;
+}
+
+static void mqtt_app_start(void) {
+
+    char server_uri[128];
+    strcpy(server_uri, "mqtt://");
+    strcat(server_uri, CONFIG_MQTT_SERVER_IP);
+    strcat(server_uri, ":");
+    strcat(server_uri, CONFIG_MQTT_SERVER_PORT);
+
+    /*const esp_mqtt_client_config_t mqtt_cfg = {
+            .uri = server_uri,
+            .event_handle = mqtt_event_handler,
+            .username = CONFIG_MQTT_USER,
+            .password = CONFIG_MQTT_PASSWORD,
+            //.cert_pem = (const char *)iot_eclipse_org_pem_start,
+    };*/
+
+    // we need to fill out all unused fields with default values
+    // (error: "sorry, unimplemented: non-trivial designated initializers not supported")
+    const esp_mqtt_client_config_t mqtt_cfg = {
+            mqtt_event_handler,//mqtt_event_callback_t event_handle;
+            nullptr,//const char *host;
+            server_uri,//const char *uri;
+            (uint32_t) CONFIG_MQTT_SERVER_PORT,//uint32_t port;
+            "ESP",//const char *client_id;
+            CONFIG_MQTT_USER,//const char *username;
+            CONFIG_MQTT_PASSWORD,//const char *password;
+            NULL,//const char *lwt_topic;
+            NULL,//const char *lwt_msg;
+            NULL,//int lwt_qos;
+            NULL,//int lwt_retain;
+            NULL,//int lwt_msg_len;
+            true,//int disable_clean_session;
+            120,//int keepalive;
+            false,//bool disable_auto_reconnect;
+            nullptr,//void *user_context;
+            5,//int task_prio;
+            6144,//int task_stack;
+            1024,//int buffer_size;
+            NULL,//const char *cert_pem;
+            esp_mqtt_transport_t {},// esp_mqtt_transport_t transport;
+            //.cert_pem = (const char *)iot_eclipse_org_pem_start,
+    };
+
+    client = esp_mqtt_client_init(&mqtt_cfg);
+    esp_mqtt_client_start(client);
+}
+
 void setup(){
 
     Serial.begin(115200);
 
     initWiFi();
-    initBME();
-    initWindowSensorSystem();
+    mqtt_app_start();
 }
 
 void loop(){
