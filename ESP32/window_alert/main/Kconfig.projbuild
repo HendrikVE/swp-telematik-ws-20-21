@@ -62,7 +62,7 @@ menu "Sensor config"
             bool "enable sensor"
             default n
             help
-                Whether the BME280 sensor should be enabled or disabled
+                Whether the BME280 sensor should be enabled or disabled. Connect SDA to GPIO 21 and SCL to GPIO 22
 
     endmenu
 
