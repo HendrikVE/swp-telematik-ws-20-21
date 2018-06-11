@@ -84,28 +84,6 @@ void initBME() {
     }
 }
 
-void printBME280Data(Stream* client) {
-
-    float temp(NAN), hum(NAN), pres(NAN);
-
-    BME280::TempUnit tempUnit(BME280::TempUnit_Celsius);
-    BME280::PresUnit presUnit(BME280::PresUnit_Pa);
-
-    bme.read(pres, temp, hum, tempUnit, presUnit);
-
-    client->print("Temp: ");
-    client->print(temp);
-    client->print("°"+ String(tempUnit == BME280::TempUnit_Celsius ? 'C' :'F'));
-    client->print("\t\tHumidity: ");
-    client->print(hum);
-    client->print("% RH");
-    client->print("\t\tPressure: ");
-    client->print(pres);
-    client->println("Pa");
-
-    delay(1000);
-}
-
 void IRAM_ATTR isrWindowSensor1() {
     uint32_t windowSensorNum = 1;
     xQueueSendFromISR(gpio_evt_queue, &windowSensorNum, NULL);
@@ -186,8 +164,8 @@ void initWindowSensorSystem() {
     gpio_evt_queue = xQueueCreate(10, sizeof(uint32_t));
     xTaskCreate(gpio_task_example, "gpio_task_example", 2048, NULL, 10, NULL);
 
-#if CONFIG_SENSOR_WINDOW_1_ENABLED
-    Serial.println("init_window_sensor(1)");
+    #if CONFIG_SENSOR_WINDOW_1_ENABLED
+        Serial.println("init_window_sensor(1)");
 
         window_sensor_1.gpio_input = CONFIG_SENSOR_WINDOW_1_GPIO_INPUT;
         window_sensor_1.gpio_output = CONFIG_SENSOR_WINDOW_1_GPIO_OUTPUT;
@@ -199,10 +177,10 @@ void initWindowSensorSystem() {
 
         // initial fake interrupt
         isrWindowSensor1();
-#endif /*CONFIG_SENSOR_WINDOW_1_ENABLED*/
+    #endif /*CONFIG_SENSOR_WINDOW_1_ENABLED*/
 
-#if CONFIG_SENSOR_WINDOW_2_ENABLED
-    Serial.println("init_window_sensor(2)");
+    #if CONFIG_SENSOR_WINDOW_2_ENABLED
+        Serial.println("init_window_sensor(2)");
 
         window_sensor_2.gpio_input = CONFIG_SENSOR_WINDOW_2_GPIO_INPUT;
         window_sensor_2.gpio_output = CONFIG_SENSOR_WINDOW_2_GPIO_OUTPUT;
@@ -214,7 +192,7 @@ void initWindowSensorSystem() {
 
         // initial fake interrupt
         isrWindowSensor2();
-#endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
+    #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
 }
 
 static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event) {
@@ -227,7 +205,10 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event) {
         case MQTT_EVENT_CONNECTED:
             Serial.println("MQTT_EVENT_CONNECTED");
             initWindowSensorSystem();
-            initBME();
+
+            #if CONFIG_SENSOR_BME280_ENABLED
+                initBME();
+            #endif /*CONFIG_SENSOR_BME280_ENABLED*/
 
             break;
 
@@ -306,6 +287,40 @@ static void mqtt_app_start(void) {
     esp_mqtt_client_start(client);
 }
 
+void publishBME280Data() {
+
+    Serial.println("publishBME280Data()");
+
+    float temperature(NAN), humidity(NAN), pressure(NAN);
+
+    BME280::TempUnit tempUnit(BME280::TempUnit_Celsius);
+    BME280::PresUnit presUnit(BME280::PresUnit_Pa);
+
+    bme.read(pressure, temperature, humidity, tempUnit, presUnit);
+
+    char strTemperature[32];
+    sprintf(strTemperature, "%f °%s", temperature, String(tempUnit == BME280::TempUnit_Celsius ? 'C' :'F').c_str());
+
+    char strHumidity[32];
+    sprintf(strHumidity, "%f %% RH", humidity);
+
+    char strPressure[32];
+    sprintf(strPressure, "%f Pa", pressure);
+
+    Serial.print("temperature: ");
+    Serial.println(strTemperature);
+
+    Serial.print("humidity: ");
+    Serial.println(strHumidity);
+
+    Serial.print("pressure: ");
+    Serial.println(strPressure);
+
+    esp_mqtt_client_publish(client, CONFIG_SENSOR_BME280_MQTT_TOPIC_TEMPERATURE, strTemperature, 0, 1, 0);
+    esp_mqtt_client_publish(client, CONFIG_SENSOR_BME280_MQTT_TOPIC_HUMIDITY, strHumidity, 0, 1, 0);
+    esp_mqtt_client_publish(client, CONFIG_SENSOR_BME280_MQTT_TOPIC_PRESSURE, strPressure, 0, 1, 0);
+}
+
 void setup(){
 
     Serial.begin(115200);
@@ -317,6 +332,10 @@ void setup(){
 void loop(){
 
     checkWiFiConnection();
+
+    #if CONFIG_SENSOR_BME280_ENABLED
+        publishBME280Data();
+    #endif /*CONFIG_SENSOR_BME280_ENABLED*/
 
     delay(1000);
 }

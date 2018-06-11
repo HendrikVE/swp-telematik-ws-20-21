@@ -64,15 +64,23 @@ menu "Sensor config"
             help
                 Whether the BME280 sensor should be enabled or disabled. Connect SDA to GPIO 21 and SCL to GPIO 22
 
-    endmenu
-
-    menu "Bosch BME680"
-
-        config SENSOR_BME680_ENABLED
-            bool "enable sensor"
-            default n
+        config SENSOR_BME280_MQTT_TOPIC_TEMPERATURE
+            string "MQTT topic for temperature"
+            default ""
             help
-                Whether the BME680 sensor should be enabled or disabled
+                MQTT topic for this temperature sensor
+
+        config SENSOR_BME280_MQTT_TOPIC_HUMIDITY
+            string "MQTT topic for humidity"
+            default ""
+            help
+                MQTT topic for this humidity sensor
+
+        config SENSOR_BME280_MQTT_TOPIC_PRESSURE
+            string "MQTT topic for pressure"
+            default ""
+            help
+                MQTT topic for this pressure sensor
 
     endmenu
 
