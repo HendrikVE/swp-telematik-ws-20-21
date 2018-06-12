@@ -1,3 +1,0 @@
-[submodule "ESP32/window_alert/components/arduino"]
-	path = ESP32/window_alert/components/arduino
-	url = https://github.com/espressif/arduino-esp32
