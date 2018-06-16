@@ -11,10 +11,12 @@ from config import config as config
 env.host_string = config.SERVER_IP
 env.user = config.SSH_USERNAME
 
+
 @task
 def setup(install_display=False):
     execute(add_sudo_user)
     execute(copy_openhab_files)
+    #execute(setup_mosquitto, True)
 
     if install_display:
         execute(install_adafruit_display)
@@ -22,7 +24,7 @@ def setup(install_display=False):
 
 @task
 def add_sudo_user():
-    run('echo "add new user with root permission"')
+    print('add new user with root permission')
 
     sudo('adduser %s' % config.NEW_USERNAME)
     sudo('usermod -aG sudo %s' % config.NEW_USERNAME)
@@ -39,24 +41,89 @@ def add_sudo_user():
 def copy_openhab_files():
     run('echo "copy config files for openhab2"')
 
-    def put_as_openhab(src, dest):
-        put(src, dest, use_sudo=True)
-        sudo('chown -R openhab:openhabian %s' % os.path.join(dest, os.path.basename(src)))
-
     res_path = os.path.join('res', 'openhab2')
     dest_path = os.path.join(os.sep, 'etc', 'openhab2')
 
-    put_as_openhab(os.path.join(res_path, 'items'), dest_path)
-    put_as_openhab(os.path.join(res_path, 'rules'), dest_path)
-    put_as_openhab(os.path.join(res_path, 'services'), dest_path)
-    put_as_openhab(os.path.join(res_path, 'sitemaps'), dest_path)
+    put(os.path.join(res_path, 'items'), dest_path, use_sudo=True)
+    put(os.path.join(res_path, 'rules'), dest_path, use_sudo=True)
+    put(os.path.join(res_path, 'services'), dest_path, use_sudo=True)
+    put(os.path.join(res_path, 'sitemaps'), dest_path, use_sudo=True)
+
+    sudo('chown -R openhab:openhabian %s/*' % dest_path)
+
+
+@task
+def setup_mosquitto(ssl=False):
+    print("not implemented yet")
+
+    """
+    sudo('apt install mosquitto')
+    
+    if ssl:
+        setup_ssl_for_mosquitto()
+    """
+
+
+@task
+def setup_ssl_for_mosquitto():
+    """
+    for reference see: http://rockingdlabs.dunmire.org/exercises-experiments/ssl-client-certs-to-secure-mqtt
+    certificates generated as shown here: https://jamielinux.com/docs/openssl-certificate-authority/index.html
+    """
+    print('setup SSL for Mosquitto MQTT broker')
+
+    home_dir = _get_homedir_openhabian()
+
+    with cd(home_dir):
+
+        ca_dir = os.path.join(home_dir, 'mosquittoCA')
+
+        sudo('mkdir %s' % ca_dir)
+        sudo('chmod 700 %s' % ca_dir)
+
+        with cd(ca_dir):
+
+            # prepare the directory
+            sudo('mkdir certs crl newcerts private')
+            sudo('chmod 700 private')
+            sudo('touch index.txt')
+            sudo('echo 1000 > serial')
+            sudo('chown -R openhab:openhabian *')
+
+            # copy config to remote
+            put(os.path.join('res', 'mosquitto_certs', 'root-config.txt'), '%s/openssl.cnf' % ca_dir, use_sudo=True)
+            sudo('chown openhab:openhabian %s/openssl.cnf' % ca_dir)
+
+            # create the root key
+            sudo('openssl genrsa -aes256 -out private/ca.key.pem 4096')
+            sudo('chmod 400 private/ca.key.pem')
+
+            # generate certificates
+            sudo('openssl req -config openssl.cnf '
+                 '-key private/ca.key.pem '
+                 '-new -x509 -days 7300 -sha256 -extensions v3_ca '
+                 '-out certs/ca.cert.pem')
+            #sudo('openssl x509 -noout -text -in certs/ca.cert.pem')
+
+            return
+
+            # copy certificates to mosquitto
+            sudo('cp ca.crt /etc/mosquitto/ca_certificates/')
+            sudo('cp myhost.crt myhost.key /etc/mosquitto/certs/')
+
+            # make references in mosquitto config
+            sudo('echo "cafile /etc/mosquitto/ca_certificates/ca.crt" >> /etc/mosquitto/mosquitto.conf')
+            sudo('echo "certfile /etc/mosquitto/certs/myhost.crt" >> /etc/mosquitto/mosquitto.conf')
+            sudo('echo "keyfile /etc/mosquitto/certs/myhost.key" >> /etc/mosquitto/mosquitto.conf')
+
+            sudo('service mosquitto restart')
 
 
 @task
 def install_adafruit_display():
-    run('echo "install adafruit display"')
+    print('install adafruit display')
 
-    home_dir = os.path.join(os.sep, 'home', 'openhabian')
+    home_dir = _get_homedir_openhabian()
 
     with cd(home_dir):
         sudo('wget https://raw.githubusercontent.com/adafruit/Raspberry-Pi-Installer-Scripts/master/adafruit-pitft.sh')
@@ -65,3 +132,28 @@ def install_adafruit_display():
         sudo('rm adafruit-pitft.sh')
 
     sudo('apt install wiringpi')
+
+
+"""
+def _put_as_user(src, dest, user, group=None):
+
+    if group is None:
+        group = user
+
+    put(src, dest, use_sudo=True)
+
+    if os.path.isfile(src) and dest.endswith(os.sep):
+        path = os.path.join(dest, os.path.basename(src))
+
+    elif os.path.isfile(src) and not dest.endswith(os.sep):
+        path = dest
+
+    else:
+        path = os.path.join(dest, os.path.basename(src))
+
+    sudo('chown -R {user}:{group} {path}'.format(user=user, group=group, path=path))
+"""
+
+
+def _get_homedir_openhabian():
+    return os.path.join(os.sep, 'home', 'openhabian')
