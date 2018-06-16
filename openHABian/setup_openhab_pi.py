@@ -63,3 +63,5 @@ def install_adafruit_display():
         sudo('chmod +x adafruit-pitft.sh')
         sudo('./adafruit-pitft.sh -u %s' % home_dir)
         sudo('rm adafruit-pitft.sh')
+
+    sudo('apt install wiringpi')
