@@ -88,22 +88,58 @@ def setup_ssl_for_mosquitto():
             sudo('chmod 700 private')
             sudo('touch index.txt')
             sudo('echo 1000 > serial')
-            sudo('chown -R openhab:openhabian *')
 
             # copy config to remote
             put(os.path.join('res', 'mosquitto_certs', 'root-config.txt'), '%s/openssl.cnf' % ca_dir, use_sudo=True)
-            sudo('chown openhab:openhabian %s/openssl.cnf' % ca_dir)
 
             # create the root key
             sudo('openssl genrsa -aes256 -out private/ca.key.pem 4096')
             sudo('chmod 400 private/ca.key.pem')
 
-            # generate certificates
+            # generate root certificate
             sudo('openssl req -config openssl.cnf '
                  '-key private/ca.key.pem '
                  '-new -x509 -days 7300 -sha256 -extensions v3_ca '
                  '-out certs/ca.cert.pem')
             #sudo('openssl x509 -noout -text -in certs/ca.cert.pem')
+
+            # prepare the directory
+            sudo('mkdir intermediate')
+
+            ca_intermediate_dir = os.path.join(ca_dir, 'intermediate')
+
+            with cd(ca_intermediate_dir):
+                sudo('mkdir certs crl csr newcerts private')
+                sudo('chmod 700 private')
+                sudo('touch index.txt')
+                sudo('echo 1000 > serial')
+
+                # copy config to remote
+                put(os.path.join('res', 'mosquitto_certs', 'intermediate-config.txt'), '%s/openssl.cnf' % ca_intermediate_dir, use_sudo=True)
+
+            # create the intermediate key
+            sudo('openssl genrsa -aes256 -out intermediate/private/intermediate.key.pem 4096')
+            sudo('chmod 400 intermediate/private/intermediate.key.pem')
+
+            # create the intermediate key
+            sudo('openssl req '
+                 '-config intermediate/openssl.cnf \
+                 -new -sha256 -key intermediate/private/intermediate.key.pem \
+                 -out intermediate/csr/intermediate.csr.pem')
+
+            # create the intermediate certificate
+            sudo('openssl ca -config openssl.cnf -extensions v3_intermediate_ca \
+                 -days 3650 -notext -md sha256 \
+                 -in intermediate/csr/intermediate.csr.pem \
+                 -out intermediate/certs/intermediate.cert.pem')
+            sudo('chmod 444 intermediate/certs/intermediate.cert.pem')
+
+            # verify the intermediate certificate
+            #sudo('openssl x509 -noout -text -in intermediate/certs/intermediate.cert.pem')
+            sudo('openssl verify -CAfile certs/ca.cert.pem intermediate/certs/intermediate.cert.pem')
+
+            sudo('cat intermediate/certs/intermediate.cert.pem certs/ca.cert.pem > intermediate/certs/ca-chain.cert.pem')
+            sudo('chmod 444 intermediate/certs/ca-chain.cert.pem')
 
             return
 
@@ -117,6 +153,8 @@ def setup_ssl_for_mosquitto():
             sudo('echo "keyfile /etc/mosquitto/certs/myhost.key" >> /etc/mosquitto/mosquitto.conf')
 
             sudo('service mosquitto restart')
+
+        sudo('chown -R openhab:openhabian %s' % ca_dir)
 
 
 @task
