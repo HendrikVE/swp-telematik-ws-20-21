@@ -73,6 +73,18 @@ def setup_ssl_for_mosquitto():
     for reference see: http://rockingdlabs.dunmire.org/exercises-experiments/ssl-client-certs-to-secure-mqtt
     certificates generated as shown here: https://jamielinux.com/docs/openssl-certificate-authority/index.html
     """
+
+    def create_key(output_file, bits):
+        sudo('openssl genrsa -aes256 \
+             -out {FILE} {BITS}'.format(FILE=output_file, BITS=bits))
+        sudo('chmod 400 {FILE}'.format(FILE=output_file))
+
+    def create_cert():
+        pass
+
+    def verify_cert():
+        pass
+
     print('setup SSL for Mosquitto MQTT broker')
 
     home_dir = _get_homedir_openhabian()
@@ -96,9 +108,7 @@ def setup_ssl_for_mosquitto():
             put(os.path.join('res', 'mosquitto_certs', 'root-config.txt'), '%s/openssl.cnf' % ca_dir, use_sudo=True)
 
             # create the root key
-            sudo('openssl genrsa -aes256 \
-                 -out private/ca.key.pem 4096')
-            sudo('chmod 400 private/ca.key.pem')
+            create_key('private/ca.key.pem', 4096)
 
             # generate root certificate
             sudo('openssl req -config openssl.cnf '
@@ -121,11 +131,9 @@ def setup_ssl_for_mosquitto():
                 put(os.path.join('res', 'mosquitto_certs', 'intermediate-config.txt'), '%s/openssl.cnf' % ca_intermediate_dir, use_sudo=True)
 
             # create the intermediate key
-            sudo('openssl genrsa -aes256 \
-                 -out intermediate/private/intermediate.key.pem 4096')
-            sudo('chmod 400 intermediate/private/intermediate.key.pem')
+            create_key('intermediate/private/intermediate.key.pem', 4096)
 
-            # create the intermediate key
+            # create the intermediate certificate
             sudo('openssl req '
                  '-config intermediate/openssl.cnf \
                  -new -sha256 \
@@ -147,8 +155,7 @@ def setup_ssl_for_mosquitto():
             sudo('chmod 444 intermediate/certs/ca-chain.cert.pem')
 
             # create a key
-            sudo('openssl genrsa -aes256 -out intermediate/private/server.key.pem 2048')
-            sudo('chmod 400 intermediate/private/server.key.pem')
+            create_key('intermediate/private/server.key.pem', 2048)
 
             # create a certificate
             sudo('openssl req -config intermediate/openssl.cnf -key intermediate/private/server.key.pem \
