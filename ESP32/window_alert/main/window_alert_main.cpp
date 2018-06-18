@@ -251,7 +251,7 @@ void publishBME280Data() {
 
     client.publish(CONFIG_SENSOR_BME280_MQTT_TOPIC_TEMPERATURE, strTemperature, false, 2);
     client.publish(CONFIG_SENSOR_BME280_MQTT_TOPIC_HUMIDITY, strHumidity, false, 2);
-    client.publish(CONFIG_SENSOR_BME280_MQTT_TOPIC_PRESSURE, strPressure, false ,2);
+    client.publish(CONFIG_SENSOR_BME280_MQTT_TOPIC_PRESSURE, strPressure, false, 2);
 }
 
 void setup(){
