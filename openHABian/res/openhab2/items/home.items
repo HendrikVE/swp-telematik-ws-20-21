@@ -1,9 +1,8 @@
 // security items
 Switch SecuritySystem "Security System"
-Contact WindowSensor1 "Fenster 1 [%s]" <door> { mqtt="<[<broker>:fulabswp18/security/WindowSensor1:state:default]" } 
-Contact WindowSensor2 "Fenster 2 [%s]" <door> { mqtt="<[<broker>:fulabswp18/security/WindowSensor2:state:default]" }
+Contact WindowSensor1 "Fenster 1 [%s]" <door> { mqtt="<[<broker>:room/livingroom/WindowSensor1:state:default]" }
+Contact WindowSensor2 "Fenster 2 [%s]" <door> { mqtt="<[<broker>:room/livingroom/WindowSensor2:state:default]" }
 
-Number wohnzimmer_temperature "Wohnzimmer [%.1f °C]" <temperature> {mqtt="<[<broker>:room/wohnzimmer/temperature:state:default]" }
-Number wohnzimmer_humidity "Wohnzimmer [%.1f %%]" <humidity> {mqtt="<[<broker>:room/wohnzimmer/humidity:state:default]" }
-Number wohnzimmer_pressure "Wohnzimmer [%.1f bar]" <pressure> {mqtt="<[<broker>:room/wohnzimmer/pressure:state:default]" }
-
+String wohnzimmer_temperature "Wohnzimmer [%s]" <temperature> { mqtt="<[<broker>:room/livingroom/temperature:state:default]" }
+String wohnzimmer_humidity "Wohnzimmer [%s]" <humidity> { mqtt="<[<broker>:room/livingroom/humidity:state:default]" }
+String wohnzimmer_pressure "Wohnzimmer [%s]" <pressure> { mqtt="<[<broker>:room/livingroom/pressure:state:default]" }
