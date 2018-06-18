@@ -77,7 +77,7 @@ void initWiFi() {
 
 void initBME() {
 
-    Wire.begin(23,27,115200);
+    Wire.begin(CONFIG_I2C_SDA_GPIO_PIN, CONFIG_I2C_SDC_GPIO_PIN, 115200);
 
     while(!bme.begin()) {
         Serial.println("Could not find BME280 sensor!");
@@ -210,7 +210,7 @@ void checkMQTTConnection() {
 
 void initMQTT() {
 
-    client.begin(CONFIG_MQTT_SERVER_IP, atoi(CONFIG_MQTT_SERVER_PORT), net);
+    client.begin(CONFIG_MQTT_SERVER_IP, CONFIG_MQTT_SERVER_PORT, net);
     checkMQTTConnection();
 
     initWindowSensorSystem();
