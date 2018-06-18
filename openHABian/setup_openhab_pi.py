@@ -49,6 +49,9 @@ def copy_openhab_files():
     put(os.path.join(res_path, 'services'), dest_path, use_sudo=True)
     put(os.path.join(res_path, 'sitemaps'), dest_path, use_sudo=True)
 
+    path_mqtt_cfg = os.path.join(dest_path, 'services', 'mqtt.cfg')
+    sudo('sed -i "s/<insert password>/{MQTT_PASSWORD}/g" {FILE}'.format(MQTT_PASSWORD=config.MQTT_PASSWORD, FILE=path_mqtt_cfg))
+
     sudo('chown -R openhab:openhabian %s/*' % dest_path)
 
 
