@@ -7,5 +7,12 @@ sitemap home label="Test"
 		Text item=WindowSensor1
 		Text item=WindowSensor2
 	}
+
+	Frame label="Sensors"
+        {
+            Text item=wohnzimmer_temperature label="Wohnzimmer Temperatur"     icon="temperature"
+            Text item=wohnzimmer_humidity    label="Wohnzimmer Luftfeutigkeit" icon="humidity"
+            Text item=wohnzimmer_pressure    label="Wohnzimmer Luftdruck"      icon="pressure"
+        }
 }
 
