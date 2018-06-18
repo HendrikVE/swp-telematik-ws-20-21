@@ -77,7 +77,7 @@ void initWiFi() {
 
 void initBME() {
 
-    Wire.begin();
+    Wire.begin(23,27,115200);
 
     while(!bme.begin()) {
         Serial.println("Could not find BME280 sensor!");
