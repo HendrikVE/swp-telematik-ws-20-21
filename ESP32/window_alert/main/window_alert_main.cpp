@@ -230,13 +230,13 @@ void publishBME280Data() {
     bme.read(pressure, temperature, humidity, tempUnit, presUnit);
 
     char strTemperature[32];
-    sprintf(strTemperature, "%f °%s", temperature, String(tempUnit == BME280::TempUnit_Celsius ? 'C' :'F').c_str());
+    sprintf(strTemperature, "%f", temperature);
 
     char strHumidity[32];
-    sprintf(strHumidity, "%f %% RH", humidity);
+    sprintf(strHumidity, "%f", humidity);
 
     char strPressure[32];
-    sprintf(strPressure, "%f Pa", pressure);
+    sprintf(strPressure, "%f", pressure);
 
     Serial.println("");
     Serial.print("temperature: ");
