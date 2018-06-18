@@ -13,8 +13,8 @@
 #include "BME280I2C.h"
 #include "Wire.h"
 
-extern const uint8_t iot_eclipse_org_pem_start[] asm("_binary_iot_eclipse_org_pem_start");
-extern const uint8_t iot_eclipse_org_pem_end[] asm("_binary_iot_eclipse_org_pem_end");
+extern const uint8_t ca_cert_pem_start[] asm("_binary_ca_cert_pem_start");
+extern const uint8_t ca_cert_pem_end[] asm("_binary_ca_cert_pem_end");
 
 struct WindowSensor {
     int gpio_input;
