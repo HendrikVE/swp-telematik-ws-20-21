@@ -8,7 +8,7 @@
 #include "freertos/queue.h"
 
 #include "Arduino.h"
-#include "WiFi.h"
+#include "WiFiClientSecure.h"
 #include "MQTT.h"
 #include "BME280I2C.h"
 #include "Wire.h"
@@ -26,7 +26,7 @@ struct WindowSensor {
 
 static xQueueHandle gpio_evt_queue = NULL;
 
-WiFiClient net;
+WiFiClientSecure net;
 MQTTClient client;
 
 BME280I2C bme;
@@ -211,6 +211,10 @@ void checkMQTTConnection() {
 void initMQTT() {
 
     client.begin(CONFIG_MQTT_SERVER_IP, CONFIG_MQTT_SERVER_PORT, net);
+
+    Serial.println((char*) ca_cert_pem_start);
+    net.setCACert((char*) ca_cert_pem_start);
+    
     checkMQTTConnection();
 
     initWindowSensorSystem();
