@@ -119,32 +119,27 @@ def setup_ssl_for_mosquitto():
 
         with cd(ca_dir):
 
-            # prepare the directory
+            # prepare the main directory
             sudo('mkdir certs crl newcerts private')
             sudo('chmod 700 private')
             sudo('touch index.txt')
             sudo('echo 1000 > serial')
-
-            # copy config to remote
             put(os.path.join('res', 'mosquitto_certs', 'root-config.txt'), '%s/openssl.cnf' % ca_dir, use_sudo=True)
 
-            # root cert and key
-            create_key('private/ca.key.pem', 4096)
-            create_cert_with_key('private/ca.key.pem', 'certs/ca.cert.pem', 7300)
-
-            # prepare the directory
+            # prepare the directory for intermediates
             sudo('mkdir intermediate')
 
             ca_intermediate_dir = os.path.join(ca_dir, 'intermediate')
-
             with cd(ca_intermediate_dir):
                 sudo('mkdir certs crl csr newcerts private')
                 sudo('chmod 700 private')
                 sudo('touch index.txt')
                 sudo('echo 1000 > serial')
-
-                # copy config to remote
                 put(os.path.join('res', 'mosquitto_certs', 'intermediate-config.txt'), '%s/openssl.cnf' % ca_intermediate_dir, use_sudo=True)
+
+            # root cert and key
+            create_key('private/ca.key.pem', 4096)
+            create_cert_with_key('private/ca.key.pem', 'certs/ca.cert.pem', 7300)
 
             # intermediate cert and key
             create_key('intermediate/private/intermediate.key.pem', 4096)
