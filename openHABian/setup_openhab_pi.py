@@ -74,9 +74,9 @@ def setup_ssl_for_mosquitto():
     certificates generated as shown here: https://jamielinux.com/docs/openssl-certificate-authority/index.html
     """
 
-    def create_key(output_file, bits):
-        sudo('openssl genrsa -aes256 \
-             -out {FILE} {BITS}'.format(FILE=output_file, BITS=bits))
+    def create_key(output_file, bits, encryption=True):
+        sudo('openssl genrsa {ENCRYPTION} \
+             -out {FILE} {BITS}'.format(FILE=output_file, BITS=bits, ENCRYPTION='-aes256' if encryption else ''))
         sudo('chmod 400 {FILE}'.format(FILE=output_file))
 
     def create_cert_with_key(key_file, output_file, lifetime):
@@ -159,7 +159,7 @@ def setup_ssl_for_mosquitto():
             sudo('chmod 444 intermediate/certs/ca-chain.cert.pem')
 
             # server cert and key
-            create_key('intermediate/private/server.key.pem', 2048)
+            create_key('intermediate/private/server.key.pem', 2048, False)
 
             create_cert_with_req('intermediate/private/server.key.pem',
                                  'intermediate/csr/server.csr.pem',
