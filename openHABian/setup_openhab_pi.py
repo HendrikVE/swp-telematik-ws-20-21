@@ -79,8 +79,29 @@ def setup_ssl_for_mosquitto():
              -out {FILE} {BITS}'.format(FILE=output_file, BITS=bits))
         sudo('chmod 400 {FILE}'.format(FILE=output_file))
 
-    def create_cert():
-        pass
+    def create_cert_with_key(key_file, output_file, lifetime):
+        sudo('openssl req \
+             -config openssl.cnf \
+             -key {KEY_FILE} \
+             -new -x509 -days {LIFETIME} -sha256 -extensions v3_ca \
+             -out {OUTPUT_FILE}'.format(KEY_FILE=key_file, OUTPUT_FILE=output_file, LIFETIME=lifetime))
+
+    def create_cert_with_req(key_file, csr_output_file, cert_output_file, lifetime, extension, config_file_csr, config_file_cert):
+        sudo('openssl req \
+             -config {CONFIG_FILE_CSR} \
+             -new -sha256 \
+             -key {KEY_FILE} \
+             -out {CSR_OUTPUT_FILE}'.format(KEY_FILE=key_file, CSR_OUTPUT_FILE=csr_output_file, CONFIG_FILE_CSR=config_file_csr))
+
+        sudo('openssl ca \
+             -config {CONFIG_FILE_CERT} \
+             -extensions {EXTENSION} \
+             -days {LIFETIME} \
+             -notext -md sha256 \
+             -in {CSR_OUTPUT_FILE} \
+             -out {CERT_OUTPUT_FILE}'.format(LIFETIME=lifetime, CSR_OUTPUT_FILE=csr_output_file, CERT_OUTPUT_FILE=cert_output_file, CONFIG_FILE_CERT=config_file_cert, EXTENSION=extension))
+
+        sudo('chmod 444 {CERT_OUTPUT_FILE}'.format(CERT_OUTPUT_FILE=cert_output_file))
 
     def verify_cert():
         pass
@@ -111,10 +132,7 @@ def setup_ssl_for_mosquitto():
             create_key('private/ca.key.pem', 4096)
 
             # generate root certificate
-            sudo('openssl req -config openssl.cnf '
-                 '-key private/ca.key.pem '
-                 '-new -x509 -days 7300 -sha256 -extensions v3_ca '
-                 '-out certs/ca.cert.pem')
+            create_cert_with_key('private/ca.key.pem', 'certs/ca.cert.pem', 7300)
 
             # prepare the directory
             sudo('mkdir intermediate')
@@ -134,21 +152,14 @@ def setup_ssl_for_mosquitto():
             create_key('intermediate/private/intermediate.key.pem', 4096)
 
             # create the intermediate certificate
-            sudo('openssl req '
-                 '-config intermediate/openssl.cnf \
-                 -new -sha256 \
-                 -key intermediate/private/intermediate.key.pem \
-                 -out intermediate/csr/intermediate.csr.pem')
-
-            # create the intermediate certificate
-            sudo('openssl ca -config openssl.cnf -extensions v3_intermediate_ca \
-                 -days 3650 -notext -md sha256 \
-                 -in intermediate/csr/intermediate.csr.pem \
-                 -out intermediate/certs/intermediate.cert.pem')
-            sudo('chmod 444 intermediate/certs/intermediate.cert.pem')
+            create_cert_with_req('intermediate/private/intermediate.key.pem',
+                                 'intermediate/csr/intermediate.csr.pem',
+                                 'intermediate/certs/intermediate.cert.pem',
+                                 3650,
+                                 'v3_intermediate_ca',
+                                 'intermediate/openssl.cnf', 'openssl.cnf')
 
             # verify the intermediate certificate
-            #sudo('openssl x509 -noout -text -in intermediate/certs/intermediate.cert.pem')
             sudo('openssl verify -CAfile certs/ca.cert.pem intermediate/certs/intermediate.cert.pem')
 
             sudo('cat intermediate/certs/intermediate.cert.pem certs/ca.cert.pem > intermediate/certs/ca-chain.cert.pem')
@@ -158,15 +169,12 @@ def setup_ssl_for_mosquitto():
             create_key('intermediate/private/server.key.pem', 2048)
 
             # create a certificate
-            sudo('openssl req -config intermediate/openssl.cnf -key intermediate/private/server.key.pem \
-                 -new -sha256 \
-                 -out intermediate/csr/server.csr.pem')
-            sudo('openssl ca -config intermediate/openssl.cnf \
-                -extensions server_cert -days 375 \
-                -notext -md sha256 \
-                -in intermediate/csr/server.csr.pem \
-                -out intermediate/certs/server.cert.pem')
-            sudo('chmod 444 intermediate/certs/server.cert.pem')
+            create_cert_with_req('intermediate/private/server.key.pem',
+                                 'intermediate/csr/server.csr.pem',
+                                 'intermediate/certs/server.cert.pem',
+                                 375,
+                                 'server_cert',
+                                 'intermediate/openssl.cnf', 'intermediate/openssl.cnf')
 
             sudo('openssl verify -CAfile intermediate/certs/ca-chain.cert.pem intermediate/certs/server.cert.pem')
 
