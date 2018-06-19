@@ -1,18 +1,16 @@
-
-sitemap home label="Test"
+sitemap home label="Home"
 {
-	Frame label="Security"
-	{
-		Switch item=SecuritySystem
-		Text item=WindowSensor1
-		Text item=WindowSensor2
-	}
-
-	Frame label="Sensors"
+        Frame label="Security"
         {
-            Text item=wohnzimmer_temperature label="Wohnzimmer Temperatur"     icon="temperature"
-            Text item=wohnzimmer_humidity    label="Wohnzimmer Luftfeutigkeit" icon="humidity"
-            Text item=wohnzimmer_pressure    label="Wohnzimmer Luftdruck"      icon="pressure"
+                Switch item=SecuritySystem
+                Text item=WindowSensor1
+                Text item=WindowSensor2
+        }
+
+        Frame label="Sensors"
+        {
+            Text item=livingroomTemperature label="Wohnzimmer Temperatur"     icon="temperature"
+            Text item=livingroomHumidity    label="Wohnzimmer Luftfeutigkeit" icon="humidity"
+            Text item=livingroomPressure    label="Wohnzimmer Luftdruck"      icon="pressure"
         }
 }
-
