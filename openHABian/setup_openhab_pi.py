@@ -82,8 +82,10 @@ def setup_ssl_for_mosquitto():
     def create_cert_with_key(key_file, output_file, lifetime):
         sudo('openssl req \
              -config openssl.cnf \
+             -new -x509 \
+             -sha256 -extensions v3_ca \
+             -days {LIFETIME} \
              -key {KEY_FILE} \
-             -new -x509 -days {LIFETIME} -sha256 -extensions v3_ca \
              -out {OUTPUT_FILE}'.format(KEY_FILE=key_file, OUTPUT_FILE=output_file, LIFETIME=lifetime))
 
     def create_cert_with_req(key_file, csr_output_file, cert_output_file, lifetime, extension, config_file_csr, config_file_cert):
