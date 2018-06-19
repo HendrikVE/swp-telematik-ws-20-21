@@ -103,8 +103,8 @@ def setup_ssl_for_mosquitto():
 
         sudo('chmod 444 {CERT_OUTPUT_FILE}'.format(CERT_OUTPUT_FILE=cert_output_file))
 
-    def verify_cert():
-        pass
+    def verify_cert(ca_file, cert_file):
+        sudo('openssl verify -CAfile {CA_FILE} {CERT_FILE}'.format(CA_FILE=ca_file, CERT_FILE=cert_file))
 
     print('setup SSL for Mosquitto MQTT broker')
 
@@ -128,10 +128,8 @@ def setup_ssl_for_mosquitto():
             # copy config to remote
             put(os.path.join('res', 'mosquitto_certs', 'root-config.txt'), '%s/openssl.cnf' % ca_dir, use_sudo=True)
 
-            # create the root key
+            # root cert and key
             create_key('private/ca.key.pem', 4096)
-
-            # generate root certificate
             create_cert_with_key('private/ca.key.pem', 'certs/ca.cert.pem', 7300)
 
             # prepare the directory
@@ -148,10 +146,9 @@ def setup_ssl_for_mosquitto():
                 # copy config to remote
                 put(os.path.join('res', 'mosquitto_certs', 'intermediate-config.txt'), '%s/openssl.cnf' % ca_intermediate_dir, use_sudo=True)
 
-            # create the intermediate key
+            # intermediate cert and key
             create_key('intermediate/private/intermediate.key.pem', 4096)
 
-            # create the intermediate certificate
             create_cert_with_req('intermediate/private/intermediate.key.pem',
                                  'intermediate/csr/intermediate.csr.pem',
                                  'intermediate/certs/intermediate.cert.pem',
@@ -159,16 +156,14 @@ def setup_ssl_for_mosquitto():
                                  'v3_intermediate_ca',
                                  'intermediate/openssl.cnf', 'openssl.cnf')
 
-            # verify the intermediate certificate
-            sudo('openssl verify -CAfile certs/ca.cert.pem intermediate/certs/intermediate.cert.pem')
+            verify_cert('certs/ca.cert.pem', 'intermediate/certs/intermediate.cert.pem')
 
             sudo('cat intermediate/certs/intermediate.cert.pem certs/ca.cert.pem > intermediate/certs/ca-chain.cert.pem')
             sudo('chmod 444 intermediate/certs/ca-chain.cert.pem')
 
-            # create a key
+            # server cert and key
             create_key('intermediate/private/server.key.pem', 2048)
 
-            # create a certificate
             create_cert_with_req('intermediate/private/server.key.pem',
                                  'intermediate/csr/server.csr.pem',
                                  'intermediate/certs/server.cert.pem',
@@ -176,7 +171,7 @@ def setup_ssl_for_mosquitto():
                                  'server_cert',
                                  'intermediate/openssl.cnf', 'intermediate/openssl.cnf')
 
-            sudo('openssl verify -CAfile intermediate/certs/ca-chain.cert.pem intermediate/certs/server.cert.pem')
+            verify_cert('intermediate/certs/ca-chain.cert.pem', 'intermediate/certs/server.cert.pem')
 
             # copy certificates to mosquitto
             sudo('cp certs/ca.cert.pem /etc/mosquitto/ca_certificates/')
