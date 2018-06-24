@@ -214,7 +214,7 @@ void initMQTT() {
 
     Serial.println((char*) ca_cert_pem_start);
     net.setCACert((char*) ca_cert_pem_start);
-    
+
     checkMQTTConnection();
 
     initWindowSensorSystem();
