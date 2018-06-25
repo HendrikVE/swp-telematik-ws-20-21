@@ -36,7 +36,9 @@ wget "https://dl.espressif.com/dl/$file"
 tar -xzf $file && rm $file
 
 printf "\nsetup esp-idf\n"
-git clone --recursive https://github.com/espressif/esp-idf.git
+git clone https://github.com/espressif/esp-idf.git
+git checkout v3.0.1
+git submodule update --init --recursive
 # git submodule add https://github.com/tuanpmt/espmqtt.git components/espmqtt
 
 printf "\nupdate ~/.profile\n"
