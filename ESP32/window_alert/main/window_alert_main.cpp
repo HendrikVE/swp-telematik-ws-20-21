@@ -199,7 +199,7 @@ void initWindowSensorSystem() {
 void checkMQTTConnection() {
 
     if (!client.connected()) {
-        Serial.println("Trying to connect to MQTT broker...");
+        Serial.println("Connect to MQTT broker...");
 
         while (!client.connect("esp32", CONFIG_MQTT_USER, CONFIG_MQTT_PASSWORD)) {
             Serial.print(".");
@@ -254,6 +254,14 @@ void publishBME280Data() {
     client.publish(CONFIG_SENSOR_BME280_MQTT_TOPIC_PRESSURE, strPressure, false, 2);
 }
 
+void startDeviceSleep(int sleepIntervalMS) {
+    //WiFi.disconnect();
+    //WiFi.mode(WIFI_OFF):
+
+    esp_sleep_enable_timer_wakeup(10000 * 1000L);
+    esp_light_sleep_start();
+}
+
 void setup(){
 
     Serial.begin(115200);
@@ -267,12 +275,15 @@ void loop(){
     client.loop();
     delay(10); // <- fixes some issues with WiFi stability
 
-    checkWiFiConnection();
-    checkMQTTConnection();
+    //checkWiFiConnection();
+    //checkMQTTConnection();
 
     #if CONFIG_SENSOR_BME280_ENABLED
-        publishBME280Data();
+        //publishBME280Data();
     #endif /*CONFIG_SENSOR_BME280_ENABLED*/
 
-    delay(5000);
+    Serial.println("loop");
+
+    startDeviceSleep(CONFIG_SENSOR_POLL_INTERVAL);
+    //delay(5000);
 }
