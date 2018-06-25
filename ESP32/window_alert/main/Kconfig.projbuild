@@ -96,13 +96,13 @@ menu "Sensor config"
                 Whether the window sensor 1 should be enabled or disabled
 
         config SENSOR_WINDOW_1_GPIO_INPUT
-            int "GPIO pin"
+            int "GPIO input pin"
             default 4
             help
                 GPIO input pin number
 
         config SENSOR_WINDOW_1_GPIO_OUTPUT
-            int "GPIO pin"
+            int "GPIO output pin"
             default 18
             help
                 GPIO output pin number
@@ -130,13 +130,13 @@ menu "Sensor config"
                 Whether the window sensor 2 should be enabled or disabled
 
         config SENSOR_WINDOW_2_GPIO_INPUT
-            int "GPIO pin"
+            int "GPIO input pin"
             default -1
             help
                 GPIO input pin number
 
         config SENSOR_WINDOW_2_GPIO_OUTPUT
-            int "GPIO pin"
+            int "GPIO output pin"
             default -1
             help
                 GPIO output pin number
