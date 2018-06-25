@@ -51,6 +51,10 @@ endmenu
 
 menu "Sensor config"
 
+    config SENSOR_POLL_INTERVAL
+        int "interval to poll sensor data (in ms)"
+        default 2000
+
     menu "Battery check"
 
         config BATTERY_CHECK_ENABLED
