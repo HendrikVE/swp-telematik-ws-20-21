@@ -51,7 +51,7 @@ endmenu
 
 menu "Sensor config"
 
-    config SENSOR_POLL_INTERVAL
+    config SENSOR_POLL_INTERVAL_MS
         int "interval to poll sensor data (in ms)"
         default 2000
 

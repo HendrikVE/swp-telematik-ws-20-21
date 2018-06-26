@@ -258,7 +258,9 @@ void startDeviceSleep(int sleepIntervalMS) {
     //WiFi.disconnect();
     //WiFi.mode(WIFI_OFF):
 
-    esp_sleep_enable_timer_wakeup(10000 * 1000L);
+    esp_sleep_enable_ext0_wakeup(GPIO_NUM_4, HIGH);
+
+    esp_sleep_enable_timer_wakeup(sleepIntervalMS * 1000L);
     esp_light_sleep_start();
 }
 
@@ -279,11 +281,12 @@ void loop(){
     //checkMQTTConnection();
 
     #if CONFIG_SENSOR_BME280_ENABLED
-        //publishBME280Data();
+        publishBME280Data();
     #endif /*CONFIG_SENSOR_BME280_ENABLED*/
 
     Serial.println("loop");
 
-    startDeviceSleep(CONFIG_SENSOR_POLL_INTERVAL);
-    //delay(5000);
+    // we still need delay because otherwise
+    delay(CONFIG_SENSOR_POLL_INTERVAL_MS);
+    startDeviceSleep(CONFIG_SENSOR_POLL_INTERVAL_MS);
 }
