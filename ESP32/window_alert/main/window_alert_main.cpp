@@ -13,8 +13,14 @@
 #include "BME280I2C.h"
 #include "Wire.h"
 
-extern const uint8_t ca_cert_pem_start[] asm("_binary_ca_cert_pem_start");
-extern const uint8_t ca_cert_pem_end[] asm("_binary_ca_cert_pem_end");
+extern const uint8_t ca_crt_start[] asm("_binary_ca_crt_start");
+extern const uint8_t ca_crt_end[] asm("_binary_ca_crt_end");
+
+extern const uint8_t client_crt_start[] asm("_binary_client_crt_start");
+extern const uint8_t client_crt_end[] asm("_binary_client_crt_end");
+
+extern const uint8_t client_key_start[] asm("_binary_client_key_start");
+extern const uint8_t client_key_end[] asm("_binary_client_key_end");
 
 struct WindowSensor {
     int gpio_input;
@@ -26,8 +32,8 @@ struct WindowSensor {
 
 static xQueueHandle gpio_evt_queue = NULL;
 
-WiFiClientSecure net;
-MQTTClient client;
+WiFiClientSecure wiFiClientSecure;
+MQTTClient mqttClient;
 
 BME280I2C bme;
 
@@ -136,11 +142,11 @@ static void gpio_task_example(void* arg) {
 
             if (digitalRead(window_sensor->gpio_input) == LOW) {
                 Serial.println("open");
-                client.publish(window_sensor->mqtt_topic, "OPEN", false, 2);
+                mqttClient.publish(window_sensor->mqtt_topic, "OPEN", false, 2);
             }
             else if (digitalRead(window_sensor->gpio_input) == HIGH) {
                 Serial.println("closed");
-                client.publish(window_sensor->mqtt_topic, "CLOSED", false, 2);
+                mqttClient.publish(window_sensor->mqtt_topic, "CLOSED", false, 2);
             }
 
             window_sensor->timestamp_last_interrupt = current_time;
@@ -198,10 +204,10 @@ void initWindowSensorSystem() {
 
 void checkMQTTConnection() {
 
-    if (!client.connected()) {
+    if (!mqttClient.connected()) {
         Serial.println("Trying to connect to MQTT broker...");
 
-        while (!client.connect("esp32", CONFIG_MQTT_USER, CONFIG_MQTT_PASSWORD)) {
+        while (!mqttClient.connect("esp32")) {
             Serial.print(".");
             delay(1000);
         }
@@ -210,10 +216,11 @@ void checkMQTTConnection() {
 
 void initMQTT() {
 
-    client.begin(CONFIG_MQTT_SERVER_IP, CONFIG_MQTT_SERVER_PORT, net);
+    mqttClient.begin(CONFIG_MQTT_SERVER_IP, CONFIG_MQTT_SERVER_PORT, wiFiClientSecure);
 
-    Serial.println((char*) ca_cert_pem_start);
-    net.setCACert((char*) ca_cert_pem_start);
+    wiFiClientSecure.setCACert((char*) ca_crt_start);
+    wiFiClientSecure.setCertificate((char*) client_crt_start);
+    wiFiClientSecure.setPrivateKey((char*) client_key_start);
 
     checkMQTTConnection();
 
@@ -253,9 +260,9 @@ void publishBME280Data() {
     Serial.println(strPressure);
     Serial.println("");
 
-    client.publish(CONFIG_SENSOR_BME280_MQTT_TOPIC_TEMPERATURE, strTemperature, false, 2);
-    client.publish(CONFIG_SENSOR_BME280_MQTT_TOPIC_HUMIDITY, strHumidity, false, 2);
-    client.publish(CONFIG_SENSOR_BME280_MQTT_TOPIC_PRESSURE, strPressure, false, 2);
+    mqttClient.publish(CONFIG_SENSOR_BME280_MQTT_TOPIC_TEMPERATURE, strTemperature, false, 2);
+    mqttClient.publish(CONFIG_SENSOR_BME280_MQTT_TOPIC_HUMIDITY, strHumidity, false, 2);
+    mqttClient.publish(CONFIG_SENSOR_BME280_MQTT_TOPIC_PRESSURE, strPressure, false, 2);
 }
 
 void setup(){
@@ -268,7 +275,7 @@ void setup(){
 
 void loop(){
 
-    client.loop();
+    mqttClient.loop();
     delay(10); // <- fixes some issues with WiFi stability
 
     checkWiFiConnection();
