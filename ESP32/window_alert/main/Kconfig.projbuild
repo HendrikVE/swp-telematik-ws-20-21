@@ -17,12 +17,16 @@ endmenu
 
 menu "MQTT config"
 
+    config MQTT_CLIENT_ID
+        string "MQTT client ID"
+        default "esp32_node"
+
     config MQTT_USER
-        string "MQTT Username"
+        string "MQTT username"
         default "your_username"
 
     config MQTT_PASSWORD
-        string "MQTT Password"
+        string "MQTT password"
         default "your_password"
 
     config MQTT_SERVER_IP
@@ -40,11 +44,11 @@ menu "I2C"
 
     config I2C_SDA_GPIO_PIN
         int "GPIO pin for SDA"
-        default 21
+        default 23
 
     config I2C_SDC_GPIO_PIN
-        int "GPIO pin for SDC"
-        default 22
+        int "GPIO pin for SCL"
+        default 27
 
 endmenu
 
