@@ -4,7 +4,7 @@
 import os
 import textwrap
 
-from fabric.api import env, task, run, sudo, execute, put
+from fabric.api import env, task, run, sudo, execute, put, get
 from fabric.context_managers import cd
 from fabric.contrib.files import append
 
@@ -104,7 +104,7 @@ def setup_ssl_for_mosquitto():
             sudo('cp openHABianPi.crt openHABianPi.key /etc/mosquitto/certs/')
 
             # make references in mosquitto config
-            listener_1883_config = 'listener 1883 localhost'
+            listener_1883_config = '\nlistener 1883 localhost'
             listener_8883_config = textwrap.dedent("""
                 listener 8883
                 cafile /etc/mosquitto/ca_certificates/ca.crt
@@ -118,6 +118,10 @@ def setup_ssl_for_mosquitto():
             append('/etc/mosquitto/mosquitto.conf', listener_8883_config, use_sudo=True)
 
             sudo('service mosquitto restart')
+
+            get('ca.crt', os.path.join('..', 'ESP32', 'window_alert', 'main', 'ca.crt'), use_sudo=True)
+            get('esp32.crt', os.path.join('..', 'ESP32', 'window_alert', 'main', 'client.crt'), use_sudo=True)
+            get('esp32.key', os.path.join('..', 'ESP32', 'window_alert', 'main', 'client.key'), use_sudo=True)
 
         sudo('chown -R openhab:openhabian %s' % ca_dir)
 
