@@ -207,7 +207,7 @@ void checkMQTTConnection() {
     if (!mqttClient.connected()) {
         Serial.println("Trying to connect to MQTT broker...");
 
-        while (!mqttClient.connect("esp32", CONFIG_MQTT_USER, CONFIG_MQTT_PASSWORD)) {
+        while (!mqttClient.connect(CONFIG_MQTT_CLIENT_ID, CONFIG_MQTT_USER, CONFIG_MQTT_PASSWORD)) {
             Serial.print(".");
             delay(1000);
         }
