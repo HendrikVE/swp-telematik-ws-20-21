@@ -111,7 +111,7 @@ def setup_ssl_for_mosquitto():
                 certfile /etc/mosquitto/certs/openHABianPi.crt
                 keyfile /etc/mosquitto/certs/openHABianPi.key
                 require_certificate true
-                use_identity_as_username true
+                # use_identity_as_username true
             """)
 
             append('/etc/mosquitto/mosquitto.conf', listener_1883_config, use_sudo=True)
