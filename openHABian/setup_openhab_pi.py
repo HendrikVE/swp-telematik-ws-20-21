@@ -18,7 +18,8 @@ env.user = config.SSH_USERNAME
 def setup(install_display=False):
     execute(add_sudo_user)
     execute(copy_openhab_files)
-    #execute(setup_mosquitto, True)
+    # execute(setup_mosquitto, True)
+    setup_ssl_for_mosquitto()
 
     if install_display:
         execute(install_adafruit_display)
@@ -76,7 +77,17 @@ def setup_ssl_for_mosquitto():
     certificates generated as shown here: https://jamielinux.com/docs/openssl-certificate-authority/index.html
     """
 
+    def get_host_ipv4():
+        return run('hostname -I | cut -d " " -f 1')
+
+    def get_host_name():
+        return run('hostname')
+
     print('setup SSL for Mosquitto MQTT broker')
+
+    host_ipv4 = get_host_ipv4()
+    host_name = get_host_name()
+    client_name = 'esp32'
 
     res_path = os.path.join('res', 'mosquitto')
     home_dir = _get_homedir_openhabian()
@@ -94,25 +105,25 @@ def setup_ssl_for_mosquitto():
             sudo('chmod +x generate-CA.sh')
 
             # create ca cert and server cert + key
-            sudo('IPLIST="192.168.2.110" HOSTLIST="openHABianPi" ./generate-CA.sh')
+            sudo('IPLIST="{IP}" HOSTLIST="{HOSTNAME}" ./generate-CA.sh'.format(IP=host_ipv4, HOSTNAME=host_name))
 
             # create client cert + key
-            sudo('IPLIST="192.168.2.110" HOSTLIST="openHABianPi" ./generate-CA.sh client esp32')
+            sudo('IPLIST="{IP}" HOSTLIST="{HOSTNAME}" ./generate-CA.sh client {CLIENT_NAME}'.format(IP=host_ipv4, HOSTNAME=host_name, CLIENT_NAME=client_name))
 
             # copy certificates to mosquitto
             sudo('cp ca.crt /etc/mosquitto/ca_certificates/')
-            sudo('cp openHABianPi.crt openHABianPi.key /etc/mosquitto/certs/')
+            sudo('cp {HOSTNAME}.crt {HOSTNAME}.key /etc/mosquitto/certs/'.format(HOSTNAME=host_name))
 
             # make references in mosquitto config
             listener_1883_config = '\nlistener 1883 localhost'
             listener_8883_config = textwrap.dedent("""
                 listener 8883
                 cafile /etc/mosquitto/ca_certificates/ca.crt
-                certfile /etc/mosquitto/certs/openHABianPi.crt
-                keyfile /etc/mosquitto/certs/openHABianPi.key
+                certfile /etc/mosquitto/certs/{HOSTNAME}.crt
+                keyfile /etc/mosquitto/certs/{HOSTNAME}.key
                 require_certificate true
                 # use_identity_as_username true
-            """)
+            """.format(HOSTNAME=host_name))
 
             append('/etc/mosquitto/mosquitto.conf', listener_1883_config, use_sudo=True)
             append('/etc/mosquitto/mosquitto.conf', listener_8883_config, use_sudo=True)
@@ -120,8 +131,8 @@ def setup_ssl_for_mosquitto():
             sudo('service mosquitto restart')
 
             get('ca.crt', os.path.join('..', 'ESP32', 'window_alert', 'main', 'ca.crt'), use_sudo=True)
-            get('esp32.crt', os.path.join('..', 'ESP32', 'window_alert', 'main', 'client.crt'), use_sudo=True)
-            get('esp32.key', os.path.join('..', 'ESP32', 'window_alert', 'main', 'client.key'), use_sudo=True)
+            get('%s.crt' % client_name, os.path.join('..', 'ESP32', 'window_alert', 'main', 'client.crt'), use_sudo=True)
+            get('%s.key' % client_name, os.path.join('..', 'ESP32', 'window_alert', 'main', 'client.key'), use_sudo=True)
 
         sudo('chown -R openhab:openhabian %s' % ca_dir)
 
