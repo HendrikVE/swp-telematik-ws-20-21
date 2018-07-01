@@ -285,5 +285,5 @@ void loop(){
         publishBME280Data();
     #endif /*CONFIG_SENSOR_BME280_ENABLED*/
 
-    delay(5000);
+    delay(15 * 60 * 1000);
 }
