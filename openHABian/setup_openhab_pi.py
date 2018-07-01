@@ -3,6 +3,7 @@
 
 import os
 import textwrap
+import time
 
 from fabric.api import env, task, run, sudo, execute, put, get
 from fabric.context_managers import cd
@@ -53,7 +54,11 @@ def copy_openhab_files():
     put(os.path.join(res_path, 'sitemaps'), dest_path, use_sudo=True)
 
     path_mqtt_cfg = os.path.join(dest_path, 'services', 'mqtt.cfg')
-    sudo('sed -i "s/<insert password>/{MQTT_PASSWORD}/g" {FILE}'.format(MQTT_PASSWORD=config.MQTT_PASSWORD, FILE=path_mqtt_cfg))
+    _replace_inplace_file('<insert password>', config.MQTT_PASSWORD, path_mqtt_cfg)
+
+    path_influxdb_cfg = os.path.join(dest_path, 'services', 'influxdb.cfg')
+    _replace_inplace_file('<insert username>', config.INFLUXDB_USERNAME_OPENHAB, path_influxdb_cfg)
+    _replace_inplace_file('<insert password>', config.INFLUXDB_PASSWORD_OPENHAB, path_influxdb_cfg)
 
     sudo('chown -R openhab:openhabian %s/*' % dest_path)
 
@@ -68,6 +73,46 @@ def setup_mosquitto(ssl=False):
     if ssl:
         setup_ssl_for_mosquitto()
     """
+
+
+@task
+def setup_influxDB_and_grafana():
+    print('setup InfluxDB and Grafana')
+
+    # print('Please install the following: Optional Components -> InfluxDB+Grafana')
+    # sudo('openhabian-config')
+
+    _setup_influxDB()
+    _setup_grafana()
+
+
+def _setup_influxDB():
+    print('setup influxDB')
+
+    run("""echo "CREATE DATABASE {DBNAME}" | influx""".format(DBNAME=config.INFLUXDB_DB_NAME))
+    run("""echo "CREATE USER admin WITH PASSWORD '{PASSWORD}' WITH ALL PRIVILEGES" | influx""".format(PASSWORD=config.INFLUXDB_PASSWORD_ADMIN))
+    run("""echo "CREATE USER {USERNAME} WITH PASSWORD '{PASSWORD}'" | influx""".format(USERNAME=config.INFLUXDB_USERNAME_OPENHAB, PASSWORD=config.INFLUXDB_PASSWORD_OPENHAB))
+    run("""echo "CREATE USER {USERNAME} WITH PASSWORD '{PASSWORD}'" | influx""".format(USERNAME=config.INFLUXDB_USERNAME_GRAFANA, PASSWORD=config.INFLUXDB_PASSWORD_GRAFANA))
+    run("""echo "GRANT ALL ON {DBNAME} TO {USERNAME}" | influx""".format(DBNAME=config.INFLUXDB_DB_NAME, USERNAME=config.INFLUXDB_USERNAME_OPENHAB))
+    run("""echo "GRANT READ ON {DBNAME} TO {USERNAME}" | influx""".format(DBNAME=config.INFLUXDB_DB_NAME, USERNAME=config.INFLUXDB_USERNAME_GRAFANA))
+
+    res_path = os.path.join('res', 'influxdb', 'influxdb.conf')
+    dest_path = '/etc/influxdb/influxdb.conf'
+
+    sudo('cp {FILE} {FILE}.old'.format(FILE=dest_path))
+    put(res_path, dest_path, use_sudo=True)
+
+    sudo('sudo systemctl restart influxdb.service')
+
+
+def _setup_grafana():
+    print('setup grafana')
+
+    res_path = os.path.join('res', 'grafana', 'grafana.ini')
+    dest_path = '/etc/grafana/grafana.ini'
+
+    sudo('cp {FILE} {FILE}.old'.format(FILE=dest_path))
+    put(res_path, dest_path, use_sudo=True)
 
 
 @task
@@ -175,3 +220,7 @@ def _put_as_user(src, dest, user, group=None):
 
 def _get_homedir_openhabian():
     return os.path.join(os.sep, 'home', 'openhabian')
+
+
+def _replace_inplace_file(pattern, replacement, file):
+    sudo('sed -i "s/{PATTERN}/{REPLACEMENT}/g" {FILE}'.format(PATTERN=pattern, REPLACEMENT=replacement, FILE=file))
