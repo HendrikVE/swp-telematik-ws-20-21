@@ -2,9 +2,12 @@
 #  -*- coding:utf-8 -*-
 
 import os
+import textwrap
+import time
 
-from fabric.api import env, task, run, sudo, execute, put
+from fabric.api import env, task, run, sudo, execute, put, get
 from fabric.context_managers import cd
+from fabric.contrib.files import append
 
 from config import config as config
 
@@ -16,7 +19,8 @@ env.user = config.SSH_USERNAME
 def setup(install_display=False):
     execute(add_sudo_user)
     execute(copy_openhab_files)
-    #execute(setup_mosquitto, True)
+    # execute(setup_mosquitto, True)
+    setup_ssl_for_mosquitto()
 
     if install_display:
         execute(install_adafruit_display)
@@ -39,7 +43,7 @@ def add_sudo_user():
 
 @task
 def copy_openhab_files():
-    run('echo "copy config files for openhab2"')
+    print('copy config files for openhab2')
 
     res_path = os.path.join('res', 'openhab2')
     dest_path = os.path.join(os.sep, 'etc', 'openhab2')
@@ -50,7 +54,11 @@ def copy_openhab_files():
     put(os.path.join(res_path, 'sitemaps'), dest_path, use_sudo=True)
 
     path_mqtt_cfg = os.path.join(dest_path, 'services', 'mqtt.cfg')
-    sudo('sed -i "s/<insert password>/{MQTT_PASSWORD}/g" {FILE}'.format(MQTT_PASSWORD=config.MQTT_PASSWORD, FILE=path_mqtt_cfg))
+    _replace_inplace_file('<insert password>', config.MQTT_PASSWORD, path_mqtt_cfg)
+
+    path_influxdb_cfg = os.path.join(dest_path, 'services', 'influxdb.cfg')
+    _replace_inplace_file('<insert username>', config.INFLUXDB_USERNAME_OPENHAB, path_influxdb_cfg)
+    _replace_inplace_file('<insert password>', config.INFLUXDB_PASSWORD_OPENHAB, path_influxdb_cfg)
 
     sudo('chown -R openhab:openhabian %s/*' % dest_path)
 
@@ -68,13 +76,81 @@ def setup_mosquitto(ssl=False):
 
 
 @task
+def setup_influxDB_and_grafana():
+    print('setup InfluxDB and Grafana')
+
+    # print('Please install the following: Optional Components -> InfluxDB+Grafana')
+    # sudo('openhabian-config')
+
+    _setup_influxDB()
+    _setup_grafana()
+
+
+@task
+def _setup_influxDB():
+    print('setup influxDB')
+
+    run("""echo "CREATE DATABASE {DBNAME}" | influx""".format(DBNAME=config.INFLUXDB_DB_NAME))
+    run("""echo "CREATE USER admin WITH PASSWORD '{PASSWORD}' WITH ALL PRIVILEGES" | influx""".format(PASSWORD=config.INFLUXDB_PASSWORD_ADMIN))
+    run("""echo "CREATE USER {USERNAME} WITH PASSWORD '{PASSWORD}'" | influx""".format(USERNAME=config.INFLUXDB_USERNAME_OPENHAB, PASSWORD=config.INFLUXDB_PASSWORD_OPENHAB))
+    run("""echo "CREATE USER {USERNAME} WITH PASSWORD '{PASSWORD}'" | influx""".format(USERNAME=config.INFLUXDB_USERNAME_GRAFANA, PASSWORD=config.INFLUXDB_PASSWORD_GRAFANA))
+    run("""echo "GRANT ALL ON {DBNAME} TO {USERNAME}" | influx""".format(DBNAME=config.INFLUXDB_DB_NAME, USERNAME=config.INFLUXDB_USERNAME_OPENHAB))
+    run("""echo "GRANT READ ON {DBNAME} TO {USERNAME}" | influx""".format(DBNAME=config.INFLUXDB_DB_NAME, USERNAME=config.INFLUXDB_USERNAME_GRAFANA))
+
+    res_path = os.path.join('res', 'influxdb', 'influxdb.conf')
+    dest_path = '/etc/influxdb/influxdb.conf'
+
+    sudo('cp {FILE} {FILE}.old'.format(FILE=dest_path))
+    put(res_path, dest_path, use_sudo=True)
+
+    sudo('sudo systemctl restart influxdb.service')
+
+
+@task
+def _setup_grafana():
+    print('setup grafana')
+
+    res_path = os.path.join('res', 'grafana')
+
+    sudo('cp {FILE} {FILE}.old'.format(FILE='/etc/grafana/grafana.ini'))
+    put(os.path.join(res_path, 'grafana.ini'), '/etc/grafana/grafana.ini', use_sudo=True)
+
+    put(os.path.join(res_path, 'provisioning', 'dashboards', 'livingroom.yaml'), '/etc/grafana/provisioning/dashboards/livingroom.yaml', use_sudo=True)
+
+    put(os.path.join(res_path, 'provisioning', 'datasources', 'openhab_home.yaml'), '/etc/grafana/provisioning/datasources/openhab_home.yaml', use_sudo=True)
+    _replace_inplace_file('DB_USER', config.INFLUXDB_USERNAME_GRAFANA, '/etc/grafana/provisioning/datasources/openhab_home.yaml')
+    _replace_inplace_file('DB_PASSWORD', config.INFLUXDB_PASSWORD_GRAFANA, '/etc/grafana/provisioning/datasources/openhab_home.yaml')
+    _replace_inplace_file('DB_NAME', config.INFLUXDB_DB_NAME, '/etc/grafana/provisioning/datasources/openhab_home.yaml')
+    _replace_inplace_file('BASIC_AUTH_USER', config.INFLUXDB_USERNAME_GRAFANA, '/etc/grafana/provisioning/datasources/openhab_home.yaml')
+    _replace_inplace_file('BASIC_AUTH_PASSWORD', config.INFLUXDB_PASSWORD_GRAFANA, '/etc/grafana/provisioning/datasources/openhab_home.yaml')
+
+    sudo('mkdir -p /var/lib/grafana/dashboards')
+    put(os.path.join(res_path, 'dashboards', 'livingroom.json'), '/var/lib/grafana/dashboards/livingroom.json', use_sudo=True)
+    sudo('chown grafana:grafana -R /var/lib/grafana/dashboards/')
+
+    sudo('sudo service grafana-server restart')
+
+
+@task
 def setup_ssl_for_mosquitto():
     """
     for reference see: http://rockingdlabs.dunmire.org/exercises-experiments/ssl-client-certs-to-secure-mqtt
     certificates generated as shown here: https://jamielinux.com/docs/openssl-certificate-authority/index.html
     """
+
+    def get_host_ipv4():
+        return run('hostname -I | cut -d " " -f 1')
+
+    def get_host_name():
+        return run('hostname')
+
     print('setup SSL for Mosquitto MQTT broker')
 
+    host_ipv4 = get_host_ipv4()
+    host_name = get_host_name()
+    client_name = 'esp32'
+
+    res_path = os.path.join('res', 'mosquitto')
     home_dir = _get_homedir_openhabian()
 
     with cd(home_dir):
@@ -86,91 +162,38 @@ def setup_ssl_for_mosquitto():
 
         with cd(ca_dir):
 
-            # prepare the directory
-            sudo('mkdir certs crl newcerts private')
-            sudo('chmod 700 private')
-            sudo('touch index.txt')
-            sudo('echo 1000 > serial')
+            put(os.path.join(res_path, 'generate-CA.sh'), 'generate-CA.sh', use_sudo=True)
+            sudo('chmod +x generate-CA.sh')
 
-            # copy config to remote
-            put(os.path.join('res', 'mosquitto_certs', 'root-config.txt'), '%s/openssl.cnf' % ca_dir, use_sudo=True)
+            # create ca cert and server cert + key
+            sudo('IPLIST="{IP}" HOSTLIST="{HOSTNAME}" ./generate-CA.sh'.format(IP=host_ipv4, HOSTNAME=host_name))
 
-            # create the root key
-            sudo('openssl genrsa -aes256 -out private/ca.key.pem 4096')
-            sudo('chmod 400 private/ca.key.pem')
-
-            # generate root certificate
-            sudo('openssl req -config openssl.cnf '
-                 '-key private/ca.key.pem '
-                 '-new -x509 -days 7300 -sha256 -extensions v3_ca '
-                 '-out certs/ca.cert.pem')
-            #sudo('openssl x509 -noout -text -in certs/ca.cert.pem')
-
-            # prepare the directory
-            sudo('mkdir intermediate')
-
-            ca_intermediate_dir = os.path.join(ca_dir, 'intermediate')
-
-            with cd(ca_intermediate_dir):
-                sudo('mkdir certs crl csr newcerts private')
-                sudo('chmod 700 private')
-                sudo('touch index.txt')
-                sudo('echo 1000 > serial')
-
-                # copy config to remote
-                put(os.path.join('res', 'mosquitto_certs', 'intermediate-config.txt'), '%s/openssl.cnf' % ca_intermediate_dir, use_sudo=True)
-
-            # create the intermediate key
-            sudo('openssl genrsa -aes256 -out intermediate/private/intermediate.key.pem 4096')
-            sudo('chmod 400 intermediate/private/intermediate.key.pem')
-
-            # create the intermediate key
-            sudo('openssl req '
-                 '-config intermediate/openssl.cnf \
-                 -new -sha256 -key intermediate/private/intermediate.key.pem \
-                 -out intermediate/csr/intermediate.csr.pem')
-
-            # create the intermediate certificate
-            sudo('openssl ca -config openssl.cnf -extensions v3_intermediate_ca \
-                 -days 3650 -notext -md sha256 \
-                 -in intermediate/csr/intermediate.csr.pem \
-                 -out intermediate/certs/intermediate.cert.pem')
-            sudo('chmod 444 intermediate/certs/intermediate.cert.pem')
-
-            # verify the intermediate certificate
-            #sudo('openssl x509 -noout -text -in intermediate/certs/intermediate.cert.pem')
-            sudo('openssl verify -CAfile certs/ca.cert.pem intermediate/certs/intermediate.cert.pem')
-
-            sudo('cat intermediate/certs/intermediate.cert.pem certs/ca.cert.pem > intermediate/certs/ca-chain.cert.pem')
-            sudo('chmod 444 intermediate/certs/ca-chain.cert.pem')
-
-            # create a key
-            sudo('openssl genrsa -aes256 -out intermediate/private/server.key.pem 2048')
-            sudo('chmod 400 intermediate/private/server.key.pem')
-
-            # create a certificate
-            sudo('openssl req -config intermediate/openssl.cnf -key intermediate/private/server.key.pem -new -sha256 -out intermediate/csr/server.csr.pem')
-            sudo('openssl ca -config intermediate/openssl.cnf \
-                -extensions server_cert -days 375 \
-                -notext -md sha256 \
-                -in intermediate/csr/server.csr.pem \
-                -out intermediate/certs/server.cert.pem')
-            sudo('chmod 444 intermediate/certs/server.cert.pem')
-
-            sudo('openssl verify -CAfile intermediate/certs/ca-chain.cert.pem intermediate/certs/server.cert.pem')
-
-            return
+            # create client cert + key
+            sudo('IPLIST="{IP}" HOSTLIST="{HOSTNAME}" ./generate-CA.sh client {CLIENT_NAME}'.format(IP=host_ipv4, HOSTNAME=host_name, CLIENT_NAME=client_name))
 
             # copy certificates to mosquitto
             sudo('cp ca.crt /etc/mosquitto/ca_certificates/')
-            sudo('cp myhost.crt myhost.key /etc/mosquitto/certs/')
+            sudo('cp {HOSTNAME}.crt {HOSTNAME}.key /etc/mosquitto/certs/'.format(HOSTNAME=host_name))
 
             # make references in mosquitto config
-            sudo('echo "cafile /etc/mosquitto/ca_certificates/ca.crt" >> /etc/mosquitto/mosquitto.conf')
-            sudo('echo "certfile /etc/mosquitto/certs/myhost.crt" >> /etc/mosquitto/mosquitto.conf')
-            sudo('echo "keyfile /etc/mosquitto/certs/myhost.key" >> /etc/mosquitto/mosquitto.conf')
+            listener_1883_config = '\nlistener 1883 localhost'
+            listener_8883_config = textwrap.dedent("""
+                listener 8883
+                cafile /etc/mosquitto/ca_certificates/ca.crt
+                certfile /etc/mosquitto/certs/{HOSTNAME}.crt
+                keyfile /etc/mosquitto/certs/{HOSTNAME}.key
+                require_certificate true
+                # use_identity_as_username true
+            """.format(HOSTNAME=host_name))
+
+            append('/etc/mosquitto/mosquitto.conf', listener_1883_config, use_sudo=True)
+            append('/etc/mosquitto/mosquitto.conf', listener_8883_config, use_sudo=True)
 
             sudo('service mosquitto restart')
+
+            get('ca.crt', os.path.join('..', 'ESP32', 'window_alert', 'main', 'ca.crt'), use_sudo=True)
+            get('%s.crt' % client_name, os.path.join('..', 'ESP32', 'window_alert', 'main', 'client.crt'), use_sudo=True)
+            get('%s.key' % client_name, os.path.join('..', 'ESP32', 'window_alert', 'main', 'client.key'), use_sudo=True)
 
         sudo('chown -R openhab:openhabian %s' % ca_dir)
 
@@ -213,3 +236,7 @@ def _put_as_user(src, dest, user, group=None):
 
 def _get_homedir_openhabian():
     return os.path.join(os.sep, 'home', 'openhabian')
+
+
+def _replace_inplace_file(pattern, replacement, file):
+    sudo('sed -i "s/{PATTERN}/{REPLACEMENT}/g" {FILE}'.format(PATTERN=pattern, REPLACEMENT=replacement, FILE=file))
