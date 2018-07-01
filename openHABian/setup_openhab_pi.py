@@ -86,6 +86,7 @@ def setup_influxDB_and_grafana():
     _setup_grafana()
 
 
+@task
 def _setup_influxDB():
     print('setup influxDB')
 
@@ -105,14 +106,29 @@ def _setup_influxDB():
     sudo('sudo systemctl restart influxdb.service')
 
 
+@task
 def _setup_grafana():
     print('setup grafana')
 
-    res_path = os.path.join('res', 'grafana', 'grafana.ini')
-    dest_path = '/etc/grafana/grafana.ini'
+    res_path = os.path.join('res', 'grafana')
 
-    sudo('cp {FILE} {FILE}.old'.format(FILE=dest_path))
-    put(res_path, dest_path, use_sudo=True)
+    sudo('cp {FILE} {FILE}.old'.format(FILE='/etc/grafana/grafana.ini'))
+    put(os.path.join(res_path, 'grafana.ini'), '/etc/grafana/grafana.ini', use_sudo=True)
+
+    put(os.path.join(res_path, 'provisioning', 'dashboards', 'livingroom.yaml'), '/etc/grafana/provisioning/dashboards/livingroom.yaml', use_sudo=True)
+
+    put(os.path.join(res_path, 'provisioning', 'datasources', 'openhab_home.yaml'), '/etc/grafana/provisioning/datasources/openhab_home.yaml', use_sudo=True)
+    _replace_inplace_file('DB_USER', config.INFLUXDB_USERNAME_GRAFANA, '/etc/grafana/provisioning/datasources/openhab_home.yaml')
+    _replace_inplace_file('DB_PASSWORD', config.INFLUXDB_PASSWORD_GRAFANA, '/etc/grafana/provisioning/datasources/openhab_home.yaml')
+    _replace_inplace_file('DB_NAME', config.INFLUXDB_DB_NAME, '/etc/grafana/provisioning/datasources/openhab_home.yaml')
+    _replace_inplace_file('BASIC_AUTH_USER', config.INFLUXDB_USERNAME_GRAFANA, '/etc/grafana/provisioning/datasources/openhab_home.yaml')
+    _replace_inplace_file('BASIC_AUTH_PASSWORD', config.INFLUXDB_PASSWORD_GRAFANA, '/etc/grafana/provisioning/datasources/openhab_home.yaml')
+
+    sudo('mkdir -p /var/lib/grafana/dashboards')
+    put(os.path.join(res_path, 'dashboards', 'livingroom.json'), '/var/lib/grafana/dashboards/livingroom.json', use_sudo=True)
+    sudo('chown grafana:grafana -R /var/lib/grafana/dashboards/')
+
+    sudo('sudo service grafana-server restart')
 
 
 @task
