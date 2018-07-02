@@ -213,6 +213,21 @@ def install_adafruit_display():
     sudo('apt install wiringpi')
 
 
+@task
+def set_intensity_adafruit_display(intensity):
+
+    intensity = int(intensity)
+
+    if intensity < 0:
+        intensity = 0
+
+    elif intensity > 1023:
+        intensity = 1023
+
+    sudo('gpio -g mode 18 pwm')
+    sudo('gpio -g pwm 18 %i' % intensity)
+
+
 """
 def _put_as_user(src, dest, user, group=None):
 
