@@ -17,7 +17,10 @@ env.user = config.SSH_USERNAME
 
 @task
 def setup(install_display=False):
+
     execute(add_sudo_user)
+    env.user = config.NEW_USERNAME
+
     execute(copy_openhab_files)
     # execute(setup_mosquitto, True)
     setup_ssl_for_mosquitto()
@@ -52,6 +55,7 @@ def copy_openhab_files():
     put(os.path.join(res_path, 'rules'), dest_path, use_sudo=True)
     put(os.path.join(res_path, 'services'), dest_path, use_sudo=True)
     put(os.path.join(res_path, 'sitemaps'), dest_path, use_sudo=True)
+    put(os.path.join(res_path, 'sounds'), dest_path, use_sudo=True)
 
     path_mqtt_cfg = os.path.join(dest_path, 'services', 'mqtt.cfg')
     _replace_inplace_file('<insert password>', config.MQTT_PASSWORD, path_mqtt_cfg)
