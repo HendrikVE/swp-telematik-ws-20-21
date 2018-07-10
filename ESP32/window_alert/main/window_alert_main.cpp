@@ -371,7 +371,6 @@ void startDeviceSleep(int sleepIntervalMS) {
         rtc_gpio_deinit(windowSensor1Output);
 
         init_window_sensor(window_sensor_1, &isrWindowSensor1);
-        isrWindowSensor1();
     #endif /*CONFIG_SENSOR_WINDOW_1_ENABLED*/
 
     #if CONFIG_SENSOR_WINDOW_2_ENABLED
@@ -379,10 +378,7 @@ void startDeviceSleep(int sleepIntervalMS) {
         rtc_gpio_deinit(windowSensor2Output);
 
         init_window_sensor(window_sensor_2, &isrWindowSensor2);
-        isrWindowSensor2();
     #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
-
-    configureWindowSensorSystem();
 }
 
 void setup(){
@@ -406,6 +402,18 @@ void loop(){
     #if CONFIG_SENSOR_BME280_ENABLED
         publishBME280Data();
     #endif /*CONFIG_SENSOR_BME280_ENABLED*/
+
+    #if CONFIG_SENSOR_WINDOW_1_ENABLED
+        isrWindowSensor1();
+    #endif /*CONFIG_SENSOR_WINDOW_1_ENABLED*/
+
+    #if CONFIG_SENSOR_WINDOW_2_ENABLED
+        isrWindowSensor2();
+    #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
+
+    while (uxQueueMessagesWaiting(windowSensorEventQueue) > 0) {
+        delay(1000);
+    }
 
     Serial.println("go to sleep");
     startDeviceSleep(CONFIG_SENSOR_POLL_INTERVAL_MS);
