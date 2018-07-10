@@ -1,11 +1,11 @@
-//Test Window Sensor Is Open
-rule "Test Window Sensor"
+rule "security system"
 when
-   Item WindowSensor1 received update OPEN
+    Item gWindowSensor received update OPEN
 then
-       if(SecuritySystem.state == ON)
-       {
-           sendBroadcastNotification("SECURITY SYSTEM: SIDE DOOR OPEN")
-           playSound("alarm.mp3")
-       }
+    if(SecuritySystem.state == ON) {
+        sendBroadcastNotification("SECURITY SYSTEM: SIDE DOOR OPEN")
+
+        setMasterVolume(new PercentType(100))
+        playSound("alarm.mp3")
+    }
 end
