@@ -309,11 +309,9 @@ void startDeviceSleep(int sleepIntervalMS) {
         window_sensor_1.last_state = rtc_gpio_get_level(windowSensor1Input);
 
         if (window_sensor_1.last_state == LOW) {
-            Serial.println("1 LOW");
             esp_sleep_enable_ext0_wakeup(windowSensor1Input, HIGH);
         }
         else if (window_sensor_1.last_state == HIGH) {
-            Serial.println("1 HIGH");
             esp_sleep_enable_ext0_wakeup(windowSensor1Input, LOW);
         }
 
@@ -342,11 +340,9 @@ void startDeviceSleep(int sleepIntervalMS) {
         window_sensor_2.last_state = rtc_gpio_get_level(windowSensor2Input);
 
         if (window_sensor_2.last_state == LOW) {
-            Serial.println("2 LOW");
             esp_sleep_enable_ext1_wakeup(BIT(windowSensor2Input), ESP_EXT1_WAKEUP_ANY_HIGH);
         }
         else if (window_sensor_2.last_state == HIGH) {
-            Serial.println("2 HIGH");
             esp_sleep_enable_ext1_wakeup(BIT(windowSensor2Input), ESP_EXT1_WAKEUP_ALL_LOW);
         }
 
