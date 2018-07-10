@@ -1,9 +1,9 @@
 // security items
 Switch SecuritySystem "Security System"
 
-Group:Contact:OR(OPEN,CLOSED) gWindowSensor
-Contact WindowSensor1 "Fenster 1 [%s]" <door> (gWindowSensor) { mqtt="<[<broker>:room/livingroom/WindowSensor1:state:default]" }
-Contact WindowSensor2 "Fenster 2 [%s]" <door> (gWindowSensor) { mqtt="<[<broker>:room/livingroom/WindowSensor2:state:default]" }
+Group:Contact:OR(OPEN,CLOSED) gWindowSensor "Fenstersensoren" <contact>
+Contact WindowSensor1 "Fenster 1 [%s]" <contact> (gWindowSensor) { mqtt="<[<broker>:room/livingroom/WindowSensor1:state:default]" }
+Contact WindowSensor2 "Fenster 2 [%s]" <contact> (gWindowSensor) { mqtt="<[<broker>:room/livingroom/WindowSensor2:state:default]" }
 
 Number livingroomTemperature "Wohnzimmer [%.1f °C]" <temperature> { mqtt="<[<broker>:room/livingroom/temperature:state:default]" }
 Number livingroomHumidity "Wohnzimmer [%.1f %%]" <humidity> { mqtt="<[<broker>:room/livingroom/humidity:state:default]" }
