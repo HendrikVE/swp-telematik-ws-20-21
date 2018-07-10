@@ -3,8 +3,7 @@ sitemap home label="Home"
         Frame label="Security"
         {
                 Switch item=SecuritySystem
-                Text item=WindowSensor1
-                Text item=WindowSensor2
+                Group item=gWindowSensor
         }
 
         Frame label="Sensors"
