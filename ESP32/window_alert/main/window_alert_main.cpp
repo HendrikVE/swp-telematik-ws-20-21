@@ -285,10 +285,6 @@ void publishBME280Data() {
 
 void startDeviceSleep(int sleepIntervalMS) {
 
-    if (!CONFIG_SENSOR_WINDOW_1_ENABLED && !CONFIG_SENSOR_WINDOW_2_ENABLED) {
-        Serial.println("there are no sensors enabled, board will wake up on timer only");
-    }
-
     WiFi.disconnect();
     WiFi.mode(WIFI_OFF);
 
