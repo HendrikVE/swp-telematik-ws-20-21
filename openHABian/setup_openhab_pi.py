@@ -3,7 +3,6 @@
 
 import os
 import textwrap
-import time
 
 from fabric.api import env, task, run, sudo, execute, put, get
 from fabric.context_managers import cd
@@ -22,8 +21,8 @@ def setup(install_display=False):
     env.user = config.NEW_USERNAME
 
     execute(copy_openhab_files)
-    # execute(setup_mosquitto, True)
-    setup_ssl_for_mosquitto()
+    execute(setup_mosquitto, True)
+    setup_influxDB_and_grafana()
 
     if install_display:
         execute(install_adafruit_display)
@@ -69,14 +68,12 @@ def copy_openhab_files():
 
 @task
 def setup_mosquitto(ssl=False):
-    print("not implemented yet")
 
-    """
+    # installation as described here: https://github.com/openhab/openhabian/blob/ecf59c4227acf79f38f0f396be26ea379f5c6e8e/functions/packages.sh
     sudo('apt install mosquitto')
     
     if ssl:
         setup_ssl_for_mosquitto()
-    """
 
 
 @task
@@ -85,6 +82,9 @@ def setup_influxDB_and_grafana():
 
     # print('Please install the following: Optional Components -> InfluxDB+Grafana')
     # sudo('openhabian-config')
+
+    # installation as described here: https://github.com/openhab/openhabian/blob/ecf59c4227acf79f38f0f396be26ea379f5c6e8e/functions/packages.sh
+    pass
 
     _setup_influxDB()
     _setup_grafana()
