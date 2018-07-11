@@ -69,24 +69,34 @@ menu "Sensor config"
 
     endmenu
 
-    menu "Bosch BME280"
+    menu "Environmental sensor"
 
-        config SENSOR_BME280_ENABLED
-            bool "enable sensor"
-            default n
-            help
-                Whether the BME280 sensor should be enabled or disabled. By default I2C settings connect SDA to GPIO 21 and SCL to GPIO 22
+        choice ENVIRONMENTAL_SENSOR
+            prompt "Sensor to use"
+            default SENSOR_NONE
 
-        config SENSOR_BME280_MQTT_TOPIC_TEMPERATURE
+            config SENSOR_NONE
+                bool "None"
+            config SENSOR_BME_280
+                bool "BME 280"
+            config SENSOR_BME_680
+                bool "BME 680"
+        endchoice
+
+        config SENSOR_MQTT_TOPIC_TEMPERATURE
             string "MQTT topic for temperature"
             default ""
 
-        config SENSOR_BME280_MQTT_TOPIC_HUMIDITY
+        config SENSOR_MQTT_TOPIC_HUMIDITY
             string "MQTT topic for humidity"
             default ""
 
-        config SENSOR_BME280_MQTT_TOPIC_PRESSURE
+        config SENSOR_MQTT_TOPIC_PRESSURE
             string "MQTT topic for pressure"
+            default ""
+
+        config SENSOR_MQTT_TOPIC_GAS
+            string "MQTT topic for gas (BME 680 only)"
             default ""
 
     endmenu
