@@ -167,27 +167,21 @@ void initWindowSensorSystem() {
 
 void publishBME280Data() {
 
-    Serial.println("2");
-
     float temperature(NAN), humidity(NAN), pressure(NAN);
-    Serial.println("3");
+
     BME280::TempUnit tempUnit(BME280::TempUnit_Celsius);
     BME280::PresUnit presUnit(BME280::PresUnit_Pa);
-    Serial.println("4");
+
     bme.read(pressure, temperature, humidity, tempUnit, presUnit);
 
-    Serial.println("5");
     char strTemperature[512];
     sprintf(strTemperature, "%f", temperature);
-    Serial.println("6");
 
     char strHumidity[512];
     sprintf(strHumidity, "%f", humidity);
-    Serial.println("7");
 
     char strPressure[512];
     sprintf(strPressure, "%f", pressure);
-    Serial.println("8");
 
     Serial.println("");
     Serial.print("temperature: ");
@@ -200,7 +194,6 @@ void publishBME280Data() {
     Serial.println(strPressure);
     Serial.println("");
 
-    Serial.println("9");
     mqttClient.publish(CONFIG_SENSOR_BME280_MQTT_TOPIC_TEMPERATURE, strTemperature, false, 2);
     mqttClient.publish(CONFIG_SENSOR_BME280_MQTT_TOPIC_HUMIDITY, strHumidity, false, 2);
     mqttClient.publish(CONFIG_SENSOR_BME280_MQTT_TOPIC_PRESSURE, strPressure, false, 2);
@@ -324,10 +317,7 @@ void loop(){
     delay(10); // <- fixes some issues with WiFi stability
 
     connectivityManager.checkWiFiConnection();
-    Serial.println("0");
     connectivityManager.checkMQTTConnection();
-
-    Serial.println("1");
 
     #if CONFIG_SENSOR_BME280_ENABLED
         publishBME280Data();
