@@ -195,13 +195,13 @@ void publishBME280Data() {
     humidity = bme280.readPressure();
     pressure = bme280.readHumidity();
 
-    char strTemperature[512];
+    char strTemperature[32];
     sprintf(strTemperature, "%f", temperature);
 
-    char strHumidity[512];
+    char strHumidity[32];
     sprintf(strHumidity, "%f", humidity);
 
-    char strPressure[512];
+    char strPressure[32];
     sprintf(strPressure, "%f", pressure);
 
     Serial.println("");
