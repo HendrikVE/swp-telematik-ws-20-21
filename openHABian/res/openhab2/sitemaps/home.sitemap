@@ -11,5 +11,6 @@ sitemap home label="Home"
             Text item=livingroomTemperature label="Wohnzimmer Temperatur"     icon="temperature"
             Text item=livingroomHumidity    label="Wohnzimmer Luftfeutigkeit" icon="humidity"
             Text item=livingroomPressure    label="Wohnzimmer Luftdruck"      icon="pressure"
+            Text item=livingroomGas         label="Wohnzimmer Gas"            icon="gas"
         }
 }

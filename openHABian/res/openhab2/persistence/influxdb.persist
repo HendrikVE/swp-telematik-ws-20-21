@@ -5,5 +5,5 @@ Strategies {
 }
 
 Items {
-    livingroomTemperature, livingroomHumidity, livingroomPressure, WindowSensor1 : strategy = everyChange
+    livingroomTemperature, livingroomHumidity, livingroomPressure, livingroomGas, WindowSensor1 : strategy = everyChange
 }
