@@ -11,10 +11,13 @@
 #include "esp_sleep.h"
 
 #include "Arduino.h"
-#include "BME280I2C.h"
 #include "Wire.h"
+#include "Adafruit_Sensor.h"
+#include "Adafruit_BME280.h"
 
 #include "ConnectivityManager.cpp"
+
+#define BME_280_I2C_ADDRESS 0x76
 
 struct WindowSensor {
     int gpio_input;
@@ -30,13 +33,13 @@ static xQueueHandle windowSensorEventQueue = NULL;
 ConnectivityManager connectivityManager;
 MQTTClient mqttClient;
 
-BME280I2C bme;
+Adafruit_BME280 bme;
 
 void initBME() {
 
-    Wire.begin(CONFIG_I2C_SDA_GPIO_PIN, CONFIG_I2C_SDC_GPIO_PIN, 115200);
+    Wire.begin(CONFIG_I2C_SDA_GPIO_PIN, CONFIG_I2C_SDC_GPIO_PIN);
 
-    while(!bme.begin()) {
+    while(!bme.begin(BME_280_I2C_ADDRESS, &Wire)) {
         Serial.println("Could not find BME280 sensor!");
         delay(1000);
     }
@@ -169,10 +172,9 @@ void publishBME280Data() {
 
     float temperature(NAN), humidity(NAN), pressure(NAN);
 
-    BME280::TempUnit tempUnit(BME280::TempUnit_Celsius);
-    BME280::PresUnit presUnit(BME280::PresUnit_Pa);
-
-    bme.read(pressure, temperature, humidity, tempUnit, presUnit);
+    temperature = bme.readTemperature();
+    humidity = bme.readPressure();
+    pressure = bme.readHumidity();
 
     char strTemperature[512];
     sprintf(strTemperature, "%f", temperature);
