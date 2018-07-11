@@ -11,19 +11,10 @@
 #include "esp_sleep.h"
 
 #include "Arduino.h"
-#include "WiFiClientSecure.h"
-#include "MQTT.h"
 #include "BME280I2C.h"
 #include "Wire.h"
 
-extern const uint8_t ca_crt_start[] asm("_binary_ca_crt_start");
-extern const uint8_t ca_crt_end[] asm("_binary_ca_crt_end");
-
-extern const uint8_t client_crt_start[] asm("_binary_client_crt_start");
-extern const uint8_t client_crt_end[] asm("_binary_client_crt_end");
-
-extern const uint8_t client_key_start[] asm("_binary_client_key_start");
-extern const uint8_t client_key_end[] asm("_binary_client_key_end");
+#include "ConnectivityManager.cpp"
 
 struct WindowSensor {
     int gpio_input;
@@ -36,56 +27,10 @@ struct WindowSensor {
 
 static xQueueHandle windowSensorEventQueue = NULL;
 
-WiFiClientSecure wiFiClientSecure;
+ConnectivityManager connectivityManager;
 MQTTClient mqttClient;
 
 BME280I2C bme;
-
-void WiFiEvent(WiFiEvent_t event) {
-
-    switch(event) {
-
-        case SYSTEM_EVENT_STA_START:
-            Serial.println("SYSTEM_EVENT_STA_START");
-            break;
-
-        case SYSTEM_EVENT_STA_GOT_IP:
-            Serial.println("SYSTEM_EVENT_STA_GOT_IP");
-            break;
-
-        case SYSTEM_EVENT_AP_STACONNECTED:
-            Serial.println("SYSTEM_EVENT_AP_STACONNECTED");
-            break;
-
-        case SYSTEM_EVENT_AP_STADISCONNECTED:
-            Serial.println("SYSTEM_EVENT_AP_STADISCONNECTED");
-            break;
-
-        case SYSTEM_EVENT_STA_DISCONNECTED:
-            Serial.println("SYSTEM_EVENT_STA_DISCONNECTED");
-            break;
-
-        default:
-            break;
-    }
-}
-
-void checkWiFiConnection() {
-
-    WiFi.mode(WIFI_STA);
-
-    while (WiFi.status() != WL_CONNECTED) {
-        Serial.println("Connect to WiFi...");
-        WiFi.begin(CONFIG_ESP_WIFI_SSID, CONFIG_ESP_WIFI_PASSWORD);
-        delay(10000);
-    }
-}
-
-void initWiFi() {
-
-    WiFi.onEvent(WiFiEvent);
-    checkWiFiConnection();
-}
 
 void initBME() {
 
@@ -220,52 +165,29 @@ void initWindowSensorSystem() {
     configureWindowSensorSystem();
 }
 
-void checkMQTTConnection() {
-
-    if (!mqttClient.connected()) {
-        Serial.println("Connect to MQTT broker...");
-
-        while (!mqttClient.connect(CONFIG_MQTT_CLIENT_ID, CONFIG_MQTT_USER, CONFIG_MQTT_PASSWORD)) {
-            Serial.print(".");
-            delay(1000);
-        }
-    }
-}
-
-void initMQTT() {
-
-    mqttClient.begin(CONFIG_MQTT_SERVER_IP, CONFIG_MQTT_SERVER_PORT, wiFiClientSecure);
-
-    wiFiClientSecure.setCACert((char*) ca_crt_start);
-    wiFiClientSecure.setCertificate((char*) client_crt_start);
-    wiFiClientSecure.setPrivateKey((char*) client_key_start);
-
-    checkMQTTConnection();
-
-    initWindowSensorSystem();
-
-    #if CONFIG_SENSOR_BME280_ENABLED
-        initBME();
-    #endif /*CONFIG_SENSOR_BME280_ENABLED*/
-}
-
 void publishBME280Data() {
 
-    float temperature(NAN), humidity(NAN), pressure(NAN);
+    Serial.println("2");
 
+    float temperature(NAN), humidity(NAN), pressure(NAN);
+    Serial.println("3");
     BME280::TempUnit tempUnit(BME280::TempUnit_Celsius);
     BME280::PresUnit presUnit(BME280::PresUnit_Pa);
-
+    Serial.println("4");
     bme.read(pressure, temperature, humidity, tempUnit, presUnit);
 
-    char strTemperature[32];
+    Serial.println("5");
+    char strTemperature[512];
     sprintf(strTemperature, "%f", temperature);
+    Serial.println("6");
 
-    char strHumidity[32];
+    char strHumidity[512];
     sprintf(strHumidity, "%f", humidity);
+    Serial.println("7");
 
-    char strPressure[32];
+    char strPressure[512];
     sprintf(strPressure, "%f", pressure);
+    Serial.println("8");
 
     Serial.println("");
     Serial.print("temperature: ");
@@ -278,6 +200,7 @@ void publishBME280Data() {
     Serial.println(strPressure);
     Serial.println("");
 
+    Serial.println("9");
     mqttClient.publish(CONFIG_SENSOR_BME280_MQTT_TOPIC_TEMPERATURE, strTemperature, false, 2);
     mqttClient.publish(CONFIG_SENSOR_BME280_MQTT_TOPIC_HUMIDITY, strHumidity, false, 2);
     mqttClient.publish(CONFIG_SENSOR_BME280_MQTT_TOPIC_PRESSURE, strPressure, false, 2);
@@ -381,8 +304,16 @@ void setup(){
 
     Serial.begin(115200);
 
-    initWiFi();
-    initMQTT();
+    connectivityManager.initWiFi();
+    connectivityManager.initMQTT();
+
+    initWindowSensorSystem();
+
+    #if CONFIG_SENSOR_BME280_ENABLED
+        initBME();
+    #endif /*CONFIG_SENSOR_BME280_ENABLED*/
+
+    mqttClient = connectivityManager.get_mqttClient();
 }
 
 void loop(){
@@ -392,8 +323,11 @@ void loop(){
     mqttClient.loop();
     delay(10); // <- fixes some issues with WiFi stability
 
-    checkWiFiConnection();
-    checkMQTTConnection();
+    connectivityManager.checkWiFiConnection();
+    Serial.println("0");
+    connectivityManager.checkMQTTConnection();
+
+    Serial.println("1");
 
     #if CONFIG_SENSOR_BME280_ENABLED
         publishBME280Data();
@@ -407,6 +341,7 @@ void loop(){
         isrWindowSensor2();
     #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
 
+    // dont go to sleep before all tasks in queue are executed
     while (uxQueueMessagesWaiting(windowSensorEventQueue) > 0) {
         delay(1000);
     }
