@@ -14,10 +14,12 @@
 #include "Wire.h"
 #include "Adafruit_Sensor.h"
 #include "Adafruit_BME280.h"
+#include "Adafruit_BME680.h"
 
 #include "ConnectivityManager.cpp"
 
 #define BME_280_I2C_ADDRESS 0x76
+#define BME_680_I2C_ADDRESS 0x77
 
 struct WindowSensor {
     int gpio_input;
@@ -33,17 +35,33 @@ static xQueueHandle windowSensorEventQueue = NULL;
 ConnectivityManager connectivityManager;
 MQTTClient mqttClient;
 
-Adafruit_BME280 bme;
+Adafruit_BME280 bme280;
+Adafruit_BME680 bme680;
 
-void initBME() {
+#if CONFIG_SENSOR_BME_280
+void initBME280() {
 
     Wire.begin(CONFIG_I2C_SDA_GPIO_PIN, CONFIG_I2C_SDC_GPIO_PIN);
 
-    while(!bme.begin(BME_280_I2C_ADDRESS, &Wire)) {
+    while(!bme280.begin(BME_280_I2C_ADDRESS)) {
         Serial.println("Could not find BME280 sensor!");
         delay(1000);
     }
+
 }
+#endif /*CONFIG_SENSOR_BME_280*/
+
+#if CONFIG_SENSOR_BME_680
+void initBME680() {
+
+    Wire.begin(CONFIG_I2C_SDA_GPIO_PIN, CONFIG_I2C_SDC_GPIO_PIN);
+
+    while(!bme680.begin(BME_680_I2C_ADDRESS)) {
+        Serial.println("Could not find BME680 sensor!");
+        delay(1000);
+    }
+}
+#endif /*CONFIG_SENSOR_BME_680*/
 
 void IRAM_ATTR isrWindowSensor1() {
     uint32_t windowSensorNum = 1;
@@ -168,13 +186,14 @@ void initWindowSensorSystem() {
     configureWindowSensorSystem();
 }
 
+#if CONFIG_SENSOR_BME_280
 void publishBME280Data() {
 
     float temperature(NAN), humidity(NAN), pressure(NAN);
 
-    temperature = bme.readTemperature();
-    humidity = bme.readPressure();
-    pressure = bme.readHumidity();
+    temperature = bme280.readTemperature();
+    humidity = bme280.readPressure();
+    pressure = bme280.readHumidity();
 
     char strTemperature[512];
     sprintf(strTemperature, "%f", temperature);
@@ -196,10 +215,53 @@ void publishBME280Data() {
     Serial.println(strPressure);
     Serial.println("");
 
-    mqttClient.publish(CONFIG_SENSOR_BME280_MQTT_TOPIC_TEMPERATURE, strTemperature, false, 2);
-    mqttClient.publish(CONFIG_SENSOR_BME280_MQTT_TOPIC_HUMIDITY, strHumidity, false, 2);
-    mqttClient.publish(CONFIG_SENSOR_BME280_MQTT_TOPIC_PRESSURE, strPressure, false, 2);
+    mqttClient.publish(CONFIG_SENSOR_MQTT_TOPIC_TEMPERATURE, strTemperature, false, 2);
+    mqttClient.publish(CONFIG_SENSOR_MQTT_TOPIC_HUMIDITY, strHumidity, false, 2);
+    mqttClient.publish(CONFIG_SENSOR_MQTT_TOPIC_PRESSURE, strPressure, false, 2);
 }
+#endif /*CONFIG_SENSOR_BME_280*/
+
+#if CONFIG_SENSOR_BME_680
+void publishBME680Data() {
+
+    if (!bme680.performReading()) {
+        Serial.println("Failed to perform reading");
+        return;
+    }
+
+    char strTemperature[32];
+    sprintf(strTemperature, "%f", bme680.temperature);
+
+    char strHumidity[32];
+    sprintf(strHumidity, "%f", bme680.humidity);
+
+    char strPressure[32];
+    sprintf(strPressure, "%f", bme680.pressure);
+
+    char strGas[32];
+    sprintf(strGas, "%f", bme680.gas_resistance);
+
+    Serial.println("");
+    Serial.print("temperature: ");
+    Serial.println(strTemperature);
+
+    Serial.print("humidity: ");
+    Serial.println(strHumidity);
+
+    Serial.print("pressure: ");
+    Serial.println(strPressure);
+    Serial.println("");
+
+    Serial.print("gas: ");
+    Serial.println(strGas);
+    Serial.println("");
+
+    mqttClient.publish(CONFIG_SENSOR_MQTT_TOPIC_TEMPERATURE, strTemperature, false, 2);
+    mqttClient.publish(CONFIG_SENSOR_MQTT_TOPIC_HUMIDITY, strHumidity, false, 2);
+    mqttClient.publish(CONFIG_SENSOR_MQTT_TOPIC_PRESSURE, strPressure, false, 2);
+    mqttClient.publish(CONFIG_SENSOR_MQTT_TOPIC_GAS, strGas, false, 2);
+}
+#endif /*CONFIG_SENSOR_BME_680*/
 
 void startDeviceSleep(int sleepIntervalMS) {
 
@@ -304,9 +366,13 @@ void setup(){
 
     initWindowSensorSystem();
 
-    #if CONFIG_SENSOR_BME280_ENABLED
-        initBME();
-    #endif /*CONFIG_SENSOR_BME280_ENABLED*/
+    #if CONFIG_SENSOR_BME_280
+        initBME280();
+    #endif /*CONFIG_SENSOR_BME_280*/
+
+    #if CONFIG_SENSOR_BME_680
+        initBME680();
+    #endif /*CONFIG_SENSOR_BME_680*/
 
     mqttClient = connectivityManager.get_mqttClient();
 }
@@ -321,9 +387,13 @@ void loop(){
     connectivityManager.checkWiFiConnection();
     connectivityManager.checkMQTTConnection();
 
-    #if CONFIG_SENSOR_BME280_ENABLED
+    #if CONFIG_SENSOR_BME_280
         publishBME280Data();
-    #endif /*CONFIG_SENSOR_BME280_ENABLED*/
+    #endif /*CONFIG_SENSOR_BME_280*/
+
+    #if CONFIG_SENSOR_BME_680
+        publishBME680Data();
+    #endif /*CONFIG_SENSOR_BME_680*/
 
     #if CONFIG_SENSOR_WINDOW_1_ENABLED
         isrWindowSensor1();
