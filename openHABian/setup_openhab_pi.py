@@ -70,7 +70,17 @@ def copy_openhab_files():
 def setup_mosquitto(ssl=False):
 
     # installation as described here: https://github.com/openhab/openhabian/blob/ecf59c4227acf79f38f0f396be26ea379f5c6e8e/functions/packages.sh
-    sudo('apt install mosquitto')
+    sudo('apt update')
+    sudo('apt -y install mosquitto mosquitto-clients')
+
+    result = sudo('grep -q "password_file /etc/mosquitto/passwd" /etc/mosquitto/mosquitto.conf')
+    if result.return_code != 0:
+        sudo('echo -e "\npassword_file /etc/mosquitto/passwd\nallow_anonymous false\n" >> /etc/mosquitto/mosquitto.conf')
+
+    sudo('echo -n "" > /etc/mosquitto/passwd')
+    sudo('mosquitto_passwd -b /etc/mosquitto/passwd {MQTT_USER} {MQTT_PASSWORD}'.format(MQTT_USER=config.MQTT_USER, MQTT_PASSWORD=config.MQTT_PASSWORD))
+    sudo('systemctl enable mosquitto.service')
+    sudo('systemctl restart mosquitto.service')
     
     if ssl:
         setup_ssl_for_mosquitto()
