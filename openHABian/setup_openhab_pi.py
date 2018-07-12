@@ -90,14 +90,32 @@ def setup_mosquitto(ssl=False):
 def setup_influxDB_and_grafana():
     print('setup InfluxDB and Grafana')
 
-    # print('Please install the following: Optional Components -> InfluxDB+Grafana')
-    # sudo('openhabian-config')
-
     # installation as described here: https://github.com/openhab/openhabian/blob/ecf59c4227acf79f38f0f396be26ea379f5c6e8e/functions/packages.sh
-    pass
+    print('install influxdb')
+    sudo('apt -y install apt-transport-https')
+    sudo('wget -O - https://repos.influxdata.com/influxdb.key | apt-key add -')
 
-    _setup_influxDB()
-    _setup_grafana()
+    codename = sudo('lsb_release -sc')
+    sudo('echo "deb https://repos.influxdata.com/debian {CODENAME} stable" > /etc/apt/sources.list.d/influxdb.list'.format(CODENAME=codename))
+    sudo('apt update')
+    sudo('apt -y install influxdb')
+    sudo('systemctl daemon-reload')
+    sudo('systemctl enable influxdb.service')
+    sudo('systemctl start influxdb.service')
+
+    print('install influxdb')
+    sudo('echo "deb https://dl.bintray.com/fg2it/deb {CODENAME} main" > /etc/apt/sources.list.d/grafana-fg2it.list'.format(CODENAME=codename))
+    sudo('apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 379CE192D401AB61')
+    sudo('apt update')
+    sudo('apt -y install grafana')
+    sudo('systemctl daemon-reload')
+    sudo('systemctl enable grafana-server.service')
+    sudo('systemctl start grafana-server.service')
+
+    sudo('dashboard_add_tile grafana')
+
+    #_setup_influxDB()
+    #_setup_grafana()
 
 
 @task
