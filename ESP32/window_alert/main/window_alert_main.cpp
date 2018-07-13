@@ -12,6 +12,7 @@
 
 #include "Arduino.h"
 #include "Wire.h"
+#include "math.h"
 #include "Adafruit_Sensor.h"
 #include "Adafruit_BME280.h"
 #include "Adafruit_BME680.h"
@@ -202,13 +203,13 @@ void publishBME280Data() {
     pressure = bme280.readPressure();
 
     char strTemperature[32];
-    sprintf(strTemperature, "%.1f", temperature);
+    sprintf(strTemperature, "%.1f", round(temperature * 10.0) / 10.0);
 
     char strHumidity[32];
-    sprintf(strHumidity, "%d", (int) humidity);
+    sprintf(strHumidity, "%d", (int) round(humidity));
 
     char strPressure[32];
-    sprintf(strPressure, "%f", pressure);
+    sprintf(strPressure, "%d", (int) round(pressure));
 
     Serial.println("");
     Serial.print("temperature: ");
@@ -236,16 +237,16 @@ void publishBME680Data() {
     }
 
     char strTemperature[32];
-    sprintf(strTemperature, "%.1f", bme680.temperature);
+    sprintf(strTemperature, "%.1f", round(bme680.temperature * 10.0) / 10.0);
 
     char strHumidity[32];
-    sprintf(strHumidity, "%d", (int) bme680.humidity);
+    sprintf(strHumidity, "%d", (int) round(bme680.humidity));
 
     char strPressure[32];
-    sprintf(strPressure, "%f", bme680.pressure);
+    sprintf(strPressure, "%d", (int) round(bme680.pressure));
 
     char strGas[32];
-    sprintf(strGas, "%f", bme680.gas_resistance);
+    sprintf(strGas, "%d", (int) round(bme680.gas_resistance));
 
     Serial.println("");
     Serial.print("temperature: ");
