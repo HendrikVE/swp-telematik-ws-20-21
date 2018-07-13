@@ -87,6 +87,9 @@ static void gpio_task_example(void* arg) {
     while (true) {
         if (xQueueReceive(windowSensorEventQueue, &windowSensorNum, portMAX_DELAY)) {
 
+            connectivityManager.checkWiFiConnection();
+            connectivityManager.checkMQTTConnection();
+
             if (windowSensorNum == 1) {
                 window_sensor = &window_sensor_1;
             }
