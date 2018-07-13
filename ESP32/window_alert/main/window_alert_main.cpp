@@ -198,14 +198,14 @@ void publishBME280Data() {
     float temperature(NAN), humidity(NAN), pressure(NAN);
 
     temperature = bme280.readTemperature();
-    humidity = bme280.readPressure();
-    pressure = bme280.readHumidity();
+    humidity = bme280.readHumidity();
+    pressure = bme280.readPressure();
 
     char strTemperature[32];
-    sprintf(strTemperature, "%f", temperature);
+    sprintf(strTemperature, "%.1f", temperature);
 
     char strHumidity[32];
-    sprintf(strHumidity, "%f", humidity);
+    sprintf(strHumidity, "%d", (int) humidity);
 
     char strPressure[32];
     sprintf(strPressure, "%f", pressure);
@@ -236,10 +236,10 @@ void publishBME680Data() {
     }
 
     char strTemperature[32];
-    sprintf(strTemperature, "%f", bme680.temperature);
+    sprintf(strTemperature, "%.1f", bme680.temperature);
 
     char strHumidity[32];
-    sprintf(strHumidity, "%f", bme680.humidity);
+    sprintf(strHumidity, "%d", (int) bme680.humidity);
 
     char strPressure[32];
     sprintf(strPressure, "%f", bme680.pressure);
@@ -335,6 +335,9 @@ void startDeviceSleep(int sleepIntervalMS) {
         rtc_gpio_hold_en(windowSensor2Input);
         rtc_gpio_hold_en(windowSensor2Output);
     #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
+
+    // give a chance for serial prints
+    delay(500);
 
     esp_sleep_enable_timer_wakeup(sleepIntervalMS * 1000L);
 
