@@ -30,6 +30,7 @@ struct WindowSensor {
     char last_state;
 } window_sensor_1, window_sensor_2;
 
+static boolean queuePaused = false;
 static xQueueHandle windowSensorEventQueue = NULL;
 
 ConnectivityManager connectivityManager;
@@ -64,11 +65,17 @@ void initBME680() {
 #endif /*CONFIG_SENSOR_BME_680*/
 
 void IRAM_ATTR isrWindowSensor1() {
+
+    if (queuePaused) return;
+
     uint32_t windowSensorNum = 1;
     xQueueSendFromISR(windowSensorEventQueue, &windowSensorNum, NULL);
 }
 
 void IRAM_ATTR isrWindowSensor2() {
+
+    if (queuePaused) return;
+
     uint32_t windowSensorNum = 2;
     xQueueSendFromISR(windowSensorEventQueue, &windowSensorNum, NULL);
 }
@@ -79,10 +86,6 @@ static void gpio_task_example(void* arg) {
     uint32_t windowSensorNum;
     while (true) {
         if (xQueueReceive(windowSensorEventQueue, &windowSensorNum, portMAX_DELAY)) {
-
-            while (WiFi.status() != WL_CONNECTED || !mqttClient.connected()) {
-                delay(1000);
-            }
 
             if (windowSensorNum == 1) {
                 window_sensor = &window_sensor_1;
@@ -387,6 +390,8 @@ void loop(){
     connectivityManager.checkWiFiConnection();
     connectivityManager.checkMQTTConnection();
 
+    queuePaused = false;
+
     #if CONFIG_SENSOR_BME_280
         publishBME280Data();
     #endif /*CONFIG_SENSOR_BME_280*/
@@ -407,6 +412,7 @@ void loop(){
     while (uxQueueMessagesWaiting(windowSensorEventQueue) > 0) {
         delay(1000);
     }
+    queuePaused = true;
 
     Serial.println("go to sleep");
     startDeviceSleep(CONFIG_SENSOR_POLL_INTERVAL_MS);
