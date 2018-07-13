@@ -344,6 +344,8 @@ void startDeviceSleep(int sleepIntervalMS) {
 
     Serial.println("woke up");
 
+    WiFi.mode(WIFI_STA);
+
     // RTC GPIO pins need to be reconfigured as digital GPIO after sleep
     #if CONFIG_SENSOR_WINDOW_1_ENABLED
         rtc_gpio_deinit(windowSensor1Input);

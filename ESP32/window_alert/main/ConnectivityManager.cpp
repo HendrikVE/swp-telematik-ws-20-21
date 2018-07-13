@@ -51,12 +51,13 @@ public:
 
     void checkWiFiConnection() {
 
-        WiFi.mode(WIFI_STA);
-
-        while (WiFi.status() != WL_CONNECTED) {
+        if (WiFi.status() != WL_CONNECTED) {
             Serial.println("Connect to WiFi...");
             WiFi.begin(CONFIG_ESP_WIFI_SSID, CONFIG_ESP_WIFI_PASSWORD);
-            delay(10000);
+        }
+        while (WiFi.status() != WL_CONNECTED) {
+            Serial.print(".");
+            delay(1000);
         }
     }
 
