@@ -343,7 +343,7 @@ void startDeviceSleep(int sleepIntervalMS) {
     esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_FAST_MEM, ESP_PD_OPTION_OFF);
     esp_sleep_pd_config(ESP_PD_DOMAIN_MAX, ESP_PD_OPTION_OFF);
 
-    esp_light_sleep_start();
+    esp_deep_sleep_start();
 
     Serial.println("woke up");
 
