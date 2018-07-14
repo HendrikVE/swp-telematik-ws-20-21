@@ -20,6 +20,9 @@ def setup(install_display=False):
     execute(add_sudo_user)
     env.user = config.NEW_USERNAME
 
+    update_device()
+    setup_audio()
+
     execute(copy_openhab_files)
     execute(setup_mosquitto, True)
     setup_influxDB_and_grafana()
@@ -55,6 +58,7 @@ def copy_openhab_files():
     put(os.path.join(res_path, 'services'), dest_path, use_sudo=True)
     put(os.path.join(res_path, 'sitemaps'), dest_path, use_sudo=True)
     put(os.path.join(res_path, 'sounds'), dest_path, use_sudo=True)
+    put(os.path.join(res_path, 'scripts'), dest_path, use_sudo=True)
 
     path_mqtt_cfg = os.path.join(dest_path, 'services', 'mqtt.cfg')
     _replace_inplace_file('<insert password>', config.MQTT_PASSWORD, path_mqtt_cfg)
@@ -236,6 +240,12 @@ def update_device():
 
     sudo('apt update')
     sudo('apt full-upgrade -y')
+
+
+@task
+def setup_audio():
+
+    sudo('apt install mplayer')
 
 
 @task

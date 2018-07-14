@@ -1,11 +1,22 @@
-rule "security system"
+rule "armed security system"
 when
     Item gWindowSensor received update OPEN
 then
     if(SecuritySystem.state == ON) {
         sendBroadcastNotification("SECURITY SYSTEM: SIDE DOOR OPEN")
 
-        setMasterVolume(new PercentType(100))
-        playSound("alarm.mp3")
+        executeCommandLine("bash@@/etc/openhab2/scripts/start_alarm.sh", 1000)
+    }
+end
+
+rule "arm/disarm security system"
+when
+    Item SecuritySystem received update
+then
+    if(SecuritySystem.state == ON) {
+        sendBroadcastNotification("SECURITY SYSTEM: ARMED")
+    }
+    else if (SecuritySystem.state == OFF) {
+        executeCommandLine("bash@@/etc/openhab2/scripts/stop_alarm.sh", 1000)
     }
 end
