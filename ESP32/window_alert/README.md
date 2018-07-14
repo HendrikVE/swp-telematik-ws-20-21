@@ -8,10 +8,6 @@
     3. Compiler options -> Enable C++ exceptions (make a tick here)
     4. Arduino Configuration -> Autostart Arduino setup and loop on boot (make a tick here)
 
-
-# PROBLEMS
-- Workaround for MQTT: https://github.com/tuanpmt/espmqtt/issues/48
-
 # Config
 Within **make menuconfig** do the following (optional) configurations:
 1. To save energy
