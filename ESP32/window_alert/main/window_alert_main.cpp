@@ -337,15 +337,15 @@ void startDeviceSleep(int sleepIntervalMS) {
         rtc_gpio_hold_en(windowSensor2Output);
     #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
 
-    // give a chance for serial prints
-    delay(500);
-
     esp_sleep_enable_timer_wakeup(sleepIntervalMS * 1000L);
 
     esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
     esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_SLOW_MEM, ESP_PD_OPTION_OFF);
     esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_FAST_MEM, ESP_PD_OPTION_OFF);
     esp_sleep_pd_config(ESP_PD_DOMAIN_MAX, ESP_PD_OPTION_OFF);
+
+    // give a chance for serial prints
+    delay(500);
 
     esp_deep_sleep_start();
 
