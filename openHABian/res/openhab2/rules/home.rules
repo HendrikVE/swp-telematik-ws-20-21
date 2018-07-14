@@ -3,7 +3,7 @@ when
     Item gWindowSensor received update OPEN
 then
     if(SecuritySystem.state == ON) {
-        sendBroadcastNotification("SECURITY SYSTEM: SIDE DOOR OPEN")
+        sendBroadcastNotification("SECURITY SYSTEM: WINDOW OPENED")
 
         executeCommandLine("bash@@/etc/openhab2/scripts/start_alarm.sh", 1000)
     }
@@ -17,6 +17,7 @@ then
         sendBroadcastNotification("SECURITY SYSTEM: ARMED")
     }
     else if (SecuritySystem.state == OFF) {
+        sendBroadcastNotification("SECURITY SYSTEM: DISARMED")
         executeCommandLine("bash@@/etc/openhab2/scripts/stop_alarm.sh", 1000)
     }
 end
