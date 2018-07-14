@@ -31,7 +31,7 @@ menu "MQTT config"
 
     config MQTT_SERVER_IP
         string "MQTT server ip"
-        default "your_ip"
+        default "openhabianpi"
 
     config MQTT_SERVER_PORT
         int "MQTT server port"
