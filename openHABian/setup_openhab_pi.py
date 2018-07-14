@@ -231,6 +231,14 @@ def setup_ssl_for_mosquitto():
 
 
 @task
+def update_device():
+    print('update device')
+
+    sudo('apt update')
+    sudo('apt full-upgrade -y')
+
+
+@task
 def install_adafruit_display():
     print('install adafruit display')
 
