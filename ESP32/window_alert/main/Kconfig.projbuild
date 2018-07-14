@@ -35,7 +35,7 @@ menu "MQTT config"
 
     config MQTT_SERVER_PORT
         int "MQTT server port"
-        default 1883
+        default 8883
 
 endmenu
 
