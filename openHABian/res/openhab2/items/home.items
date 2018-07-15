@@ -1,5 +1,6 @@
 // security items
 Switch SecuritySystem "Security System"
+String wifi_quality "WLAN Qualität [%s]" <network> { mqtt="[<broker>:environment/wifi/quality:state:default]"}
 
 Group:Contact:OR(OPEN,CLOSED) gWindowSensor "Fenstersensoren" <contact>
 Contact WindowSensor1 "Fenster 1 [%s]" <contact> (gWindowSensor) { mqtt="<[<broker>:room/livingroom/WindowSensor1:state:default]" }

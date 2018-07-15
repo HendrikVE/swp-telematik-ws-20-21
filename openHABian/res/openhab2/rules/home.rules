@@ -21,3 +21,13 @@ then
         executeCommandLine("bash@@/etc/openhab2/scripts/stop_alarm.sh", 1000)
     }
 end
+
+rule "Wifi Bad Signal"
+when
+   Item wifi_quality received update
+then
+       if(wifi_quality.state < 40)
+       {
+           sendBroadcastNotification("SECURITY SYSTEM: WIFI DOWN")
+       }
+end
