@@ -245,7 +245,7 @@ def update_device():
 @task
 def setup_audio():
 
-    sudo('apt install mplayer')
+    sudo('apt install mpg123')
 
 
 @task
