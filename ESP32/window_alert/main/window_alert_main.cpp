@@ -380,7 +380,7 @@ void setup(){
         initBME680();
     #endif /*CONFIG_SENSOR_BME_680*/
 
-    mqttClient = connectivityManager.get_mqttClient();
+    mqttClient = *connectivityManager.get_mqttClient();
 }
 
 void loop(){

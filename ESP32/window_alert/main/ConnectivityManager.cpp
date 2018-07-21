@@ -90,8 +90,8 @@ public:
         checkMQTTConnection();
     }
 
-    MQTTClient get_mqttClient() {
-        return mqttClient;
+    MQTTClient* get_mqttClient() {
+        return &mqttClient;
     }
 
 };
