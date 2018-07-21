@@ -18,6 +18,9 @@ private:
     WiFiClientSecure wiFiClientSecure;
     MQTTClient mqttClient;
 
+    SemaphoreHandle_t wifiMutex = NULL;
+    SemaphoreHandle_t mqttMutex = NULL;
+
     void static WiFiEvent(WiFiEvent_t event) {
 
         switch(event) {
@@ -49,15 +52,25 @@ private:
 
 public:
 
+    ConnectivityManager() {
+        wifiMutex = xSemaphoreCreateMutex();
+        mqttMutex = xSemaphoreCreateMutex();
+    }
+
     void checkWiFiConnection() {
 
-        if (WiFi.status() != WL_CONNECTED) {
-            Serial.println("Connect to WiFi...");
-            WiFi.begin(CONFIG_ESP_WIFI_SSID, CONFIG_ESP_WIFI_PASSWORD);
-        }
-        while (WiFi.status() != WL_CONNECTED) {
-            Serial.print(".");
-            delay(1000);
+        if (xSemaphoreTake(wifiMutex, (TickType_t) 10 ) == pdTRUE) {
+
+            if (WiFi.status() != WL_CONNECTED) {
+                Serial.println("Connect to WiFi...");
+                WiFi.begin(CONFIG_ESP_WIFI_SSID, CONFIG_ESP_WIFI_PASSWORD);
+            }
+            while (WiFi.status() != WL_CONNECTED) {
+                Serial.print(".");
+                delay(1000);
+            }
+
+            xSemaphoreGive(wifiMutex);
         }
     }
 
@@ -69,13 +82,18 @@ public:
 
     void checkMQTTConnection() {
 
-        if (!mqttClient.connected()) {
-            Serial.println("Connect to MQTT broker...");
+        if (xSemaphoreTake(mqttMutex, (TickType_t) 10 ) == pdTRUE) {
 
-            while (!mqttClient.connect(CONFIG_MQTT_CLIENT_ID, CONFIG_MQTT_USER, CONFIG_MQTT_PASSWORD)) {
-                Serial.print(".");
-                delay(1000);
+            if (!mqttClient.connected()) {
+                Serial.println("Connect to MQTT broker...");
+
+                while (!mqttClient.connect(CONFIG_MQTT_CLIENT_ID, CONFIG_MQTT_USER, CONFIG_MQTT_PASSWORD)) {
+                    Serial.print(".");
+                    delay(1000);
+                }
             }
+
+            xSemaphoreGive(mqttMutex);
         }
     }
 
