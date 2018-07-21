@@ -23,6 +23,7 @@
 #define BME_680_I2C_ADDRESS 0x77
 
 struct WindowSensor {
+    int id;
     int gpio_input;
     int gpio_output;
     int interrupt_debounce;
@@ -30,6 +31,11 @@ struct WindowSensor {
     unsigned long timestamp_last_interrupt;
     char last_state;
 } window_sensor_1, window_sensor_2;
+
+struct WindowSensorEvent {
+    WindowSensor* windowSensor;
+    bool level;
+};
 
 static boolean queuePaused = false;
 static xQueueHandle windowSensorEventQueue = NULL;
@@ -69,38 +75,36 @@ void IRAM_ATTR isrWindowSensor1() {
 
     if (queuePaused) return;
 
-    uint32_t windowSensorNum = 1;
-    xQueueSendFromISR(windowSensorEventQueue, &windowSensorNum, NULL);
+    WindowSensorEvent event;
+    event.windowSensor = &window_sensor_1;
+    event.level = digitalRead(window_sensor_1.gpio_input);
+
+    xQueueSendFromISR(windowSensorEventQueue, &event, NULL);
 }
 
 void IRAM_ATTR isrWindowSensor2() {
 
     if (queuePaused) return;
 
-    uint32_t windowSensorNum = 2;
-    xQueueSendFromISR(windowSensorEventQueue, &windowSensorNum, NULL);
+    WindowSensorEvent event;
+    event.windowSensor = &window_sensor_2;
+    event.level = digitalRead(window_sensor_2.gpio_input);
+
+    xQueueSendFromISR(windowSensorEventQueue, &event, NULL);
 }
 
 static void gpio_task_example(void* arg) {
 
     struct WindowSensor* window_sensor;
-    uint32_t windowSensorNum;
+    WindowSensorEvent event;
     while (true) {
-        if (xQueueReceive(windowSensorEventQueue, &windowSensorNum, portMAX_DELAY)) {
+        if (xQueueReceive(windowSensorEventQueue, &event, portMAX_DELAY)) {
 
             connectivityManager.checkWiFiConnection();
             connectivityManager.checkMQTTConnection();
 
-            if (windowSensorNum == 1) {
-                window_sensor = &window_sensor_1;
-            }
-            else if (windowSensorNum == 2) {
-                window_sensor = &window_sensor_2;
-            }
-            else {
-                // ignore unkown source
-                continue;
-            }
+            window_sensor = event.windowSensor;
+            bool current_state = event.level;
 
             unsigned long current_time = (unsigned long) esp_timer_get_time() / 1000;
 
@@ -120,10 +124,9 @@ static void gpio_task_example(void* arg) {
             }
 
             char output[128];
-            sprintf(output, "window sensor #%i: ", windowSensorNum);
+            sprintf(output, "window sensor #%i: ", window_sensor->id);
             Serial.print(output);
 
-            char current_state = digitalRead(window_sensor->gpio_input);
             if (current_state == LOW) {
                 Serial.println("open");
                 window_sensor->last_state = LOW;
@@ -156,6 +159,7 @@ void configureWindowSensorSystem() {
     #if CONFIG_SENSOR_WINDOW_1_ENABLED
         Serial.println("configureWindowSensorSystem(1)");
 
+        window_sensor_1.id = 1;
         window_sensor_1.gpio_input = CONFIG_SENSOR_WINDOW_1_GPIO_INPUT;
         window_sensor_1.gpio_output = CONFIG_SENSOR_WINDOW_1_GPIO_OUTPUT;
         window_sensor_1.interrupt_debounce = CONFIG_SENSOR_WINDOW_1_INTERRUPT_DEBOUNCE_MS;
@@ -168,6 +172,7 @@ void configureWindowSensorSystem() {
     #if CONFIG_SENSOR_WINDOW_2_ENABLED
         Serial.println("configureWindowSensorSystem(2)");
 
+        window_sensor_2.id = 2;
         window_sensor_2.gpio_input = CONFIG_SENSOR_WINDOW_2_GPIO_INPUT;
         window_sensor_2.gpio_output = CONFIG_SENSOR_WINDOW_2_GPIO_OUTPUT;
         window_sensor_2.interrupt_debounce = CONFIG_SENSOR_WINDOW_2_INTERRUPT_DEBOUNCE_MS;
@@ -181,7 +186,7 @@ void configureWindowSensorSystem() {
 void initWindowSensorSystem() {
 
     Serial.println("init task queue");
-    windowSensorEventQueue = xQueueCreate(10, sizeof(uint32_t));
+    windowSensorEventQueue = xQueueCreate(10, sizeof(struct WindowSensorEvent));
     xTaskCreate(gpio_task_example, "gpio_task_example", 2048, NULL, 10, NULL);
 
     configureWindowSensorSystem();
@@ -387,6 +392,14 @@ void loop(){
 
     Serial.println("loop");
 
+    #if CONFIG_SENSOR_WINDOW_1_ENABLED
+        isrWindowSensor1();
+    #endif /*CONFIG_SENSOR_WINDOW_1_ENABLED*/
+
+    #if CONFIG_SENSOR_WINDOW_2_ENABLED
+        isrWindowSensor2();
+    #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
+
     mqttClient.loop();
     delay(10); // <- fixes some issues with WiFi stability
 
@@ -402,14 +415,6 @@ void loop(){
     #if CONFIG_SENSOR_BME_680
         publishBME680Data();
     #endif /*CONFIG_SENSOR_BME_680*/
-
-    #if CONFIG_SENSOR_WINDOW_1_ENABLED
-        isrWindowSensor1();
-    #endif /*CONFIG_SENSOR_WINDOW_1_ENABLED*/
-
-    #if CONFIG_SENSOR_WINDOW_2_ENABLED
-        isrWindowSensor2();
-    #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
 
     // dont go to sleep before all tasks in queue are executed
     while (uxQueueMessagesWaiting(windowSensorEventQueue) > 0) {
