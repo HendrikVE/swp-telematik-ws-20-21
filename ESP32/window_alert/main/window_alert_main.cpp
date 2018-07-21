@@ -163,9 +163,6 @@ void configureWindowSensorSystem() {
         window_sensor_1.timestamp_last_interrupt = 0;
 
         init_window_sensor(window_sensor_1, &isrWindowSensor1);
-
-        // initial fake interrupt
-        isrWindowSensor1();
     #endif /*CONFIG_SENSOR_WINDOW_1_ENABLED*/
 
     #if CONFIG_SENSOR_WINDOW_2_ENABLED
@@ -178,9 +175,6 @@ void configureWindowSensorSystem() {
         window_sensor_2.timestamp_last_interrupt = 0;
 
         init_window_sensor(window_sensor_2, &isrWindowSensor2);
-
-        // initial fake interrupt
-        isrWindowSensor2();
     #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
 }
 
