@@ -54,11 +54,12 @@ def copy_openhab_files():
     dest_path = os.path.join(os.sep, 'etc', 'openhab2')
 
     put(os.path.join(res_path, 'items'), dest_path, use_sudo=True)
+    put(os.path.join(res_path, 'persistence'), dest_path, use_sudo=True)
     put(os.path.join(res_path, 'rules'), dest_path, use_sudo=True)
+    put(os.path.join(res_path, 'scripts'), dest_path, use_sudo=True)
     put(os.path.join(res_path, 'services'), dest_path, use_sudo=True)
     put(os.path.join(res_path, 'sitemaps'), dest_path, use_sudo=True)
     put(os.path.join(res_path, 'sounds'), dest_path, use_sudo=True)
-    put(os.path.join(res_path, 'scripts'), dest_path, use_sudo=True)
 
     path_mqtt_cfg = os.path.join(dest_path, 'services', 'mqtt.cfg')
     _replace_inplace_file('<insert password>', config.MQTT_PASSWORD, path_mqtt_cfg)
