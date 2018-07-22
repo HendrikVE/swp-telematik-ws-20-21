@@ -15,7 +15,6 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 6,
   "links": [],
   "panels": [
     {
@@ -297,6 +296,7 @@
       }
     }
   ],
+  "refresh": "15m",
   "schemaVersion": 16,
   "style": "dark",
   "tags": [],
@@ -304,8 +304,8 @@
     "list": []
   },
   "time": {
-    "from": "now-7d/d",
-    "to": "now-7d/d"
+    "from": "now-24h",
+    "to": "now"
   },
   "timepicker": {
     "refresh_intervals": [
@@ -335,5 +335,5 @@
   "timezone": "",
   "title": "Wohnzimmer",
   "uid": "nbXoc2Rgk",
-  "version": 1
+  "version": 6
 }
