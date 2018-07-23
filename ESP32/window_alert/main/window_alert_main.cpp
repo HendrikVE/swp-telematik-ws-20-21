@@ -39,6 +39,11 @@ struct WindowSensorEvent {
     bool level;
 };
 
+void buildTopic(char* output, const char* room, const char* boardID, const char* measurement) {
+
+    sprintf(output, "room/%s/%s/%s", room, boardID, measurement);
+}
+
 static boolean queuePaused = false;
 static xQueueHandle windowSensorEventQueue = NULL;
 
@@ -158,6 +163,8 @@ void init_window_sensor(struct WindowSensor window_sensor, void (*isr)()) {
 
 void configureWindowSensorSystem() {
 
+    char topic[128];
+
     #if CONFIG_SENSOR_WINDOW_1_ENABLED
         Serial.println("configureWindowSensorSystem(1)");
 
@@ -166,7 +173,8 @@ void configureWindowSensorSystem() {
         window_sensor_1.gpio_output = CONFIG_SENSOR_WINDOW_1_GPIO_OUTPUT;
         window_sensor_1.interrupt_debounce = CONFIG_SENSOR_WINDOW_1_INTERRUPT_DEBOUNCE_MS;
 
-        strcpy(window_sensor_1.mqtt_topic, CONFIG_SENSOR_WINDOW_1_MQTT_TOPIC);
+        buildTopic(topic, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_WINDOW_1_MQTT_TOPIC);
+        strcpy(window_sensor_1.mqtt_topic, topic);
 
         window_sensor_1.timestamp_last_interrupt = 0;
 
@@ -180,7 +188,10 @@ void configureWindowSensorSystem() {
         window_sensor_2.gpio_input = CONFIG_SENSOR_WINDOW_2_GPIO_INPUT;
         window_sensor_2.gpio_output = CONFIG_SENSOR_WINDOW_2_GPIO_OUTPUT;
         window_sensor_2.interrupt_debounce = CONFIG_SENSOR_WINDOW_2_INTERRUPT_DEBOUNCE_MS;
-        strcpy(window_sensor_2.mqtt_topic, CONFIG_SENSOR_WINDOW_2_MQTT_TOPIC);
+
+        buildTopic(topic, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_WINDOW_2_MQTT_TOPIC);
+        strcpy(window_sensor_2.mqtt_topic, topic);
+
         window_sensor_2.timestamp_last_interrupt = 0;
 
         init_window_sensor(window_sensor_2, &isrWindowSensor2);
@@ -225,9 +236,18 @@ void publishBME280Data() {
     Serial.println(strPressure);
     Serial.println("");
 
-    mqttClient.publish(CONFIG_SENSOR_MQTT_TOPIC_TEMPERATURE, strTemperature, false, 2);
-    mqttClient.publish(CONFIG_SENSOR_MQTT_TOPIC_HUMIDITY, strHumidity, false, 2);
-    mqttClient.publish(CONFIG_SENSOR_MQTT_TOPIC_PRESSURE, strPressure, false, 2);
+    char topicTemperature[128];
+    buildTopic(topicTemperature, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_TEMPERATURE);
+
+    char topicHumidity[128];
+    buildTopic(topicHumidity, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_HUMIDITY);
+
+    char topicPressure[128];
+    buildTopic(topicPressure, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_PRESSURE);
+
+    mqttClient.publish(topicTemperature, strTemperature, false, 2);
+    mqttClient.publish(topicHumidity, strHumidity, false, 2);
+    mqttClient.publish(topicPressure, strPressure, false, 2);
 }
 #endif /*CONFIG_SENSOR_BME_280*/
 
@@ -266,10 +286,22 @@ void publishBME680Data() {
     Serial.println(strGas);
     Serial.println("");
 
-    mqttClient.publish(CONFIG_SENSOR_MQTT_TOPIC_TEMPERATURE, strTemperature, false, 2);
-    mqttClient.publish(CONFIG_SENSOR_MQTT_TOPIC_HUMIDITY, strHumidity, false, 2);
-    mqttClient.publish(CONFIG_SENSOR_MQTT_TOPIC_PRESSURE, strPressure, false, 2);
-    mqttClient.publish(CONFIG_SENSOR_MQTT_TOPIC_GAS, strGas, false, 2);
+    char topicTemperature[128];
+    buildTopic(topicTemperature, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_TEMPERATURE);
+
+    char topicHumidity[128];
+    buildTopic(topicHumidity, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_HUMIDITY);
+
+    char topicPressure[128];
+    buildTopic(topicPressure, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_PRESSURE);
+
+    char topicGas[128];
+    buildTopic(topicGas, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_GAS);
+
+    mqttClient.publish(topicTemperature, strTemperature, false, 2);
+    mqttClient.publish(topicHumidity, strHumidity, false, 2);
+    mqttClient.publish(topicPressure, strPressure, false, 2);
+    mqttClient.publish(topicGas, strGas, false, 2);
 }
 #endif /*CONFIG_SENSOR_BME_680*/
 

@@ -1,3 +1,19 @@
+menu "Device config"
+
+    config DEVICE_ROOM
+        string "Room"
+        default "livingroom"
+        help
+            Room, where the device is placed (e.g. used for building the mqtt topic)
+
+    config DEVICE_ID
+        string "Device ID"
+        default "esp32-1"
+        help
+            Device ID (e.g. used for building the mqtt topic)
+
+endmenu
+
 menu "WiFi config"
 
     config ESP_WIFI_SSID
@@ -84,20 +100,20 @@ menu "Sensor config"
         endchoice
 
         config SENSOR_MQTT_TOPIC_TEMPERATURE
-            string "MQTT topic for temperature"
-            default ""
+            string "MQTT subtopic for temperature"
+            default "temperature"
 
         config SENSOR_MQTT_TOPIC_HUMIDITY
-            string "MQTT topic for humidity"
-            default ""
+            string "MQTT subtopic for humidity"
+            default "humidity"
 
         config SENSOR_MQTT_TOPIC_PRESSURE
-            string "MQTT topic for pressure"
-            default ""
+            string "MQTT subtopic for pressure"
+            default "pressure"
 
         config SENSOR_MQTT_TOPIC_GAS
-            string "MQTT topic for gas (BME 680 only)"
-            default ""
+            string "MQTT subtopic for gas (BME 680 only)"
+            default "gas"
 
     endmenu
 
@@ -129,9 +145,9 @@ menu "Sensor config"
 
         config SENSOR_WINDOW_1_MQTT_TOPIC
             string "MQTT topic"
-            default ""
+            default "WindowSensor1"
             help
-                MQTT topic for this sensor
+                MQTT subtopic for this sensor
 
     endmenu
 
@@ -163,9 +179,9 @@ menu "Sensor config"
 
         config SENSOR_WINDOW_2_MQTT_TOPIC
             string "MQTT topic"
-            default ""
+            default "WindowSensor2"
             help
-                MQTT topic for this sensor
+                MQTT subtopic for this sensor
 
     endmenu
 
