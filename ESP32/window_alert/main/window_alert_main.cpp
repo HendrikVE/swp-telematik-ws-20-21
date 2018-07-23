@@ -408,12 +408,20 @@ void setup(){
 
     Serial.begin(115200);
 
-    char versionText[128];
-    sprintf(versionText, "This board is running with version %s (%i)", APP_VERSION_NAME, APP_VERSION_CODE);
-    Serial.println(versionText);
-
     connectivityManager.initWiFi();
     connectivityManager.initMQTT();
+    mqttClient = *connectivityManager.get_mqttClient();
+
+    char strVersion[128];
+    sprintf(strVersion, "%s (%i)", APP_VERSION_NAME, APP_VERSION_CODE);
+
+    char topicVersion[128];
+    buildTopic(topicVersion, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, "version");
+    bool suc = mqttClient.publish(topicVersion, strVersion, true, 2);
+
+    Serial.println(suc);
+    Serial.println(topicVersion);
+    Serial.println(strVersion);
 
     initWindowSensorSystem();
 
@@ -424,8 +432,6 @@ void setup(){
     #if CONFIG_SENSOR_BME_680
         initBME680();
     #endif /*CONFIG_SENSOR_BME_680*/
-
-    mqttClient = *connectivityManager.get_mqttClient();
 }
 
 void loop(){

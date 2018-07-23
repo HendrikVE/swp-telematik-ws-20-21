@@ -1,12 +1,14 @@
 // security items
 Switch SecuritySystem "Security System"
-String wifi_quality "WLAN Qualität [%s]" <network> { mqtt="[<broker>:environment/wifi/quality:state:default]"}
+String wifi_quality "WLAN Qualität [%s]" <network> {mqtt="[<broker>:environment/wifi/quality:state:default]"}
+
+String AppVersion "VERSION: [%s]" <keyring> {mqtt="<[<broker>:room/livingroom/esp32-1/version:state:default]"}
 
 Group:Contact:OR(OPEN,CLOSED) gWindowSensor "Fenstersensoren" <contact>
-Contact WindowSensor1 "Fenster 1 [%s]" <contact> (gWindowSensor) { mqtt="<[<broker>:room/livingroom/esp32-1/WindowSensor1:state:default]" }
-Contact WindowSensor2 "Fenster 2 [%s]" <contact> (gWindowSensor) { mqtt="<[<broker>:room/livingroom/esp32-1/WindowSensor2:state:default]" }
+Contact WindowSensor1 "Fenster 1 [%s]" <contact> (gWindowSensor) {mqtt="<[<broker>:room/livingroom/esp32-1/WindowSensor1:state:default]"}
+Contact WindowSensor2 "Fenster 2 [%s]" <contact> (gWindowSensor) {mqtt="<[<broker>:room/livingroom/esp32-1/WindowSensor2:state:default]"}
 
-Number livingroomTemperature "Wohnzimmer [%.1f °C]" <temperature> { mqtt="<[<broker>:room/livingroom/esp32-1/temperature:state:default]" }
-Number livingroomHumidity "Wohnzimmer [%.1f %%]" <humidity> { mqtt="<[<broker>:room/livingroom/esp32-1/humidity:state:default]" }
-Number livingroomPressure "Wohnzimmer [%.1f Pa]" <pressure> { mqtt="<[<broker>:room/livingroom/esp32-1/pressure:state:default]" }
-Number livingroomGas "Wohnzimmer [%.1f Ohm]" <gas> { mqtt="<[<broker>:room/livingroom/esp32-1/gas:state:default]" }
+Number livingroomTemperature "Wohnzimmer [%.1f °C]" <temperature> {mqtt="<[<broker>:room/livingroom/esp32-1/temperature:state:default]"}
+Number livingroomHumidity "Wohnzimmer [%.1f %%]" <humidity> {mqtt="<[<broker>:room/livingroom/esp32-1/humidity:state:default]"}
+Number livingroomPressure "Wohnzimmer [%.1f Pa]" <pressure> {mqtt="<[<broker>:room/livingroom/esp32-1/pressure:state:default]"}
+Number livingroomGas "Wohnzimmer [%.1f Ohm]" <gas> {mqtt="<[<broker>:room/livingroom/esp32-1/gas:state:default]"}

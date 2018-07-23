@@ -1,16 +1,18 @@
-sitemap home label="Home"
-{
-        Frame label="Security"
-        {
-                Switch item=SecuritySystem
-                Group item=gWindowSensor
-        }
+sitemap home label="Home" {
 
-        Frame label="Sensors"
-        {
-            Text item=livingroomTemperature label="Wohnzimmer Temperatur"     icon="temperature"
-            Text item=livingroomHumidity    label="Wohnzimmer Luftfeutigkeit" icon="humidity"
-            Text item=livingroomPressure    label="Wohnzimmer Luftdruck"      icon="pressure"
-            Text item=livingroomGas         label="Wohnzimmer Gas"            icon="gas"
-        }
+    Frame label="Device" {
+        Text item=AppVersion
+    }
+
+    Frame label="Security" {
+        Switch item=SecuritySystem
+        Group item=gWindowSensor
+    }
+
+    Frame label="Sensors" {
+        Text item=livingroomTemperature label="Wohnzimmer Temperatur"     icon="temperature"
+        Text item=livingroomHumidity    label="Wohnzimmer Luftfeutigkeit" icon="humidity"
+        Text item=livingroomPressure    label="Wohnzimmer Luftdruck"      icon="pressure"
+        Text item=livingroomGas         label="Wohnzimmer Gas"            icon="gas"
+    }
 }
