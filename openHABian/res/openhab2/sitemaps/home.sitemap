@@ -1,5 +1,10 @@
 sitemap home label="Home" {
 
+    Frame label="Security" {
+        Switch item=SecuritySystem
+        Group item=gWindowSensor
+    }
+
     Frame label="Device management" {
         Text label="Devices" icon="receiver" {
 
@@ -15,11 +20,6 @@ sitemap home label="Home" {
                 Text item=AppVersionESP32_2
             }
         }
-    }
-
-    Frame label="Security" {
-        Switch item=SecuritySystem
-        Group item=gWindowSensor
     }
 
     Frame label="Sensors" {
