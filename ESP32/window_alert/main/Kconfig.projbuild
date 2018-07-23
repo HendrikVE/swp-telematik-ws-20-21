@@ -109,8 +109,9 @@ menu "Sensor config"
             default "pressure"
 
         config SENSOR_MQTT_TOPIC_GAS
-            string "MQTT subtopic for gas (BME 680 only)"
+            string "MQTT subtopic for gas"
             default "gas"
+            depends on SENSOR_BME_680
 
     endmenu
 
