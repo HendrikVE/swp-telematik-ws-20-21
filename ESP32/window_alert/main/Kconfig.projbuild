@@ -128,24 +128,28 @@ menu "Sensor config"
             default 14
             help
                 GPIO input pin number
+            depends on SENSOR_WINDOW_1_ENABLED
 
         config SENSOR_WINDOW_1_GPIO_OUTPUT
             int "GPIO output pin"
             default 15
             help
                 GPIO output pin number
+            depends on SENSOR_WINDOW_1_ENABLED
 
         config SENSOR_WINDOW_1_INTERRUPT_DEBOUNCE_MS
             int "Interrupt debounce"
             default 100
             help
                 debounce interval for interrupt in ms
+            depends on SENSOR_WINDOW_1_ENABLED
 
         config SENSOR_WINDOW_1_MQTT_TOPIC
             string "MQTT topic"
             default "WindowSensor1"
             help
                 MQTT subtopic for this sensor
+            depends on SENSOR_WINDOW_1_ENABLED
 
     endmenu
 
@@ -162,24 +166,28 @@ menu "Sensor config"
             default 25
             help
                 GPIO input pin number
+            depends on SENSOR_WINDOW_2_ENABLED
 
         config SENSOR_WINDOW_2_GPIO_OUTPUT
             int "GPIO output pin"
             default 26
             help
                 GPIO output pin number
+            depends on SENSOR_WINDOW_2_ENABLED
 
         config SENSOR_WINDOW_2_INTERRUPT_DEBOUNCE_MS
             int "Interrupt debounce"
             default 100
             help
                 debounce interval for interrupt in ms
+            depends on SENSOR_WINDOW_2_ENABLED
 
         config SENSOR_WINDOW_2_MQTT_TOPIC
             string "MQTT topic"
             default "WindowSensor2"
             help
                 MQTT subtopic for this sensor
+            depends on SENSOR_WINDOW_2_ENABLED
 
     endmenu
 
