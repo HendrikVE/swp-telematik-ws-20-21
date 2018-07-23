@@ -15,6 +15,19 @@ menu "Device config"
 endmenu
 
 
+menu "OTA config"
+
+    config OTA_HOST
+        string "OTA server address"
+        default "openhabianpi"
+
+    config OTA_FILENAME
+        string "OTA filename"
+        default "window_alert.bin"
+
+endmenu
+
+
 menu "WiFi config"
 
     config ESP_WIFI_SSID
