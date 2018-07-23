@@ -25,16 +25,16 @@ sitemap home label="Home" {
     Frame label="Sensors" {
 
         Frame label="Livingroom" {
-            Text item=livingroomTemperature label="Livingroom temperature"
-            Text item=livingroomHumidity    label="Livingroom humidity"
-            Text item=livingroomPressure    label="Livingroom pressure"
+            Text item=livingroomTemperature label="Temperature"
+            Text item=livingroomHumidity    label="Humidity"
+            Text item=livingroomPressure    label="Pressure"
         }
 
         Frame label="Office" {
-            Text item=livingroomTemperature label="Livingroom temperature"
-            Text item=livingroomHumidity    label="Livingroom humidity"
-            Text item=livingroomPressure    label="Livingroom pressure"
-            Text item=livingroomGas         label="Livingroom gas"
+            Text item=livingroomTemperature label="Temperature"
+            Text item=livingroomHumidity    label="Humidity"
+            Text item=livingroomPressure    label="Pressure"
+            Text item=livingroomGas         label="Gas"
         }
 
     }
