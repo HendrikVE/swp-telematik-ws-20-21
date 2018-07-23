@@ -1,7 +1,20 @@
 sitemap home label="Home" {
 
-    Frame label="Device" {
-        Text item=AppVersion
+    Frame label="Device management" {
+        Text label="Devices" icon="receiver" {
+
+            Frame label="ESP32-1" {
+                Text item=AppVersionESP32_1
+                Group item=gWindowSensor
+                Text item=livingroomTemperature label="Temperature"
+                Text item=livingroomHumidity    label="Humidity"
+                Text item=livingroomPressure    label="Pressure"
+            }
+
+            Frame label="ESP32-2" {
+                Text item=AppVersionESP32_2
+            }
+        }
     }
 
     Frame label="Security" {
@@ -10,9 +23,19 @@ sitemap home label="Home" {
     }
 
     Frame label="Sensors" {
-        Text item=livingroomTemperature label="Wohnzimmer Temperatur"     icon="temperature"
-        Text item=livingroomHumidity    label="Wohnzimmer Luftfeutigkeit" icon="humidity"
-        Text item=livingroomPressure    label="Wohnzimmer Luftdruck"      icon="pressure"
-        Text item=livingroomGas         label="Wohnzimmer Gas"            icon="gas"
+
+        Frame label="Livingroom" {
+            Text item=livingroomTemperature label="Livingroom temperature"
+            Text item=livingroomHumidity    label="Livingroom humidity"
+            Text item=livingroomPressure    label="Livingroom pressure"
+        }
+
+        Frame label="Office" {
+            Text item=livingroomTemperature label="Livingroom temperature"
+            Text item=livingroomHumidity    label="Livingroom humidity"
+            Text item=livingroomPressure    label="Livingroom pressure"
+            Text item=livingroomGas         label="Livingroom gas"
+        }
+
     }
 }
