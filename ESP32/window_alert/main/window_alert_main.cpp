@@ -10,6 +10,8 @@
 #include "driver/rtc_io.h"
 #include "esp_sleep.h"
 
+#include "MANIFEST.h"
+
 #include "Arduino.h"
 #include "Wire.h"
 #include "math.h"
@@ -163,7 +165,9 @@ void configureWindowSensorSystem() {
         window_sensor_1.gpio_input = CONFIG_SENSOR_WINDOW_1_GPIO_INPUT;
         window_sensor_1.gpio_output = CONFIG_SENSOR_WINDOW_1_GPIO_OUTPUT;
         window_sensor_1.interrupt_debounce = CONFIG_SENSOR_WINDOW_1_INTERRUPT_DEBOUNCE_MS;
+
         strcpy(window_sensor_1.mqtt_topic, CONFIG_SENSOR_WINDOW_1_MQTT_TOPIC);
+
         window_sensor_1.timestamp_last_interrupt = 0;
 
         init_window_sensor(window_sensor_1, &isrWindowSensor1);
@@ -371,6 +375,10 @@ void startDeviceSleep(int sleepIntervalMS) {
 void setup(){
 
     Serial.begin(115200);
+
+    char versionText[128];
+    sprintf(versionText, "This board is running with version %s (%i)", APP_VERSION_NAME, APP_VERSION_CODE);
+    Serial.println(versionText);
 
     connectivityManager.initWiFi();
     connectivityManager.initMQTT();
