@@ -10,7 +10,7 @@ menu "Device config"
         string "Device ID"
         default "esp32-1"
         help
-            Device ID (e.g. used for building the mqtt topic)
+            Device ID (e.g. used as MQTT client ID and for building the MQTT topic)
 
 endmenu
 
@@ -32,10 +32,6 @@ endmenu
 
 
 menu "MQTT config"
-
-    config MQTT_CLIENT_ID
-        string "MQTT client ID"
-        default "esp32_node"
 
     config MQTT_USER
         string "MQTT username"

@@ -87,7 +87,7 @@ public:
             if (!mqttClient.connected()) {
                 Serial.println("Connect to MQTT broker...");
 
-                while (!mqttClient.connect(CONFIG_MQTT_CLIENT_ID, CONFIG_MQTT_USER, CONFIG_MQTT_PASSWORD)) {
+                while (!mqttClient.connect(CONFIG_DEVICE_ID, CONFIG_MQTT_USER, CONFIG_MQTT_PASSWORD)) {
                     Serial.print(".");
                     delay(1000);
                 }
