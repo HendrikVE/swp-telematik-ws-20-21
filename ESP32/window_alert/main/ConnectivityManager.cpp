@@ -99,11 +99,11 @@ public:
 
     void initMQTT() {
 
-        mqttClient.begin(CONFIG_MQTT_SERVER_IP, CONFIG_MQTT_SERVER_PORT, wiFiClientSecure);
-
         wiFiClientSecure.setCACert((char*) ca_crt_start);
         wiFiClientSecure.setCertificate((char*) client_crt_start);
         wiFiClientSecure.setPrivateKey((char*) client_key_start);
+
+        mqttClient.begin(CONFIG_MQTT_SERVER_IP, CONFIG_MQTT_SERVER_PORT, wiFiClientSecure);
 
         checkMQTTConnection();
     }
