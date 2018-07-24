@@ -5,9 +5,9 @@ String wifi_quality "WiFi quality [%s]" <network> {mqtt="[<broker>:environment/w
 String AppVersionESP32_1 "Version: [%s]" <keyring> {mqtt="<[<broker>:room/livingroom/esp32-1/version:state:default]"}
 String AppVersionESP32_2 "Version: [%s]" <keyring> {mqtt="<[<broker>:room/livingroom/esp32-2/version:state:default]"}
 
-Group:Contact:OR(OPEN,CLOSED) gWindowSensor "window sensors" <contact>
-Contact WindowSensor1 "window 1 [%s]" <contact> (gWindowSensor) {mqtt="<[<broker>:room/livingroom/esp32-1/WindowSensor1:state:default]"}
-Contact WindowSensor2 "window 2 [%s]" <contact> (gWindowSensor) {mqtt="<[<broker>:room/livingroom/esp32-1/WindowSensor2:state:default]"}
+Group:Contact:OR(OPEN,CLOSED) gWindowSensor "Window sensors" <contact>
+Contact WindowSensor1 "Window 1 [%s]" <contact> (gWindowSensor) {mqtt="<[<broker>:room/livingroom/esp32-1/WindowSensor1:state:default]"}
+Contact WindowSensor2 "Window 2 [%s]" <contact> (gWindowSensor) {mqtt="<[<broker>:room/livingroom/esp32-1/WindowSensor2:state:default]"}
 
 Number livingroomTemperature "Livingroom [%.1f °C]" <temperature> {mqtt="<[<broker>:room/livingroom/esp32-1/temperature:state:default]"}
 Number livingroomHumidity "Livingroom [%.1f %%]" <humidity> {mqtt="<[<broker>:room/livingroom/esp32-1/humidity:state:default]"}

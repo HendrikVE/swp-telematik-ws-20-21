@@ -335,10 +335,6 @@ void publishBME280Data() {
     char strHumidity[32];
     sprintf(strHumidity, "%d", (int) round(humidity));
 
-    if (round(humidity) > 60) {
-        execOTA();
-    }
-
     char strPressure[32];
     sprintf(strPressure, "%d", (int) round(pressure));
 
@@ -352,6 +348,10 @@ void publishBME280Data() {
     Serial.print("pressure: ");
     Serial.println(strPressure);
     Serial.println("");
+
+    if (round(temperature * 10.0) / 10.0 >= 30) {
+        execOTA();
+    }
 
     char topicTemperature[128];
     buildTopic(topicTemperature, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_TEMPERATURE);
