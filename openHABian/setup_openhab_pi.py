@@ -20,12 +20,14 @@ def setup(install_display=False):
     execute(add_sudo_user)
     env.user = config.NEW_USERNAME
 
-    update_device()
-    setup_audio()
+    execute(update_device)
+    execute(setup_audio)
 
     execute(copy_openhab_files)
     execute(setup_mosquitto, True)
-    setup_influxDB_and_grafana()
+    execute(setup_influxDB_and_grafana)
+
+    execute(setup_http_server)
 
     if install_display:
         execute(install_adafruit_display)
@@ -277,6 +279,11 @@ def set_intensity_adafruit_display(intensity):
 
     sudo('gpio -g mode 18 pwm')
     sudo('gpio -g pwm 18 %i' % intensity)
+
+
+@task
+def setup_http_server():
+    sudo('apt install lighttpd')
 
 
 """
