@@ -18,11 +18,124 @@
 #include "Adafruit_Sensor.h"
 #include "Adafruit_BME280.h"
 #include "Adafruit_BME680.h"
+#include "Update.h"
 
 #include "ConnectivityManager.cpp"
 
 #define BME_280_I2C_ADDRESS 0x76
 #define BME_680_I2C_ADDRESS 0x77
+
+WiFiClient client;
+
+RTC_DATA_ATTR int bootCount = 0;
+int contentLength = 0;
+bool isValidContentType = false;
+
+String getHeaderValue(String header, String headerName) {
+    return header.substring(strlen(headerName.c_str()));
+}
+
+void execOTA() {
+    Serial.println("Connecting to: " + String(CONFIG_OTA_HOST));
+
+    if (client.connect(CONFIG_OTA_HOST, 80)) {
+
+        Serial.println("Fetching Bin: " + String(CONFIG_OTA_FILENAME));
+
+        client.print(String("GET ") + CONFIG_DEVICE_ID + "/" + String(APP_VERSION_CODE + 1) + "/" + CONFIG_OTA_FILENAME + " HTTP/1.1\r\n" +
+                     "Host: " + CONFIG_OTA_HOST + "\r\n" +
+                     "Cache-Control: no-cache\r\n" +
+                     "Connection: close\r\n\r\n");
+
+        unsigned long timeout = millis();
+        while (client.available() == 0) {
+            if (millis() - timeout > 5000) {
+                Serial.println("Client Timeout !");
+                client.stop();
+                return;
+            }
+        }
+
+        while (client.available()) {
+
+            String line = client.readStringUntil('\n');
+            // remove space, to check if the line is end of headers
+            line.trim();
+
+            // if the the line is empty, this is end of headers break the while and feed the
+            // remaining `client` to the Update.writeStream();
+            if (!line.length()) {
+                break; // headers ended -> get the OTA started
+            }
+
+            if (line.startsWith("HTTP/1.1")) {
+                if (line.indexOf("200") < 0) {
+                    Serial.println("Got a non 200 status code from server. Exiting OTA Update.");
+                    break;
+                }
+            }
+
+            if (line.startsWith("Content-Length: ")) {
+                contentLength = atoi((getHeaderValue(line, "Content-Length: ")).c_str());
+                Serial.println("Got " + String(contentLength) + " bytes from server");
+            }
+
+            if (line.startsWith("Content-Type: ")) {
+                String contentType = getHeaderValue(line, "Content-Type: ");
+                Serial.println("Got " + contentType + " payload.");
+                if (contentType == "application/octet-stream") {
+                    isValidContentType = true;
+                }
+            }
+        }
+    }
+    else {
+        Serial.println("Connection to " + String(CONFIG_OTA_HOST) + " failed. Please check your setup");
+    }
+
+    Serial.println("contentLength : " + String(contentLength) + ", isValidContentType : " + String(isValidContentType));
+
+    if (contentLength && isValidContentType) {
+
+        bool canBegin = Update.begin(contentLength);
+
+        // If yes, begin
+        if (canBegin) {
+            Serial.println("Begin OTA. This may take 2 - 5 mins to complete. Things might be quite for a while.. Patience!");
+            size_t written = Update.writeStream(client);
+
+            if (written == contentLength) {
+                Serial.println("Written : " + String(written) + " successfully");
+            }
+            else {
+                Serial.println("Written only : " + String(written) + "/" + String(contentLength) + ". Retry?" );
+            }
+
+            if (Update.end()) {
+                Serial.println("OTA done!");
+
+                if (Update.isFinished()) {
+                    Serial.println("Update successfully completed. Rebooting.");
+                    ESP.restart();
+                }
+                else {
+                    Serial.println("Update not finished? Something went wrong!");
+                }
+            }
+            else {
+                Serial.println("Error Occurred. Error #: " + String(Update.getError()));
+            }
+        }
+        else {
+            Serial.println("Not enough space to begin OTA");
+            client.flush();
+        }
+    }
+    else {
+        Serial.println("There was no content in the response");
+        client.flush();
+    }
+}
 
 struct WindowSensor {
     int id;
@@ -222,6 +335,10 @@ void publishBME280Data() {
     char strHumidity[32];
     sprintf(strHumidity, "%d", (int) round(humidity));
 
+    if (round(humidity) > 60) {
+        execOTA();
+    }
+
     char strPressure[32];
     sprintf(strPressure, "%d", (int) round(pressure));
 
@@ -375,7 +492,7 @@ void startDeviceSleep(int sleepIntervalMS) {
     esp_sleep_enable_timer_wakeup(sleepIntervalMS * 1000L);
 
     esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
-    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_SLOW_MEM, ESP_PD_OPTION_OFF);
+    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_SLOW_MEM, ESP_PD_OPTION_ON);
     esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_FAST_MEM, ESP_PD_OPTION_OFF);
     esp_sleep_pd_config(ESP_PD_DOMAIN_MAX, ESP_PD_OPTION_OFF);
 
@@ -408,6 +525,8 @@ void setup(){
 
     Serial.begin(115200);
 
+    bootCount++;
+
     connectivityManager.initWiFi();
     connectivityManager.initMQTT();
     mqttClient = *connectivityManager.get_mqttClient();
@@ -417,11 +536,13 @@ void setup(){
 
     char topicVersion[128];
     buildTopic(topicVersion, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, "version");
-    bool suc = mqttClient.publish(topicVersion, strVersion, true, 2);
+    mqttClient.publish(topicVersion, strVersion, true, 2);
 
-    Serial.println(suc);
-    Serial.println(topicVersion);
-    Serial.println(strVersion);
+    Serial.println("device is running version: " + String(strVersion));
+
+    /*if (bootCount % 4 == 0) {
+        execOTA();
+    }*/
 
     initWindowSensorSystem();
 
