@@ -1,3 +1,33 @@
+menu "Device config"
+
+    config DEVICE_ROOM
+        string "Room"
+        default "livingroom"
+        help
+            Room, where the device is placed (e.g. used for building the mqtt topic)
+
+    config DEVICE_ID
+        string "Device ID"
+        default "esp32-1"
+        help
+            Device ID (e.g. used as MQTT client ID and for building the MQTT topic)
+
+endmenu
+
+
+menu "OTA config"
+
+    config OTA_HOST
+        string "OTA server address"
+        default "openhabianpi"
+
+    config OTA_FILENAME
+        string "OTA filename"
+        default "window_alert.bin"
+
+endmenu
+
+
 menu "WiFi config"
 
     config ESP_WIFI_SSID
@@ -16,10 +46,6 @@ endmenu
 
 
 menu "MQTT config"
-
-    config MQTT_CLIENT_ID
-        string "MQTT client ID"
-        default "esp32_node"
 
     config MQTT_USER
         string "MQTT username"
@@ -57,7 +83,7 @@ menu "Sensor config"
 
     config SENSOR_POLL_INTERVAL_MS
         int "interval to poll sensor data (in ms)"
-        default 900000
+        default 5400000
 
     menu "Battery check"
 
@@ -84,20 +110,21 @@ menu "Sensor config"
         endchoice
 
         config SENSOR_MQTT_TOPIC_TEMPERATURE
-            string "MQTT topic for temperature"
-            default ""
+            string "MQTT subtopic for temperature"
+            default "temperature"
 
         config SENSOR_MQTT_TOPIC_HUMIDITY
-            string "MQTT topic for humidity"
-            default ""
+            string "MQTT subtopic for humidity"
+            default "humidity"
 
         config SENSOR_MQTT_TOPIC_PRESSURE
-            string "MQTT topic for pressure"
-            default ""
+            string "MQTT subtopic for pressure"
+            default "pressure"
 
         config SENSOR_MQTT_TOPIC_GAS
-            string "MQTT topic for gas (BME 680 only)"
-            default ""
+            string "MQTT subtopic for gas"
+            default "gas"
+            depends on SENSOR_BME_680
 
     endmenu
 
@@ -114,24 +141,28 @@ menu "Sensor config"
             default 14
             help
                 GPIO input pin number
+            depends on SENSOR_WINDOW_1_ENABLED
 
         config SENSOR_WINDOW_1_GPIO_OUTPUT
             int "GPIO output pin"
             default 15
             help
                 GPIO output pin number
+            depends on SENSOR_WINDOW_1_ENABLED
 
         config SENSOR_WINDOW_1_INTERRUPT_DEBOUNCE_MS
             int "Interrupt debounce"
             default 100
             help
                 debounce interval for interrupt in ms
+            depends on SENSOR_WINDOW_1_ENABLED
 
         config SENSOR_WINDOW_1_MQTT_TOPIC
             string "MQTT topic"
-            default ""
+            default "WindowSensor1"
             help
-                MQTT topic for this sensor
+                MQTT subtopic for this sensor
+            depends on SENSOR_WINDOW_1_ENABLED
 
     endmenu
 
@@ -148,24 +179,28 @@ menu "Sensor config"
             default 25
             help
                 GPIO input pin number
+            depends on SENSOR_WINDOW_2_ENABLED
 
         config SENSOR_WINDOW_2_GPIO_OUTPUT
             int "GPIO output pin"
             default 26
             help
                 GPIO output pin number
+            depends on SENSOR_WINDOW_2_ENABLED
 
         config SENSOR_WINDOW_2_INTERRUPT_DEBOUNCE_MS
             int "Interrupt debounce"
             default 100
             help
                 debounce interval for interrupt in ms
+            depends on SENSOR_WINDOW_2_ENABLED
 
         config SENSOR_WINDOW_2_MQTT_TOPIC
             string "MQTT topic"
-            default ""
+            default "WindowSensor2"
             help
-                MQTT topic for this sensor
+                MQTT subtopic for this sensor
+            depends on SENSOR_WINDOW_2_ENABLED
 
     endmenu
 

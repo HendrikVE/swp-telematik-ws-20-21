@@ -7,6 +7,7 @@
     2. Serial flasher config -> Flash size (adjust value to your board)
     3. Compiler options -> Enable C++ exceptions (make a tick here)
     4. Arduino Configuration -> Autostart Arduino setup and loop on boot (make a tick here)
+    5. Partition Table -> Partition Table -> Factory app, two OTA definitions
 
 # Config
 Within **make menuconfig** do the following (optional) configurations:
