@@ -205,14 +205,19 @@ def setup_ssl_for_mosquitto():
             sudo('chmod +x generate-CA.sh')
 
             # create ca cert and server cert + key
-            sudo('IPLIST="{IP}" HOSTLIST="{HOSTNAME}" ./generate-CA.sh'.format(IP=host_ipv4, HOSTNAME=host_name))
+            sudo('IPLIST="{IP}" HOSTLIST="{HOSTNAME}" ./generate-CA.sh'.format(IP=host_ipv4, HOSTNAME=host_ipv4))
+
+            # script is naming certs based on hostname, rename them
+            sudo('mv {HOSTNAME}.crt {IP}.crt'.format(HOSTNAME=host_name, IP=host_ipv4))
+            sudo('mv {HOSTNAME}.csr {IP}.csr'.format(HOSTNAME=host_name, IP=host_ipv4))
+            sudo('mv {HOSTNAME}.key {IP}.key'.format(HOSTNAME=host_name, IP=host_ipv4))
 
             # create client cert + key
-            sudo('IPLIST="{IP}" HOSTLIST="{HOSTNAME}" ./generate-CA.sh client {CLIENT_NAME}'.format(IP=host_ipv4, HOSTNAME=host_name, CLIENT_NAME=client_name))
+            sudo('IPLIST="{IP}" HOSTLIST="{HOSTNAME}" ./generate-CA.sh client {CLIENT_NAME}'.format(IP=host_ipv4, HOSTNAME=host_ipv4, CLIENT_NAME=client_name))
 
             # copy certificates to mosquitto
             sudo('cp ca.crt /etc/mosquitto/ca_certificates/')
-            sudo('cp {HOSTNAME}.crt {HOSTNAME}.key /etc/mosquitto/certs/'.format(HOSTNAME=host_name))
+            sudo('cp {HOSTNAME}.crt {HOSTNAME}.key /etc/mosquitto/certs/'.format(HOSTNAME=host_ipv4))
 
             # make references in mosquitto config
             listener_1883_config = '\nlistener 1883 localhost'
@@ -223,7 +228,7 @@ def setup_ssl_for_mosquitto():
                 keyfile /etc/mosquitto/certs/{HOSTNAME}.key
                 require_certificate true
                 # use_identity_as_username true
-            """.format(HOSTNAME=host_name))
+            """.format(HOSTNAME=host_ipv4))
 
             append('/etc/mosquitto/mosquitto.conf', listener_1883_config, use_sudo=True)
             append('/etc/mosquitto/mosquitto.conf', listener_8883_config, use_sudo=True)
