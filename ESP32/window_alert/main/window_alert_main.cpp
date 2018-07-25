@@ -349,10 +349,6 @@ void publishBME280Data() {
     Serial.println(strPressure);
     Serial.println("");
 
-    if (round(temperature * 10.0) / 10.0 >= 30) {
-        execOTA();
-    }
-
     char topicTemperature[128];
     buildTopic(topicTemperature, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_TEMPERATURE);
 
