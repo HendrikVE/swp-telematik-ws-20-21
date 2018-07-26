@@ -65,7 +65,16 @@ public:
                 Serial.println("Connect to WiFi...");
                 WiFi.begin(CONFIG_ESP_WIFI_SSID, CONFIG_ESP_WIFI_PASSWORD);
             }
+
+            int attempts = 0;
             while (WiFi.status() != WL_CONNECTED) {
+
+                attempts++;
+                if (attempts >= 15) {
+                    // restart device in case WiFi library wont connect
+                    ESP.restart();
+                }
+
                 Serial.print(".");
                 delay(1000);
             }
