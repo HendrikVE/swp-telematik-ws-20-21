@@ -13,96 +13,59 @@
 #include "MANIFEST.h"
 
 #include "Arduino.h"
+#include "WiFiClientSecure.h"
 #include "Wire.h"
 #include "math.h"
+#include "Update.h"
 #include "Adafruit_Sensor.h"
 #include "Adafruit_BME280.h"
 #include "Adafruit_BME680.h"
-#include "Update.h"
+
+#include "HTTPClient.h"
 
 #include "ConnectivityManager.cpp"
 
 #define BME_280_I2C_ADDRESS 0x76
 #define BME_680_I2C_ADDRESS 0x77
 
-WiFiClient client;
+HTTPClient http;
 
 RTC_DATA_ATTR int bootCount = 0;
 int contentLength = 0;
-bool isValidContentType = false;
-
-String getHeaderValue(String header, String headerName) {
-    return header.substring(strlen(headerName.c_str()));
-}
+//bool isValidContentType = false;
 
 void execOTA() {
-    Serial.println("Connecting to: " + String(CONFIG_OTA_HOST));
 
-    if (client.connect(CONFIG_OTA_HOST, 80)) {
+    char request[256];
+    sprintf(request, "https://%s/%s/%s/%s", (char*) CONFIG_OTA_HOST, (char*) CONFIG_DEVICE_ID, String(APP_VERSION_CODE + 1).c_str(), (char*) CONFIG_OTA_FILENAME);
 
-        Serial.println("Fetching Bin: " + String(CONFIG_OTA_FILENAME));
+    Serial.print("request on URL: ");
+    Serial.println(request);
 
-        client.print(String("GET ") + CONFIG_DEVICE_ID + "/" + String(APP_VERSION_CODE + 1) + "/" + CONFIG_OTA_FILENAME + " HTTP/1.1\r\n" +
-                     "Host: " + CONFIG_OTA_HOST + "\r\n" +
-                     "Cache-Control: no-cache\r\n" +
-                     "Connection: close\r\n\r\n");
+    http.begin(request, (char*) ca_crt_start);
+    int httpCode = http.GET();
 
-        unsigned long timeout = millis();
-        while (client.available() == 0) {
-            if (millis() - timeout > 5000) {
-                Serial.println("Client Timeout !");
-                client.stop();
-                return;
-            }
-        }
+    if (httpCode != HTTP_CODE_OK) {
+        Serial.print("[HTTP] GET... failed, error: ");
+        Serial.println(http.errorToString(httpCode).c_str());
 
-        while (client.available()) {
+        Serial.println("Exiting OTA Update");
 
-            String line = client.readStringUntil('\n');
-            // remove space, to check if the line is end of headers
-            line.trim();
+        http.end();
 
-            // if the the line is empty, this is end of headers break the while and feed the
-            // remaining `client` to the Update.writeStream();
-            if (!line.length()) {
-                break; // headers ended -> get the OTA started
-            }
-
-            if (line.startsWith("HTTP/1.1")) {
-                if (line.indexOf("200") < 0) {
-                    Serial.println("Got a non 200 status code from server. Exiting OTA Update.");
-                    break;
-                }
-            }
-
-            if (line.startsWith("Content-Length: ")) {
-                contentLength = atoi((getHeaderValue(line, "Content-Length: ")).c_str());
-                Serial.println("Got " + String(contentLength) + " bytes from server");
-            }
-
-            if (line.startsWith("Content-Type: ")) {
-                String contentType = getHeaderValue(line, "Content-Type: ");
-                Serial.println("Got " + contentType + " payload.");
-                if (contentType == "application/octet-stream") {
-                    isValidContentType = true;
-                }
-            }
-        }
-    }
-    else {
-        Serial.println("Connection to " + String(CONFIG_OTA_HOST) + " failed. Please check your setup");
+        return;
     }
 
-    Serial.println("contentLength : " + String(contentLength) + ", isValidContentType : " + String(isValidContentType));
+    contentLength = http.getSize();
+    Serial.println("Got " + String(contentLength) + " bytes from server");
 
-    if (contentLength && isValidContentType) {
+    if (contentLength) {
 
         bool canBegin = Update.begin(contentLength);
 
-        // If yes, begin
         if (canBegin) {
             Serial.println("Begin OTA. This may take 2 - 5 mins to complete. Things might be quite for a while.. Patience!");
-            size_t written = Update.writeStream(client);
+            size_t written = Update.writeStream(*http.getStreamPtr());
 
             if (written == contentLength) {
                 Serial.println("Written : " + String(written) + " successfully");
@@ -128,13 +91,13 @@ void execOTA() {
         }
         else {
             Serial.println("Not enough space to begin OTA");
-            client.flush();
         }
     }
     else {
         Serial.println("There was no content in the response");
-        client.flush();
     }
+
+    http.end();
 }
 
 struct WindowSensor {
@@ -536,10 +499,6 @@ void setup(){
 
     Serial.println("device is running version: " + String(strVersion));
 
-    /*if (bootCount % 4 == 0) {
-        execOTA();
-    }*/
-
     initWindowSensorSystem();
 
     #if CONFIG_SENSOR_BME_280
@@ -554,6 +513,7 @@ void setup(){
 void loop(){
 
     Serial.println("loop");
+    execOTA();
 
     #if CONFIG_SENSOR_WINDOW_1_ENABLED
         isrWindowSensor1();
