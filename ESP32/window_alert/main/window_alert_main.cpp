@@ -32,22 +32,18 @@ HTTPClient http;
 
 RTC_DATA_ATTR int bootCount = 0;
 int contentLength = 0;
-//bool isValidContentType = false;
 
 void execOTA() {
 
     char request[256];
     sprintf(request, "https://%s/%s/%s/%s", (char*) CONFIG_OTA_HOST, (char*) CONFIG_DEVICE_ID, String(APP_VERSION_CODE + 1).c_str(), (char*) CONFIG_OTA_FILENAME);
 
-    Serial.print("request on URL: ");
-    Serial.println(request);
-
-    http.begin(request, (char*) ca_crt_start);
+    http.begin((char*) CONFIG_OTA_HOST, 443, request, (char*) ca_crt_start, (char*) client_crt_start, (char*) client_crt_start);
     int httpCode = http.GET();
 
     if (httpCode != HTTP_CODE_OK) {
         Serial.print("[HTTP] GET... failed, error: ");
-        Serial.println(http.errorToString(httpCode).c_str());
+        Serial.println(httpCode);
 
         Serial.println("Exiting OTA Update");
 
