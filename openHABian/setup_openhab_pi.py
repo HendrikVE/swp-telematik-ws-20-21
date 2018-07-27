@@ -177,12 +177,6 @@ def setup_ssl_for_mosquitto():
     certificates generated as shown here: https://jamielinux.com/docs/openssl-certificate-authority/index.html
     """
 
-    def get_host_ipv4():
-        return run('hostname -I | cut -d " " -f 1')
-
-    def get_host_name():
-        return run('hostname')
-
     print('setup SSL for Mosquitto MQTT broker')
 
     host_ipv4 = get_host_ipv4()
@@ -288,7 +282,19 @@ def set_intensity_adafruit_display(intensity):
 
 @task
 def setup_http_server():
-    sudo('apt install lighttpd')
+    sudo('apt install nginx')
+
+    res_path = os.path.join('res', 'nginx', 'conf.d')
+    dest_path = os.path.join(os.sep, 'etc', 'nginx', 'conf.d')
+
+    put(os.path.join(res_path, 'ota.conf'), dest_path, use_sudo=True)
+
+    with cd(dest_path):
+        _replace_inplace_file('SERVER_IP', get_host_ipv4(), 'ota.conf')
+        sudo('mv ota.conf %s.conf' % get_host_ipv4())
+
+
+    sudo('service nginx restart')
 
 
 """
@@ -314,6 +320,14 @@ def _put_as_user(src, dest, user, group=None):
 
 def _get_homedir_openhabian():
     return os.path.join(os.sep, 'home', 'openhabian')
+
+
+def get_host_ipv4():
+    return run('hostname -I | cut -d " " -f 1')
+
+
+def get_host_name():
+    return run('hostname')
 
 
 def _replace_inplace_file(pattern, replacement, file):
