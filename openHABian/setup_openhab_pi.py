@@ -183,12 +183,12 @@ def setup_ssl_for_mosquitto():
     host_name = get_host_name()
     client_name = 'esp32'
 
-    res_path = os.path.join('res', 'mosquitto')
+    res_path = os.path.join('res', 'CA')
     home_dir = _get_homedir_openhabian()
 
     with cd(home_dir):
 
-        ca_dir = os.path.join(home_dir, 'mosquittoCA')
+        ca_dir = os.path.join(home_dir, 'CA')
 
         sudo('mkdir %s' % ca_dir)
         sudo('chmod 700 %s' % ca_dir)
