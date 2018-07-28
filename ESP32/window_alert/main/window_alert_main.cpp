@@ -30,10 +30,7 @@
 
 HTTPClient http;
 
-RTC_DATA_ATTR int bootCount = 0;
-int contentLength = 0;
-
-void execOTA() {
+void checkForOTAUpdate() {
 
     char request[256];
     sprintf(request, "https://%s/%s/%s/%s", (char*) CONFIG_OTA_HOST, (char*) CONFIG_DEVICE_ID, String(APP_VERSION_CODE + 1).c_str(), (char*) CONFIG_OTA_FILENAME);
@@ -54,7 +51,7 @@ void execOTA() {
         return;
     }
 
-    contentLength = http.getSize();
+    int contentLength = http.getSize();
     Serial.println("Got " + String(contentLength) + " bytes from server");
 
     if (contentLength) {
@@ -482,8 +479,6 @@ void setup(){
 
     Serial.begin(115200);
 
-    bootCount++;
-
     connectivityManager.initWiFi();
     connectivityManager.initMQTT();
     mqttClient = *connectivityManager.get_mqttClient();
@@ -511,7 +506,6 @@ void setup(){
 void loop(){
 
     Serial.println("loop");
-    execOTA();
 
     #if CONFIG_SENSOR_WINDOW_1_ENABLED
         isrWindowSensor1();
@@ -542,6 +536,9 @@ void loop(){
         delay(1000);
     }
     queuePaused = true;
+
+    // after work is done, check for update before sleeping
+    checkForOTAUpdate();
 
     Serial.println("go to sleep");
     startDeviceSleep(CONFIG_SENSOR_POLL_INTERVAL_MS);
