@@ -23,6 +23,8 @@ def setup(install_display=False):
     execute(update_device)
     execute(setup_audio)
 
+    execute(setup_CA)
+
     execute(copy_openhab_files)
     execute(setup_mosquitto, True)
     execute(setup_influxDB_and_grafana)
@@ -172,42 +174,17 @@ def _setup_grafana():
 
 @task
 def setup_ssl_for_mosquitto():
-    """
-    for reference see: http://rockingdlabs.dunmire.org/exercises-experiments/ssl-client-certs-to-secure-mqtt
-    certificates generated as shown here: https://jamielinux.com/docs/openssl-certificate-authority/index.html
-    """
 
     print('setup SSL for Mosquitto MQTT broker')
 
     host_ipv4 = get_host_ipv4()
-    host_name = get_host_name()
-    client_name = 'esp32'
-
-    res_path = os.path.join('res', 'CA')
     home_dir = _get_homedir_openhabian()
 
     with cd(home_dir):
 
         ca_dir = os.path.join(home_dir, 'CA')
 
-        sudo('mkdir %s' % ca_dir)
-        sudo('chmod 700 %s' % ca_dir)
-
         with cd(ca_dir):
-
-            put(os.path.join(res_path, 'generate-CA.sh'), 'generate-CA.sh', use_sudo=True)
-            sudo('chmod +x generate-CA.sh')
-
-            # create ca cert and server cert + key
-            sudo('IPLIST="{IP}" HOSTLIST="{HOSTNAME}" ./generate-CA.sh'.format(IP=host_ipv4, HOSTNAME=host_ipv4))
-
-            # script is naming certs based on hostname, rename them
-            sudo('mv {HOSTNAME}.crt {IP}.crt'.format(HOSTNAME=host_name, IP=host_ipv4))
-            sudo('mv {HOSTNAME}.csr {IP}.csr'.format(HOSTNAME=host_name, IP=host_ipv4))
-            sudo('mv {HOSTNAME}.key {IP}.key'.format(HOSTNAME=host_name, IP=host_ipv4))
-
-            # create client cert + key
-            sudo('IPLIST="{IP}" HOSTLIST="{HOSTNAME}" ./generate-CA.sh client {CLIENT_NAME}'.format(IP=host_ipv4, HOSTNAME=host_ipv4, CLIENT_NAME=client_name))
 
             # copy certificates to mosquitto
             sudo('cp ca.crt /etc/mosquitto/ca_certificates/')
@@ -229,9 +206,51 @@ def setup_ssl_for_mosquitto():
 
             sudo('service mosquitto restart')
 
+
+@task
+def setup_CA():
+    """
+        for reference see: http://rockingdlabs.dunmire.org/exercises-experiments/ssl-client-certs-to-secure-mqtt
+        certificates generated as shown here: https://jamielinux.com/docs/openssl-certificate-authority/index.html
+        """
+
+    print('setup SSL for Mosquitto MQTT broker')
+
+    host_ipv4 = get_host_ipv4()
+    host_name = get_host_name()
+    client_name = 'esp32'
+
+    res_path = os.path.join('res', 'CA')
+    home_dir = _get_homedir_openhabian()
+
+    with cd(home_dir):
+        ca_dir = os.path.join(home_dir, 'CA')
+
+        sudo('mkdir %s' % ca_dir)
+        sudo('chmod 700 %s' % ca_dir)
+
+        with cd(ca_dir):
+            put(os.path.join(res_path, 'generate-CA.sh'), 'generate-CA.sh', use_sudo=True)
+            sudo('chmod +x generate-CA.sh')
+
+            # create ca cert and server cert + key
+            sudo('IPLIST="{IP}" HOSTLIST="{HOSTNAME}" ./generate-CA.sh'.format(IP=host_ipv4, HOSTNAME=host_ipv4))
+
+            # script is naming certs based on hostname, rename them
+            sudo('mv {HOSTNAME}.crt {IP}.crt'.format(HOSTNAME=host_name, IP=host_ipv4))
+            sudo('mv {HOSTNAME}.csr {IP}.csr'.format(HOSTNAME=host_name, IP=host_ipv4))
+            sudo('mv {HOSTNAME}.key {IP}.key'.format(HOSTNAME=host_name, IP=host_ipv4))
+
+            # create client cert + key
+            sudo('IPLIST="{IP}" HOSTLIST="{HOSTNAME}" ./generate-CA.sh client {CLIENT_NAME}'.format(IP=host_ipv4,
+                                                                                                    HOSTNAME=host_ipv4,
+                                                                                                    CLIENT_NAME=client_name))
+
             get('ca.crt', os.path.join('..', 'ESP32', 'window_alert', 'main', 'ca.crt'), use_sudo=True)
-            get('%s.crt' % client_name, os.path.join('..', 'ESP32', 'window_alert', 'main', 'client.crt'), use_sudo=True)
-            get('%s.key' % client_name, os.path.join('..', 'ESP32', 'window_alert', 'main', 'client.key'), use_sudo=True)
+            get('%s.crt' % client_name, os.path.join('..', 'ESP32', 'window_alert', 'main', 'client.crt'),
+                use_sudo=True)
+            get('%s.key' % client_name, os.path.join('..', 'ESP32', 'window_alert', 'main', 'client.key'),
+                use_sudo=True)
 
         sudo('chown -R openhab:openhabian %s' % ca_dir)
 
