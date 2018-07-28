@@ -23,7 +23,8 @@
 
 #include "HTTPClient.h"
 
-#include "ConnectivityManager.cpp"
+#include "manager/ConnectivityManager.cpp"
+#include "storage/FlashStorage.h"
 
 #define BME_280_I2C_ADDRESS 0x76
 #define BME_680_I2C_ADDRESS 0x77

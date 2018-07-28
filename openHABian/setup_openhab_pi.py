@@ -246,10 +246,10 @@ def setup_CA():
                                                                                                     HOSTNAME=host_ipv4,
                                                                                                     CLIENT_NAME=client_name))
 
-            get('ca.crt', os.path.join('..', 'ESP32', 'window_alert', 'main', 'ca.crt'), use_sudo=True)
-            get('%s.crt' % client_name, os.path.join('..', 'ESP32', 'window_alert', 'main', 'client.crt'),
+            get('ca.crt', os.path.join('..', 'ESP32', 'window_alert', 'main', 'storage', 'certs', 'ca.crt'), use_sudo=True)
+            get('%s.crt' % client_name, os.path.join('..', 'ESP32', 'window_alert', 'main', 'storage', 'certs', 'client.crt'),
                 use_sudo=True)
-            get('%s.key' % client_name, os.path.join('..', 'ESP32', 'window_alert', 'main', 'client.key'),
+            get('%s.key' % client_name, os.path.join('..', 'ESP32', 'window_alert', 'main', 'storage', 'certs', 'client.key'),
                 use_sudo=True)
 
         sudo('chown -R openhab:openhabian %s' % ca_dir)
