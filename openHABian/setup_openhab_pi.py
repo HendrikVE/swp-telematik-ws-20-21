@@ -29,7 +29,7 @@ def setup(install_display=False):
     execute(setup_mosquitto, True)
     execute(setup_influxDB_and_grafana)
 
-    execute(setup_http_server)
+    execute(setup_http_ota_server)
 
     if install_display:
         execute(install_adafruit_display)
@@ -300,7 +300,7 @@ def set_intensity_adafruit_display(intensity):
 
 
 @task
-def setup_http_server():
+def setup_http_ota_server():
     sudo('apt -y install nginx apache2-utils')
 
     res_path = os.path.join('res', 'nginx', 'conf.d')
