@@ -25,6 +25,14 @@ menu "OTA config"
         string "OTA filename"
         default "window_alert.bin"
 
+    config OTA_SERVER_USERNAME
+        string "OTA server username"
+        default "esp32_OTA"
+
+    config OTA_SERVER_PASSWORD
+        string "OTA server password"
+        default "your_password"
+
 endmenu
 
 

@@ -247,7 +247,7 @@ def update_device():
 @task
 def setup_audio():
 
-    sudo('apt install mpg123')
+    sudo('apt -y install mpg123')
 
 
 @task
@@ -262,7 +262,7 @@ def install_adafruit_display():
         sudo('./adafruit-pitft.sh -u %s' % home_dir)
         sudo('rm adafruit-pitft.sh')
 
-    sudo('apt install wiringpi')
+    sudo('apt -y install wiringpi')
 
 
 @task
@@ -282,7 +282,7 @@ def set_intensity_adafruit_display(intensity):
 
 @task
 def setup_http_server():
-    sudo('apt install nginx')
+    sudo('apt -y install nginx apache2-utils')
 
     res_path = os.path.join('res', 'nginx', 'conf.d')
     dest_path = os.path.join(os.sep, 'etc', 'nginx', 'conf.d')
@@ -293,6 +293,7 @@ def setup_http_server():
         _replace_inplace_file('SERVER_IP', get_host_ipv4(), 'ota.conf')
         sudo('mv ota.conf %s.conf' % get_host_ipv4())
 
+    sudo('echo "{PASSWORD}" | htpasswd -ic /etc/nginx/.htpasswd {USERNAME}'.format(PASSWORD=config.OTA_SERVER_PASSWORD, USERNAME=config.OTA_SERVER_USERNAME))
 
     sudo('service nginx restart')
 

@@ -38,7 +38,9 @@ void execOTA() {
     char request[256];
     sprintf(request, "https://%s/%s/%s/%s", (char*) CONFIG_OTA_HOST, (char*) CONFIG_DEVICE_ID, String(APP_VERSION_CODE + 1).c_str(), (char*) CONFIG_OTA_FILENAME);
 
-    http.begin((char*) CONFIG_OTA_HOST, 443, request, (char*) ca_crt_start, (char*) client_crt_start, (char*) client_crt_start);
+    http.begin((char*) CONFIG_OTA_HOST, 443, request, (char*) ca_crt_start, (char*) client_crt_start, (char*) client_key_start);
+    http.setAuthorization(CONFIG_OTA_SERVER_USERNAME, CONFIG_OTA_SERVER_PASSWORD);
+
     int httpCode = http.GET();
 
     if (httpCode != HTTP_CODE_OK) {
