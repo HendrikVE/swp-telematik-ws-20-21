@@ -23,8 +23,7 @@
 #include "manager/UpdateManager.cpp"
 #include "storage/FlashStorage.h"
 
-#define BME_280_I2C_ADDRESS 0x76
-#define BME_680_I2C_ADDRESS 0x77
+#include "hardware/EnvironmentSensor.cpp"
 
 struct WindowSensor {
     int id;
@@ -41,6 +40,8 @@ struct WindowSensorEvent {
     bool level;
 };
 
+EnvironmentSensor* environmentSensor;
+
 void buildTopic(char* output, const char* room, const char* boardID, const char* measurement) {
 
     sprintf(output, "room/%s/%s/%s", room, boardID, measurement);
@@ -52,34 +53,6 @@ static xQueueHandle windowSensorEventQueue = NULL;
 ConnectivityManager connectivityManager;
 UpdateManager updateManager;
 MQTTClient mqttClient;
-
-Adafruit_BME280 bme280;
-Adafruit_BME680 bme680;
-
-#if CONFIG_SENSOR_BME_280
-void initBME280() {
-
-    Wire.begin(CONFIG_I2C_SDA_GPIO_PIN, CONFIG_I2C_SDC_GPIO_PIN);
-
-    while(!bme280.begin(BME_280_I2C_ADDRESS)) {
-        Serial.println("Could not find BME280 sensor!");
-        delay(1000);
-    }
-
-}
-#endif /*CONFIG_SENSOR_BME_280*/
-
-#if CONFIG_SENSOR_BME_680
-void initBME680() {
-
-    Wire.begin(CONFIG_I2C_SDA_GPIO_PIN, CONFIG_I2C_SDC_GPIO_PIN);
-
-    while(!bme680.begin(BME_680_I2C_ADDRESS)) {
-        Serial.println("Could not find BME680 sensor!");
-        delay(1000);
-    }
-}
-#endif /*CONFIG_SENSOR_BME_680*/
 
 void IRAM_ATTR isrWindowSensor1() {
 
@@ -210,34 +183,36 @@ void initWindowSensorSystem() {
     configureWindowSensorSystem();
 }
 
-#if CONFIG_SENSOR_BME_280
-void publishBME280Data() {
+
+void publishEnvironmentData() {
 
     float temperature(NAN), humidity(NAN), pressure(NAN);
 
-    temperature = bme280.readTemperature();
-    humidity = bme280.readHumidity();
-    pressure = bme280.readPressure();
+    temperature = environmentSensor->readTemperature();
+    humidity = environmentSensor->readHumidity();
+    pressure = environmentSensor->readPressure();
+
 
     char strTemperature[32];
     sprintf(strTemperature, "%.1f", round(temperature * 10.0) / 10.0);
 
+    Serial.print("temperature: ");
+    Serial.println(strTemperature);
+
+
     char strHumidity[32];
     sprintf(strHumidity, "%d", (int) round(humidity));
+
+    Serial.print("humidity: ");
+    Serial.println(strHumidity);
+
 
     char strPressure[32];
     sprintf(strPressure, "%d", (int) round(pressure));
 
-    Serial.println("");
-    Serial.print("temperature: ");
-    Serial.println(strTemperature);
-
-    Serial.print("humidity: ");
-    Serial.println(strHumidity);
-
     Serial.print("pressure: ");
     Serial.println(strPressure);
-    Serial.println("");
+
 
     char topicTemperature[128];
     buildTopic(topicTemperature, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_TEMPERATURE);
@@ -251,62 +226,26 @@ void publishBME280Data() {
     mqttClient.publish(topicTemperature, strTemperature, false, 2);
     mqttClient.publish(topicHumidity, strHumidity, false, 2);
     mqttClient.publish(topicPressure, strPressure, false, 2);
+
+    #if CONFIG_SENSOR_MQTT_TOPIC_GAS
+        if (environmentSensor->supportingGasResistence()) {
+
+            float gas_resistance(NAN);
+            gas_resistance = environmentSensor->readGasResistence();
+
+            char strGasResistence[32];
+            sprintf(strGasResistence, "%d", (int) round(gas_resistance));
+
+            Serial.print("gas resistence: ");
+            Serial.println(strGasResistence);
+
+            char topicGas[128];
+            buildTopic(topicGas, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_GAS);
+
+            mqttClient.publish(topicGas, strGasResistence, false, 2);
+        }
+    #endif /*CONFIG_SENSOR_BME_680*/
 }
-#endif /*CONFIG_SENSOR_BME_280*/
-
-#if CONFIG_SENSOR_BME_680
-void publishBME680Data() {
-
-    if (!bme680.performReading()) {
-        Serial.println("Failed to perform reading");
-        return;
-    }
-
-    char strTemperature[32];
-    sprintf(strTemperature, "%.1f", round(bme680.temperature * 10.0) / 10.0);
-
-    char strHumidity[32];
-    sprintf(strHumidity, "%d", (int) round(bme680.humidity));
-
-    char strPressure[32];
-    sprintf(strPressure, "%d", (int) round(bme680.pressure));
-
-    char strGas[32];
-    sprintf(strGas, "%d", (int) round(bme680.gas_resistance));
-
-    Serial.println("");
-    Serial.print("temperature: ");
-    Serial.println(strTemperature);
-
-    Serial.print("humidity: ");
-    Serial.println(strHumidity);
-
-    Serial.print("pressure: ");
-    Serial.println(strPressure);
-    Serial.println("");
-
-    Serial.print("gas: ");
-    Serial.println(strGas);
-    Serial.println("");
-
-    char topicTemperature[128];
-    buildTopic(topicTemperature, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_TEMPERATURE);
-
-    char topicHumidity[128];
-    buildTopic(topicHumidity, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_HUMIDITY);
-
-    char topicPressure[128];
-    buildTopic(topicPressure, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_PRESSURE);
-
-    char topicGas[128];
-    buildTopic(topicGas, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_GAS);
-
-    mqttClient.publish(topicTemperature, strTemperature, false, 2);
-    mqttClient.publish(topicHumidity, strHumidity, false, 2);
-    mqttClient.publish(topicPressure, strPressure, false, 2);
-    mqttClient.publish(topicGas, strGas, false, 2);
-}
-#endif /*CONFIG_SENSOR_BME_680*/
 
 void startDeviceSleep(int sleepIntervalMS) {
 
@@ -427,12 +366,14 @@ void setup(){
     initWindowSensorSystem();
 
     #if CONFIG_SENSOR_BME_280
-        initBME280();
+        environmentSensor = new EnvironmentSensor(Sensor::BME280);
     #endif /*CONFIG_SENSOR_BME_280*/
 
     #if CONFIG_SENSOR_BME_680
-        initBME680();
+        environmentSensor = new EnvironmentSensor(Sensor::BME680);
     #endif /*CONFIG_SENSOR_BME_680*/
+
+    environmentSensor->init();
 }
 
 void loop(){
@@ -455,13 +396,7 @@ void loop(){
 
     queuePaused = false;
 
-    #if CONFIG_SENSOR_BME_280
-        publishBME280Data();
-    #endif /*CONFIG_SENSOR_BME_280*/
-
-    #if CONFIG_SENSOR_BME_680
-        publishBME680Data();
-    #endif /*CONFIG_SENSOR_BME_680*/
+    publishEnvironmentData();
 
     // dont go to sleep before all tasks in queue are executed
     while (uxQueueMessagesWaiting(windowSensorEventQueue) > 0) {
