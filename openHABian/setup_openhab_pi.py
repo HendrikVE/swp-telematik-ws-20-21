@@ -404,4 +404,4 @@ def get_host_name():
 
 
 def _replace_inplace_file(pattern, replacement, file):
-    sudo('sed -i "s/{PATTERN}/{REPLACEMENT}/g" {FILE}'.format(PATTERN=pattern, REPLACEMENT=replacement, FILE=file))
+    sudo('sed -i "s/{PATTERN}/{REPLACEMENT}/g" {FILE}'.format(PATTERN=pattern.replace('/', '\/'), REPLACEMENT=replacement.replace('/', '\/'), FILE=file))
