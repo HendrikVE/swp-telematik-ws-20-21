@@ -142,7 +142,6 @@ void configureWindowSensorSystem() {
     char topic[128];
 
     #if CONFIG_SENSOR_WINDOW_1_ENABLED
-        Serial.println("configureWindowSensorSystem(1)");
 
         window_sensor_1.id = 1;
         window_sensor_1.gpio_input = CONFIG_SENSOR_WINDOW_1_GPIO_INPUT;
@@ -158,7 +157,6 @@ void configureWindowSensorSystem() {
     #endif /*CONFIG_SENSOR_WINDOW_1_ENABLED*/
 
     #if CONFIG_SENSOR_WINDOW_2_ENABLED
-        Serial.println("configureWindowSensorSystem(2)");
 
         window_sensor_2.id = 2;
         window_sensor_2.gpio_input = CONFIG_SENSOR_WINDOW_2_GPIO_INPUT;
@@ -317,7 +315,7 @@ void startDeviceSleep(int sleepIntervalMS) {
     esp_sleep_enable_timer_wakeup(sleepIntervalMS * 1000L);
 
     esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
-    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_SLOW_MEM, ESP_PD_OPTION_ON);
+    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_SLOW_MEM, ESP_PD_OPTION_OFF);
     esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_FAST_MEM, ESP_PD_OPTION_OFF);
     esp_sleep_pd_config(ESP_PD_DOMAIN_MAX, ESP_PD_OPTION_OFF);
 
