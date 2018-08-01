@@ -31,6 +31,10 @@ def setup(install_display=False):
 
     execute(setup_http_ota_server)
 
+    execute(setup_lets_encrypt)
+    execute(setup_dynamic_dns)
+    execute(setup_grafana_remote_access)
+
     if install_display:
         execute(install_adafruit_display)
 
@@ -315,6 +319,55 @@ def setup_http_ota_server():
     sudo('echo "{PASSWORD}" | htpasswd -ic /etc/nginx/.htpasswd {USERNAME}'.format(PASSWORD=config.OTA_SERVER_PASSWORD, USERNAME=config.OTA_SERVER_USERNAME))
 
     sudo('service nginx restart')
+
+
+@task
+def setup_lets_encrypt():
+    print('setup Let\'s Encrypt')
+
+    sudo('apt -y install certbot')
+
+    # nginx is blocking port 80, stop it and restart it after certificate generation
+    sudo('service nginx stop')
+    sudo('certbot certonly --standalone -d %s' % config.DDNS_DOMAIN_NAME)
+    sudo('service nginx start')
+
+
+@task
+def setup_dynamic_dns():
+    print('setup no-ip client for dynamic dns service')
+
+    with cd('/usr/local/src'):
+        sudo('wget https://www.noip.com/client/linux/noip-duc-linux.tar.gz')
+        sudo('tar xzf noip-duc-linux.tar.gz')
+
+        with cd('noip-2.1.9-1'):
+            sudo('make')
+            sudo('make install')
+
+    sudo('/usr/local/bin/noip2 -C')
+
+
+@task
+def setup_grafana_remote_access():
+
+    config_file = '/etc/grafana/grafana.ini'
+
+    cert_file = '/etc/letsencrypt/live/%s/cert.pem' % config.DDNS_DOMAIN_NAME
+    cert_key = '/etc/letsencrypt/live/%s/privkey.pem' % config.DDNS_DOMAIN_NAME
+
+    sudo('cp %s /etc/grafana/' % cert_file)
+    sudo('cp %s /etc/grafana/' % cert_key)
+
+    cert_file = '/etc/grafana/cert.pem'
+    cert_key = '/etc/grafana/privkey.pem'
+
+    _replace_inplace_file(';CONFIG_PROTOCOL', 'protocol = https', config_file)
+    _replace_inplace_file(';CONFIG_PORT', 'http_port = 3000', config_file)
+    _replace_inplace_file(';CONFIG_CERT_FILE', 'cert_file = %s' % cert_file, config_file)
+    _replace_inplace_file(';CONFIG_CERT_KEY', 'cert_key = %s' % cert_key, config_file)
+
+    sudo('service grafana-server restart')
 
 
 """
