@@ -1,4 +1,4 @@
-sitemap home label="Home" {
+sitemap window_alert label="Security system" {
 
     Frame label="Security" {
         Switch item=SecuritySystem
