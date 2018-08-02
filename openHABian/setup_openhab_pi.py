@@ -269,6 +269,7 @@ def update_device():
 
 @task
 def setup_audio():
+    print('setup audio')
 
     sudo('apt -y install mpg123')
 
@@ -290,6 +291,7 @@ def install_adafruit_display():
 
 @task
 def set_intensity_adafruit_display(intensity):
+    print('set adafruit display intensity')
 
     intensity = int(intensity)
 
@@ -305,6 +307,8 @@ def set_intensity_adafruit_display(intensity):
 
 @task
 def setup_http_ota_server():
+    print('setup ota server')
+
     sudo('apt -y install nginx apache2-utils')
 
     res_path = os.path.join('res', 'nginx', 'conf.d')
@@ -350,6 +354,7 @@ def setup_dynamic_dns():
 
 @task
 def setup_grafana_remote_access():
+    print('setup remote access for grafana')
 
     config_file = '/etc/grafana/grafana.ini'
 
