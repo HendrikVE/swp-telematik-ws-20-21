@@ -8,6 +8,8 @@
     3. Compiler options -> Enable C++ exceptions (make a tick here)
     4. Arduino Configuration -> Autostart Arduino setup and loop on boot (make a tick here)
     5. Partition Table -> Partition Table -> Factory app, two OTA definitions
+3. Hardware
+    1. Dont use the 5V pin when using battery, this pin is only powered when connected to USB
 
 # Config
 Within **make menuconfig** do the following (optional) configurations:
