@@ -21,9 +21,9 @@
 #include "manager/UpdateManager.cpp"
 #include "storage/FlashStorage.h"
 
-EnvironmentSensor* environmentSensor;
-WindowSensor* windowSensor1;
-WindowSensor* windowSensor2;
+EnvironmentSensor* pEnvironmentSensor;
+WindowSensor* pWindowSensor1;
+WindowSensor* pWindowSensor2;
 
 ConnectivityManager connectivityManager;
 UpdateManager updateManager;
@@ -42,8 +42,8 @@ void IRAM_ATTR isrWindowSensor1() {
     if (queuePaused) return;
 
     WindowSensorEvent event;
-    event.windowSensor = windowSensor1;
-    event.level = digitalRead(windowSensor1->getInputGpio());
+    event.windowSensor = pWindowSensor1;
+    event.level = digitalRead(pWindowSensor1->getInputGpio());
 
     xQueueSendFromISR(windowSensorEventQueue, &event, NULL);
 }
@@ -53,13 +53,13 @@ void IRAM_ATTR isrWindowSensor2() {
     if (queuePaused) return;
 
     WindowSensorEvent event;
-    event.windowSensor = windowSensor2;
-    event.level = digitalRead(windowSensor2->getInputGpio());
+    event.windowSensor = pWindowSensor2;
+    event.level = digitalRead(pWindowSensor2->getInputGpio());
 
     xQueueSendFromISR(windowSensorEventQueue, &event, NULL);
 }
 
-static void gpio_task_example(void* arg) {
+static void gpioTask(void* arg) {
 
     WindowSensor* windowSensor;
     WindowSensorEvent event;
@@ -117,26 +117,26 @@ void configureWindowSensorSystem() {
 
         buildTopic(topic, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_WINDOW_1_MQTT_TOPIC);
 
-        windowSensor1 = new WindowSensor(
+        pWindowSensor1 = new WindowSensor(
                 CONFIG_SENSOR_WINDOW_1_GPIO_INPUT,
                 CONFIG_SENSOR_WINDOW_1_GPIO_OUTPUT,
                 CONFIG_SENSOR_WINDOW_1_INTERRUPT_DEBOUNCE_MS,
                 topic);
 
-        windowSensor1->initGpio(&isrWindowSensor1);
+        pWindowSensor1->initGpio(&isrWindowSensor1);
     #endif /*CONFIG_SENSOR_WINDOW_1_ENABLED*/
 
     #if CONFIG_SENSOR_WINDOW_2_ENABLED
 
         buildTopic(topic, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_WINDOW_2_MQTT_TOPIC);
 
-        windowSensor2 = new WindowSensor(
+        pWindowSensor2 = new WindowSensor(
                 CONFIG_SENSOR_WINDOW_2_GPIO_INPUT,
                 CONFIG_SENSOR_WINDOW_2_GPIO_OUTPUT,
                 CONFIG_SENSOR_WINDOW_2_INTERRUPT_DEBOUNCE_MS,
                 topic);
 
-        windowSensor2->initGpio(&isrWindowSensor2);
+        pWindowSensor2->initGpio(&isrWindowSensor2);
     #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
 }
 
@@ -144,7 +144,7 @@ void initWindowSensorSystem() {
 
     Serial.println("init task queue");
     windowSensorEventQueue = xQueueCreate(10, sizeof(struct WindowSensorEvent));
-    xTaskCreate(gpio_task_example, "gpio_task_example", 2048, NULL, 10, NULL);
+    xTaskCreate(gpioTask, "gpioTask", 2048, NULL, 10, NULL);
 
     configureWindowSensorSystem();
 }
@@ -154,9 +154,9 @@ void publishEnvironmentData() {
 
     float temperature(NAN), humidity(NAN), pressure(NAN);
 
-    temperature = environmentSensor->readTemperature();
-    humidity = environmentSensor->readHumidity();
-    pressure = environmentSensor->readPressure();
+    temperature = pEnvironmentSensor->readTemperature();
+    humidity = pEnvironmentSensor->readHumidity();
+    pressure = pEnvironmentSensor->readPressure();
 
 
     char strTemperature[32];
@@ -193,10 +193,10 @@ void publishEnvironmentData() {
     mqttClient.publish(topicHumidity, strHumidity, false, 2);
     mqttClient.publish(topicPressure, strPressure, false, 2);
 
-    if (environmentSensor->supportingGasResistence()) {
+    if (pEnvironmentSensor->supportingGasResistence()) {
 
         float gas_resistance(NAN);
-        gas_resistance = environmentSensor->readGasResistence();
+        gas_resistance = pEnvironmentSensor->readGasResistence();
 
         char strGasResistence[32];
         sprintf(strGasResistence, "%d", (int) round(gas_resistance));
@@ -218,19 +218,19 @@ void startDeviceSleep(int sleepIntervalMS) {
 
     #if CONFIG_SENSOR_WINDOW_1_ENABLED
 
-        detachInterrupt(digitalPinToInterrupt(windowSensor1->getInputGpio()));
+        detachInterrupt(digitalPinToInterrupt(pWindowSensor1->getInputGpio()));
 
-        gpio_num_t windowSensor1Input = (gpio_num_t) windowSensor1->getInputGpio();
-        gpio_num_t windowSensor1Output = (gpio_num_t) windowSensor1->getOutputGpio();
+        gpio_num_t windowSensor1Input = (gpio_num_t) pWindowSensor1->getInputGpio();
+        gpio_num_t windowSensor1Output = (gpio_num_t) pWindowSensor1->getOutputGpio();
 
-        windowSensor1->initRtcGpio();
+        pWindowSensor1->initRtcGpio();
 
-        windowSensor1->setLastState(rtc_gpio_get_level(windowSensor1Input));
+        pWindowSensor1->setLastState(rtc_gpio_get_level(windowSensor1Input));
 
-        if (windowSensor1->getLastState() == LOW) {
+        if (pWindowSensor1->getLastState() == LOW) {
             esp_sleep_enable_ext0_wakeup(windowSensor1Input, HIGH);
         }
-        else if (windowSensor1->getLastState() == HIGH) {
+        else if (pWindowSensor1->getLastState() == HIGH) {
             esp_sleep_enable_ext0_wakeup(windowSensor1Input, LOW);
         }
 
@@ -240,19 +240,19 @@ void startDeviceSleep(int sleepIntervalMS) {
 
     #if CONFIG_SENSOR_WINDOW_2_ENABLED
 
-        detachInterrupt(digitalPinToInterrupt(windowSensor2->getInputGpio()));
+        detachInterrupt(digitalPinToInterrupt(pWindowSensor2->getInputGpio()));
 
-        gpio_num_t windowSensor2Input = (gpio_num_t) windowSensor2->getInputGpio();
-        gpio_num_t windowSensor2Output = (gpio_num_t) windowSensor2->getOutputGpio();
+        gpio_num_t windowSensor2Input = (gpio_num_t) pWindowSensor2->getInputGpio();
+        gpio_num_t windowSensor2Output = (gpio_num_t) pWindowSensor2->getOutputGpio();
 
-        windowSensor2->initRtcGpio();
+        pWindowSensor2->initRtcGpio();
 
-        windowSensor2->setLastState(rtc_gpio_get_level(windowSensor2Input));
+        pWindowSensor2->setLastState(rtc_gpio_get_level(windowSensor2Input));
 
-        if (windowSensor2->getLastState() == LOW) {
+        if (pWindowSensor2->getLastState() == LOW) {
             esp_sleep_enable_ext1_wakeup(BIT(windowSensor2Input), ESP_EXT1_WAKEUP_ANY_HIGH);
         }
-        else if (windowSensor2->getLastState() == HIGH) {
+        else if (pWindowSensor2->getLastState() == HIGH) {
             esp_sleep_enable_ext1_wakeup(BIT(windowSensor2Input), ESP_EXT1_WAKEUP_ALL_LOW);
         }
 
@@ -278,15 +278,15 @@ void startDeviceSleep(int sleepIntervalMS) {
 
     // RTC GPIO pins need to be reconfigured as digital GPIO after sleep
     #if CONFIG_SENSOR_WINDOW_1_ENABLED
-        windowSensor1->deinitRtcGpio();
+        pWindowSensor1->deinitRtcGpio();
 
-        windowSensor1->initGpio(&isrWindowSensor1);
+        pWindowSensor1->initGpio(&isrWindowSensor1);
     #endif /*CONFIG_SENSOR_WINDOW_1_ENABLED*/
 
     #if CONFIG_SENSOR_WINDOW_2_ENABLED
-        windowSensor2->deinitRtcGpio();
+        pWindowSensor2->deinitRtcGpio();
 
-        windowSensor2->initGpio(&isrWindowSensor2);
+        pWindowSensor2->initGpio(&isrWindowSensor2);
     #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
 }
 
@@ -310,14 +310,14 @@ void setup(){
     initWindowSensorSystem();
 
     #if CONFIG_SENSOR_BME_280
-        environmentSensor = new EnvironmentSensor(Sensor::BME280);
+        pEnvironmentSensor = new EnvironmentSensor(Sensor::BME280);
     #endif /*CONFIG_SENSOR_BME_280*/
 
     #if CONFIG_SENSOR_BME_680
-        environmentSensor = new EnvironmentSensor(Sensor::BME680);
+        pEnvironmentSensor = new EnvironmentSensor(Sensor::BME680);
     #endif /*CONFIG_SENSOR_BME_680*/
 
-    environmentSensor->init();
+    pEnvironmentSensor->init();
 }
 
 void loop(){
