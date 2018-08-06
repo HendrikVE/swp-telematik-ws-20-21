@@ -43,7 +43,7 @@ void IRAM_ATTR isrWindowSensor1() {
 
     WindowSensorEvent event;
     event.windowSensor = windowSensor1;
-    event.level = digitalRead(windowSensor1->getInputGPIO());
+    event.level = digitalRead(windowSensor1->getInputGpio());
 
     xQueueSendFromISR(windowSensorEventQueue, &event, NULL);
 }
@@ -54,7 +54,7 @@ void IRAM_ATTR isrWindowSensor2() {
 
     WindowSensorEvent event;
     event.windowSensor = windowSensor2;
-    event.level = digitalRead(windowSensor2->getInputGPIO());
+    event.level = digitalRead(windowSensor2->getInputGpio());
 
     xQueueSendFromISR(windowSensorEventQueue, &event, NULL);
 }
@@ -66,8 +66,8 @@ static void gpio_task_example(void* arg) {
     while (true) {
         if (xQueueReceive(windowSensorEventQueue, &event, portMAX_DELAY)) {
 
-            connectivityManager.checkWiFiConnection();
-            connectivityManager.checkMQTTConnection();
+            connectivityManager.checkWifiConnection();
+            connectivityManager.checkMqttConnection();
 
             windowSensor = event.windowSensor;
             bool current_state = event.level;
@@ -90,18 +90,18 @@ static void gpio_task_example(void* arg) {
             }
 
             char output[128];
-            sprintf(output, "window sensor #%i: ", windowSensor->getID());
+            sprintf(output, "window sensor #%i: ", windowSensor->getId());
             Serial.print(output);
 
             if (current_state == LOW) {
                 Serial.println("open");
                 windowSensor->setLastState(LOW);
-                mqttClient.publish(windowSensor->getMQTTTopic(), "OPEN", false, 2);
+                mqttClient.publish(windowSensor->getMqttTopic(), "OPEN", false, 2);
             }
             else if (current_state == HIGH) {
                 Serial.println("closed");
                 windowSensor->setLastState(HIGH);
-                mqttClient.publish(windowSensor->getMQTTTopic(), "CLOSED", false, 2);
+                mqttClient.publish(windowSensor->getMqttTopic(), "CLOSED", false, 2);
             }
 
             windowSensor->setTimestampLastInterrupt(current_time);
@@ -123,7 +123,7 @@ void configureWindowSensorSystem() {
                 CONFIG_SENSOR_WINDOW_1_INTERRUPT_DEBOUNCE_MS,
                 topic);
 
-        windowSensor1->initGPIO(&isrWindowSensor1);
+        windowSensor1->initGpio(&isrWindowSensor1);
     #endif /*CONFIG_SENSOR_WINDOW_1_ENABLED*/
 
     #if CONFIG_SENSOR_WINDOW_2_ENABLED
@@ -136,7 +136,7 @@ void configureWindowSensorSystem() {
                 CONFIG_SENSOR_WINDOW_2_INTERRUPT_DEBOUNCE_MS,
                 topic);
 
-        windowSensor2->initGPIO(&isrWindowSensor2);
+        windowSensor2->initGpio(&isrWindowSensor2);
     #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
 }
 
@@ -220,12 +220,12 @@ void startDeviceSleep(int sleepIntervalMS) {
 
     #if CONFIG_SENSOR_WINDOW_1_ENABLED
 
-        detachInterrupt(digitalPinToInterrupt(windowSensor1->getInputGPIO()));
+        detachInterrupt(digitalPinToInterrupt(windowSensor1->getInputGpio()));
 
-        gpio_num_t windowSensor1Input = (gpio_num_t) windowSensor1->getInputGPIO();
-        gpio_num_t windowSensor1Output = (gpio_num_t) windowSensor1->getOutputGPIO();
+        gpio_num_t windowSensor1Input = (gpio_num_t) windowSensor1->getInputGpio();
+        gpio_num_t windowSensor1Output = (gpio_num_t) windowSensor1->getOutputGpio();
 
-        windowSensor1->initRTCGPIO();
+        windowSensor1->initRtcGpio();
 
         windowSensor1->setLastState(rtc_gpio_get_level(windowSensor1Input));
 
@@ -242,12 +242,12 @@ void startDeviceSleep(int sleepIntervalMS) {
 
     #if CONFIG_SENSOR_WINDOW_2_ENABLED
 
-        detachInterrupt(digitalPinToInterrupt(windowSensor2->getInputGPIO()));
+        detachInterrupt(digitalPinToInterrupt(windowSensor2->getInputGpio()));
 
-        gpio_num_t windowSensor2Input = (gpio_num_t) windowSensor2->getInputGPIO();
-        gpio_num_t windowSensor2Output = (gpio_num_t) windowSensor2->getOutputGPIO();
+        gpio_num_t windowSensor2Input = (gpio_num_t) windowSensor2->getInputGpio();
+        gpio_num_t windowSensor2Output = (gpio_num_t) windowSensor2->getOutputGpio();
 
-        windowSensor2->initRTCGPIO();
+        windowSensor2->initRtcGpio();
 
         windowSensor2->setLastState(rtc_gpio_get_level(windowSensor2Input));
 
@@ -280,15 +280,15 @@ void startDeviceSleep(int sleepIntervalMS) {
 
     // RTC GPIO pins need to be reconfigured as digital GPIO after sleep
     #if CONFIG_SENSOR_WINDOW_1_ENABLED
-        windowSensor1->deinitRTCGPIO();
+        windowSensor1->deinitRtcGpio();
 
-        windowSensor1->initGPIO(&isrWindowSensor1);
+        windowSensor1->initGpio(&isrWindowSensor1);
     #endif /*CONFIG_SENSOR_WINDOW_1_ENABLED*/
 
     #if CONFIG_SENSOR_WINDOW_2_ENABLED
-        windowSensor2->deinitRTCGPIO();
+        windowSensor2->deinitRtcGpio();
 
-        windowSensor2->initGPIO(&isrWindowSensor2);
+        windowSensor2->initGpio(&isrWindowSensor2);
     #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
 }
 
@@ -296,9 +296,9 @@ void setup(){
 
     Serial.begin(115200);
 
-    connectivityManager.initWiFi();
-    connectivityManager.initMQTT();
-    mqttClient = *connectivityManager.get_mqttClient();
+    connectivityManager.initWifi();
+    connectivityManager.initMqtt();
+    mqttClient = *connectivityManager.getMqttClient();
 
     char strVersion[128];
     sprintf(strVersion, "%s (%i)", APP_VERSION_NAME, APP_VERSION_CODE);
@@ -337,8 +337,8 @@ void loop(){
     mqttClient.loop();
     delay(10); // <- fixes some issues with WiFi stability
 
-    connectivityManager.checkWiFiConnection();
-    connectivityManager.checkMQTTConnection();
+    connectivityManager.checkWifiConnection();
+    connectivityManager.checkMqttConnection();
 
     queuePaused = false;
 

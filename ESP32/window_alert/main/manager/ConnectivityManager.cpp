@@ -5,13 +5,84 @@
 
 class ConnectivityManager {
 
+public:
+
+    ConnectivityManager() {
+        mWifiMutex = xSemaphoreCreateMutex();
+        mMqttMutex = xSemaphoreCreateMutex();
+    }
+
+    void checkWifiConnection() {
+
+        if (xSemaphoreTake(mWifiMutex, (TickType_t) 10 ) == pdTRUE) {
+
+            if (WiFi.status() != WL_CONNECTED) {
+                Serial.println("Connect to WiFi...");
+                WiFi.begin(CONFIG_ESP_WIFI_SSID, CONFIG_ESP_WIFI_PASSWORD);
+            }
+
+            int attempts = 0;
+            while (WiFi.status() != WL_CONNECTED) {
+
+                attempts++;
+                if (attempts >= 15) {
+                    // restart device in case WiFi library wont connect
+                    ESP.restart();
+                }
+
+                Serial.print(".");
+                delay(1000);
+            }
+
+            xSemaphoreGive(mWifiMutex);
+        }
+    }
+
+    void initWifi() {
+
+        WiFi.onEvent(WiFiEvent);
+        checkWifiConnection();
+    }
+
+    void checkMqttConnection() {
+
+        if (xSemaphoreTake(mMqttMutex, (TickType_t) 10 ) == pdTRUE) {
+
+            if (!mMqttClient.connected()) {
+                Serial.println("Connect to MQTT broker...");
+
+                while (!mMqttClient.connect(CONFIG_DEVICE_ID, CONFIG_MQTT_USER, CONFIG_MQTT_PASSWORD)) {
+                    Serial.print(".");
+                    delay(1000);
+                }
+            }
+
+            xSemaphoreGive(mMqttMutex);
+        }
+    }
+
+    void initMqtt() {
+
+        mWifiClientSecure.setCACert((char*) ca_crt_start);
+        mWifiClientSecure.setCertificate((char*) client_crt_start);
+        mWifiClientSecure.setPrivateKey((char*) client_key_start);
+
+        mMqttClient.begin(CONFIG_MQTT_SERVER_IP, CONFIG_MQTT_SERVER_PORT, mWifiClientSecure);
+
+        checkMqttConnection();
+    }
+
+    MQTTClient* getMqttClient() {
+        return &mMqttClient;
+    }
+
 private:
 
-    WiFiClientSecure wiFiClientSecure;
-    MQTTClient mqttClient;
+    WiFiClientSecure mWifiClientSecure;
+    MQTTClient mMqttClient;
 
-    SemaphoreHandle_t wifiMutex = NULL;
-    SemaphoreHandle_t mqttMutex = NULL;
+    SemaphoreHandle_t mWifiMutex = NULL;
+    SemaphoreHandle_t mMqttMutex = NULL;
 
     void static WiFiEvent(WiFiEvent_t event) {
 
@@ -40,77 +111,6 @@ private:
             default:
                 break;
         }
-    }
-
-public:
-
-    ConnectivityManager() {
-        wifiMutex = xSemaphoreCreateMutex();
-        mqttMutex = xSemaphoreCreateMutex();
-    }
-
-    void checkWiFiConnection() {
-
-        if (xSemaphoreTake(wifiMutex, (TickType_t) 10 ) == pdTRUE) {
-
-            if (WiFi.status() != WL_CONNECTED) {
-                Serial.println("Connect to WiFi...");
-                WiFi.begin(CONFIG_ESP_WIFI_SSID, CONFIG_ESP_WIFI_PASSWORD);
-            }
-
-            int attempts = 0;
-            while (WiFi.status() != WL_CONNECTED) {
-
-                attempts++;
-                if (attempts >= 15) {
-                    // restart device in case WiFi library wont connect
-                    ESP.restart();
-                }
-
-                Serial.print(".");
-                delay(1000);
-            }
-
-            xSemaphoreGive(wifiMutex);
-        }
-    }
-
-    void initWiFi() {
-
-        WiFi.onEvent(WiFiEvent);
-        checkWiFiConnection();
-    }
-
-    void checkMQTTConnection() {
-
-        if (xSemaphoreTake(mqttMutex, (TickType_t) 10 ) == pdTRUE) {
-
-            if (!mqttClient.connected()) {
-                Serial.println("Connect to MQTT broker...");
-
-                while (!mqttClient.connect(CONFIG_DEVICE_ID, CONFIG_MQTT_USER, CONFIG_MQTT_PASSWORD)) {
-                    Serial.print(".");
-                    delay(1000);
-                }
-            }
-
-            xSemaphoreGive(mqttMutex);
-        }
-    }
-
-    void initMQTT() {
-
-        wiFiClientSecure.setCACert((char*) ca_crt_start);
-        wiFiClientSecure.setCertificate((char*) client_crt_start);
-        wiFiClientSecure.setPrivateKey((char*) client_key_start);
-
-        mqttClient.begin(CONFIG_MQTT_SERVER_IP, CONFIG_MQTT_SERVER_PORT, wiFiClientSecure);
-
-        checkMQTTConnection();
-    }
-
-    MQTTClient* get_mqttClient() {
-        return &mqttClient;
     }
 
 };

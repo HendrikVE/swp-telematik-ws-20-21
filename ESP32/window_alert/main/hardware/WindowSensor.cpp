@@ -4,46 +4,34 @@
 
 class WindowSensor {
 
-private:
-
-    static int instanceID;
-
-    int id;
-    int gpio_input;
-    int gpio_output;
-    int interrupt_debounce;
-    char mqtt_topic[128];
-    unsigned long timestamp_last_interrupt = 0;
-    char last_state;
-
 public:
 
-    WindowSensor(int gpio_input, int gpio_output, int interrupt_debounce, char* mqtt_topic) {
+    WindowSensor(int gpioInput, int gpioOutput, int interruptDebounce, char* mqttTopic) {
 
-        this->instanceID++;
-        this->id = instanceID;
+        this->msInstanceID++;
+        this->mId = msInstanceID;
 
-        this->gpio_input = gpio_input;
-        this->gpio_output = gpio_output;
-        this->interrupt_debounce = interrupt_debounce;
-        strcpy(this->mqtt_topic, mqtt_topic);
+        this->mGpioInput = gpioInput;
+        this->mGpioOutput = gpioOutput;
+        this->mInterruptDebounce = interruptDebounce;
+        strcpy(this->mMqttTopic, mqttTopic);
     }
 
-    void initGPIO(void (*isr)()) {
+    void initGpio(void (*isr)()) {
 
-        pinMode(this->getOutputGPIO(), OUTPUT);
-        pinMode(this->getInputGPIO(), INPUT_PULLDOWN);
+        pinMode(this->getOutputGpio(), OUTPUT);
+        pinMode(this->getInputGpio(), INPUT_PULLDOWN);
 
-        attachInterrupt(digitalPinToInterrupt(this->getInputGPIO()), isr, CHANGE);
+        attachInterrupt(digitalPinToInterrupt(this->getInputGpio()), isr, CHANGE);
 
         // output always on to detect changes on input
-        digitalWrite(this->getOutputGPIO(), HIGH);
+        digitalWrite(this->getOutputGpio(), HIGH);
     }
 
-    void initRTCGPIO() {
+    void initRtcGpio() {
 
-        gpio_num_t inputGPIO = (gpio_num_t) (this->getInputGPIO());
-        gpio_num_t outputGPIO = (gpio_num_t) (this->getOutputGPIO());
+        gpio_num_t inputGPIO = (gpio_num_t) (this->getInputGpio());
+        gpio_num_t outputGPIO = (gpio_num_t) (this->getOutputGpio());
 
         rtc_gpio_init(inputGPIO);
         rtc_gpio_init(outputGPIO);
@@ -57,57 +45,69 @@ public:
         rtc_gpio_set_level(outputGPIO, HIGH);
     }
 
-    void deinitRTCGPIO() {
+    void deinitRtcGpio() {
 
-        rtc_gpio_deinit((gpio_num_t) (this->getInputGPIO()));
-        rtc_gpio_deinit((gpio_num_t) (this->getOutputGPIO()));
+        rtc_gpio_deinit((gpio_num_t) (this->getInputGpio()));
+        rtc_gpio_deinit((gpio_num_t) (this->getOutputGpio()));
     }
 
 
     /* GETTER */
 
-    int getID() {
-        return this->id;
+    int getId() {
+        return this->mId;
     }
 
-    int getInputGPIO() {
-        return this->gpio_input;
+    int getInputGpio() {
+        return this->mGpioInput;
     }
 
-    int getOutputGPIO() {
-        return this->gpio_output;
+    int getOutputGpio() {
+        return this->mGpioOutput;
     }
 
     int getTimestampLastInterrupt() {
-        return this->timestamp_last_interrupt;
+        return this->mTimestampLastInterrupt;
     }
 
     int getInterruptDebounce() {
-        return this->interrupt_debounce;
+        return this->mInterruptDebounce;
     }
 
     char getLastState() {
-        return this->last_state;
+        return this->mLastState;
     }
 
-    char* getMQTTTopic() {
-        return this->mqtt_topic;
+    char* getMqttTopic() {
+        return this->mMqttTopic;
     }
 
 
     /* SETTER */
 
     void setLastState(char state) {
-        this->last_state = state;
+        this->mLastState = state;
     }
 
     void setTimestampLastInterrupt(int timestamp) {
-        this->timestamp_last_interrupt = timestamp;
+        this->mTimestampLastInterrupt = timestamp;
     }
+
+private:
+
+    static int msInstanceID;
+
+    int mId;
+    int mGpioInput;
+    int mGpioOutput;
+    int mInterruptDebounce;
+    char mMqttTopic[128];
+    unsigned long mTimestampLastInterrupt = 0;
+    char mLastState;
 
 };
 
-int WindowSensor::instanceID = -1;
+int WindowSensor::msInstanceID = -1;
 
 struct WindowSensorEvent {
     WindowSensor* windowSensor;

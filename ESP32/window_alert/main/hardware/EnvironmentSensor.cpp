@@ -13,37 +13,16 @@ enum class Sensor {UNDEFINED, BME280, BME680};
 
 class EnvironmentSensor {
 
-private:
-
-    Sensor sensor = Sensor::UNDEFINED;
-
-    Adafruit_BME280* bme280;
-    Adafruit_BME680* bme680;
-
-    bool prepareMeasurements() {
-
-        if (sensor == Sensor::BME680) {
-            if (!bme680->performReading()) {
-                Serial.println("Failed to perform reading");
-                return false;
-            }
-
-            return true;
-        }
-
-        return true;
-    }
-
 public:
 
     EnvironmentSensor(enum Sensor type) {
-        sensor = type;
+        mSensor = type;
 
         if (type == Sensor::BME280) {
-            bme280 = new Adafruit_BME280();
+            mpBme280 = new Adafruit_BME280();
         }
         else if (type == Sensor::BME680) {
-            bme680 = new Adafruit_BME680();
+            mpBme680 = new Adafruit_BME680();
         }
         else if (type == Sensor::UNDEFINED) {
             throw "Undefined sensor type not allowed!";
@@ -51,23 +30,23 @@ public:
     }
 
     bool supportingGasResistence() {
-        return sensor == Sensor::BME680;
+        return mSensor == Sensor::BME680;
     }
 
     void init() {
 
-        if (sensor == Sensor::BME280) {
+        if (mSensor == Sensor::BME280) {
             Wire.begin(CONFIG_I2C_SDA_GPIO_PIN, CONFIG_I2C_SDC_GPIO_PIN);
 
-            while(!bme280->begin(BME_280_I2C_ADDRESS)) {
+            while(!mpBme280->begin(BME_280_I2C_ADDRESS)) {
                 Serial.println("Could not find BME280 sensor!");
                 delay(1000);
             }
         }
-        else if (sensor == Sensor::BME680) {
+        else if (mSensor == Sensor::BME680) {
             Wire.begin(CONFIG_I2C_SDA_GPIO_PIN, CONFIG_I2C_SDC_GPIO_PIN);
 
-            while(!bme680->begin(BME_680_I2C_ADDRESS)) {
+            while(!mpBme680->begin(BME_680_I2C_ADDRESS)) {
                 Serial.println("Could not find BME680 sensor!");
                 delay(1000);
             }
@@ -78,11 +57,11 @@ public:
 
         prepareMeasurements();
 
-        if (sensor == Sensor::BME280) {
-            return bme280->readTemperature();
+        if (mSensor == Sensor::BME280) {
+            return mpBme280->readTemperature();
         }
-        else if (sensor == Sensor::BME680) {
-            return bme680->temperature;
+        else if (mSensor == Sensor::BME680) {
+            return mpBme680->temperature;
         }
 
         throw "Sensor type is UNDEFINED!";
@@ -92,11 +71,11 @@ public:
 
         prepareMeasurements();
 
-        if (sensor == Sensor::BME280) {
-            return bme280->readHumidity();
+        if (mSensor == Sensor::BME280) {
+            return mpBme280->readHumidity();
         }
-        else if (sensor == Sensor::BME680) {
-            return bme680->humidity;
+        else if (mSensor == Sensor::BME680) {
+            return mpBme680->humidity;
         }
 
         throw "Sensor type is UNDEFINED!";
@@ -106,11 +85,11 @@ public:
 
         prepareMeasurements();
 
-        if (sensor == Sensor::BME280) {
-            return bme280->readPressure();
+        if (mSensor == Sensor::BME280) {
+            return mpBme280->readPressure();
         }
-        else if (sensor == Sensor::BME680) {
-            return bme680->pressure;
+        else if (mSensor == Sensor::BME680) {
+            return mpBme680->pressure;
         }
 
         throw "Sensor type is UNDEFINED!";
@@ -120,14 +99,35 @@ public:
 
         prepareMeasurements();
 
-        if (sensor == Sensor::BME280) {
+        if (mSensor == Sensor::BME280) {
             throw "BME280 does not support gas measurements!";
         }
-        else if (sensor == Sensor::BME680) {
-            return bme680->gas_resistance;
+        else if (mSensor == Sensor::BME680) {
+            return mpBme680->gas_resistance;
         }
 
         throw "Sensor type is UNDEFINED!";
+    }
+
+private:
+
+    Sensor mSensor = Sensor::UNDEFINED;
+
+    Adafruit_BME280* mpBme280;
+    Adafruit_BME680* mpBme680;
+
+    bool prepareMeasurements() {
+
+        if (mSensor == Sensor::BME680) {
+            if (!mpBme680->performReading()) {
+                Serial.println("Failed to perform reading");
+                return false;
+            }
+
+            return true;
+        }
+
+        return true;
     }
 
 };
