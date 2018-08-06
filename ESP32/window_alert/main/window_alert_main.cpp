@@ -193,24 +193,22 @@ void publishEnvironmentData() {
     mqttClient.publish(topicHumidity, strHumidity, false, 2);
     mqttClient.publish(topicPressure, strPressure, false, 2);
 
-    #if CONFIG_SENSOR_MQTT_TOPIC_GAS
-        if (environmentSensor->supportingGasResistence()) {
+    if (environmentSensor->supportingGasResistence()) {
 
-            float gas_resistance(NAN);
-            gas_resistance = environmentSensor->readGasResistence();
+        float gas_resistance(NAN);
+        gas_resistance = environmentSensor->readGasResistence();
 
-            char strGasResistence[32];
-            sprintf(strGasResistence, "%d", (int) round(gas_resistance));
+        char strGasResistence[32];
+        sprintf(strGasResistence, "%d", (int) round(gas_resistance));
 
-            Serial.print("gas resistence: ");
-            Serial.println(strGasResistence);
+        Serial.print("gas resistence: ");
+        Serial.println(strGasResistence);
 
-            char topicGas[128];
-            buildTopic(topicGas, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_GAS);
+        char topicGas[128];
+        buildTopic(topicGas, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_GAS);
 
-            mqttClient.publish(topicGas, strGasResistence, false, 2);
-        }
-    #endif /*CONFIG_SENSOR_BME_680*/
+        mqttClient.publish(topicGas, strGasResistence, false, 2);
+    }
 }
 
 void startDeviceSleep(int sleepIntervalMS) {
