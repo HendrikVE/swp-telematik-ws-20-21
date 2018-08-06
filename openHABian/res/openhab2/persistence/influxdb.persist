@@ -5,6 +5,6 @@ Strategies {
 }
 
 Items {
-    livingroomTemperature, livingroomHumidity, livingroomPressure, livingroomGas : strategy = everyUpdate
+    ESP32_1_temperature, ESP32_1_humidity, ESP32_1_pressure, ESP32_1_gas : strategy = everyUpdate
     gWindowSensor : strategy = everyChange
 }

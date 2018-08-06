@@ -9,15 +9,20 @@ sitemap window_alert label="Security system" {
         Text label="Devices" icon="receiver" {
 
             Frame label="ESP32-1" {
-                Text item=AppVersionESP32_1
-                Group item=gWindowSensor
-                Text item=livingroomTemperature label="Temperature"
-                Text item=livingroomHumidity    label="Humidity"
-                Text item=livingroomPressure    label="Pressure"
+                Text item=ESP32_1_AppVersion
+                Group item=gESP32_1_WindowSensor
+                Text item=ESP32_1_temperature label="Temperature"
+                Text item=ESP32_1_humidity    label="Humidity"
+                Text item=ESP32_1_pressure    label="Pressure"
             }
 
             Frame label="ESP32-2" {
-                Text item=AppVersionESP32_2
+                Text item=ESP32_2_AppVersion
+                Group item=gESP32_2_WindowSensor
+                Text item=ESP32_2_temperature label="Temperature"
+                Text item=ESP32_2_humidity    label="Humidity"
+                Text item=ESP32_2_pressure    label="Pressure"
+                Text item=ESP32_2_gas         label="Gas"
             }
         }
     }

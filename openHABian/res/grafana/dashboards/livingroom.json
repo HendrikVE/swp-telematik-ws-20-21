@@ -69,7 +69,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "livingroomTemperature",
+          "measurement": "ESP32_1_temperature",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "A",
@@ -190,7 +190,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "livingroomPressure",
+          "measurement": "ESP32_1_pressure",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "A",
@@ -233,7 +233,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "livingroomHumidity",
+          "measurement": "ESP32_1_humidity",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "B",
