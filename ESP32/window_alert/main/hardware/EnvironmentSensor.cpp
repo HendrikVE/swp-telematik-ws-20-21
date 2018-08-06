@@ -1,5 +1,11 @@
 #include <stdbool.h>
 
+#include "Wire.h"
+
+#include "Adafruit_Sensor.h"
+#include "Adafruit_BME280.h"
+#include "Adafruit_BME680.h"
+
 #define BME_280_I2C_ADDRESS 0x76
 #define BME_680_I2C_ADDRESS 0x77
 
@@ -8,6 +14,7 @@ enum class Sensor {UNDEFINED, BME280, BME680};
 class EnvironmentSensor {
 
 private:
+
     Sensor sensor = Sensor::UNDEFINED;
 
     Adafruit_BME280* bme280;
