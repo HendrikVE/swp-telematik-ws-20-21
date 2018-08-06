@@ -22,8 +22,7 @@
 #include "storage/FlashStorage.h"
 
 EnvironmentSensor* pEnvironmentSensor;
-WindowSensor* pWindowSensor1;
-WindowSensor* pWindowSensor2;
+WindowSensor *pWindowSensor1, *pWindowSensor2;
 
 ConnectivityManager connectivityManager;
 UpdateManager updateManager;
@@ -195,11 +194,11 @@ void publishEnvironmentData() {
 
     if (pEnvironmentSensor->supportingGasResistence()) {
 
-        float gas_resistance(NAN);
-        gas_resistance = pEnvironmentSensor->readGasResistence();
+        float gasResistance(NAN);
+        gasResistance = pEnvironmentSensor->readGasResistence();
 
         char strGasResistence[32];
-        sprintf(strGasResistence, "%d", (int) round(gas_resistance));
+        sprintf(strGasResistence, "%d", (int) round(gasResistance));
 
         Serial.print("gas resistence: ");
         Serial.println(strGasResistence);
