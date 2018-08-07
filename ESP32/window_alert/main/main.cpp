@@ -69,21 +69,21 @@ static void gpioTask(void* arg) {
             connectivityManager.checkMqttConnection();
 
             windowSensor = event.windowSensor;
-            bool current_state = event.level;
+            bool currentState = event.level;
 
             unsigned long current_time = (unsigned long) esp_timer_get_time() / 1000;
 
-            unsigned long time_diff = 0;
+            unsigned long timeDiff = 0;
 
             if (current_time < windowSensor->getTimestampLastInterrupt()) {
                 // catch overflow
-                time_diff = windowSensor->getInterruptDebounce() + 1;
+                timeDiff = windowSensor->getInterruptDebounce() + 1;
             }
             else {
-                time_diff = current_time - windowSensor->getTimestampLastInterrupt();
+                timeDiff = current_time - windowSensor->getTimestampLastInterrupt();
             }
 
-            if (time_diff <= windowSensor->getInterruptDebounce()) {
+            if (timeDiff <= windowSensor->getInterruptDebounce()) {
                 // not within debounce time -> ignore interrupt
                 continue;
             }
@@ -92,12 +92,12 @@ static void gpioTask(void* arg) {
             sprintf(output, "window sensor #%i: ", windowSensor->getId());
             Serial.print(output);
 
-            if (current_state == LOW) {
+            if (currentState == LOW) {
                 Serial.println("open");
                 windowSensor->setLastState(LOW);
                 mqttClient.publish(windowSensor->getMqttTopic(), "OPEN", false, 2);
             }
-            else if (current_state == HIGH) {
+            else if (currentState == HIGH) {
                 Serial.println("closed");
                 windowSensor->setLastState(HIGH);
                 mqttClient.publish(windowSensor->getMqttTopic(), "CLOSED", false, 2);
