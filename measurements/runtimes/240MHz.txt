@@ -1,0 +1,84 @@
+running on 240 MHz (single core)
+
+Following format:
+time to establish wifi connection
+time to establish mqtt connection
+time to publish window sensor 1 data
+time to publish window sensor 2 data
+time used before activate sleep mode
+
+#######AVERAGE############
+4934
+2087
+7220
+7240
+8965
+##########################
+
+#######MAXIMUM############
+6154
+2419
+8309
+8327
+9890
+##########################
+
+6154
+1834
+task: 8259
+task: 8278
+9826
+
+4114
+1938
+task: 6355
+task: 6369
+8016
+
+4154
+2419
+task: 6668
+task: 6685
+8360
+
+4114
+1915
+task: 6584
+task: 6610
+9068
+
+6154
+1966
+task: 8233
+task: 8253
+9793
+
+5115
+2404
+task: 7852
+task: 7881
+9846
+
+4154
+2260
+task: 6468
+task: 6485
+8173
+
+6114
+2035
+task: 8309
+task: 8327
+9890
+
+4154
+2091
+task: 6298
+task: 6313
+7829
+
+5114
+2012
+task: 7177
+task: 7201
+8846
