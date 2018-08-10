@@ -3,6 +3,8 @@
 
 import argparse
 import sys
+import subprocess
+from subprocess import PIPE, Popen, STDOUT
 
 
 def main(argv):
@@ -41,10 +43,14 @@ def main(argv):
     for i in range(count):
 
         if flash:
-            run_flash()
+            room = raw_input('room: ')
+            id = raw_input('deviceID: ')
+            run_flash(room, id)
 
         if build:
-            run_build()
+            room = raw_input('room: ')
+            id = raw_input('deviceID: ')
+            run_build(room, id)
 
         if upload:
             run_upload()
@@ -77,16 +83,28 @@ def init_argparse():
     return parser
 
 
-def run_flash():
-    print('flash')
+def run_flash(device_room, device_id):
+
+    process = subprocess.Popen(['./flash.sh', device_room, device_id], stdout=PIPE, stderr=STDOUT)
+
+    for line in iter(process.stdout.readline, ''):
+        print(line.strip())
 
 
-def run_build():
-    print('build')
+def run_build(device_room, device_id):
+
+    process = subprocess.Popen(['./build.sh', device_room, device_id], stdout=PIPE, stderr=STDOUT)
+
+    for line in iter(process.stdout.readline, ''):
+        print(line.strip())
 
 
 def run_upload():
-    print('upload')
+
+    process = subprocess.Popen(['./upload.sh'], stdout=PIPE, stderr=STDOUT)
+
+    for line in iter(process.stdout.readline, ''):
+        print(line.strip())
 
 
 if __name__ == '__main__':
