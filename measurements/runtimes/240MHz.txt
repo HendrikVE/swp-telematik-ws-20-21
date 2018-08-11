@@ -3,8 +3,8 @@ running on 240 MHz (single core)
 Following format:
 time to establish wifi connection
 time to establish mqtt connection
-time to publish window sensor 1 data
-time to publish window sensor 2 data
+time used until published window sensor 1 data
+time used until published window sensor 2 data
 time used before activate sleep mode
 
 #######AVERAGE############
