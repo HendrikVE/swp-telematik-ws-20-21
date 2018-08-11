@@ -375,27 +375,6 @@ def setup_grafana_remote_access():
     sudo('service grafana-server restart')
 
 
-"""
-def _put_as_user(src, dest, user, group=None):
-
-    if group is None:
-        group = user
-
-    put(src, dest, use_sudo=True)
-
-    if os.path.isfile(src) and dest.endswith(os.sep):
-        path = os.path.join(dest, os.path.basename(src))
-
-    elif os.path.isfile(src) and not dest.endswith(os.sep):
-        path = dest
-
-    else:
-        path = os.path.join(dest, os.path.basename(src))
-
-    sudo('chown -R {user}:{group} {path}'.format(user=user, group=group, path=path))
-"""
-
-
 def _get_homedir_openhabian():
     return os.path.join(os.sep, 'home', 'openhabian')
 
