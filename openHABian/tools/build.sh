@@ -10,10 +10,10 @@ fi
 deviceRoom='"'$1'"'
 deviceID='"'$2'"'
 
-sed -i "/CONFIG_DEVICE_ROOM=/c\CONFIG_DEVICE_ROOM=$deviceRoom" ../sdkconfig
-sed -i "/CONFIG_DEVICE_ID=/c\CONFIG_DEVICE_ID=$deviceID" ../sdkconfig
+sed -i "/CONFIG_DEVICE_ROOM=/c\CONFIG_DEVICE_ROOM=$deviceRoom" ../../ESP32/window_alert/sdkconfig
+sed -i "/CONFIG_DEVICE_ID=/c\CONFIG_DEVICE_ID=$deviceID" ../../ESP32/window_alert/sdkconfig
 
 dir=$(pwd)
-cd ..
+cd ../../ESP32/window_alert/
 make app
 cd $dir
