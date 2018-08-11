@@ -8,6 +8,8 @@ execute this script with
 
 import argparse
 import sys
+import os
+
 from subprocess import PIPE, Popen, STDOUT
 
 from fabric.api import env, sudo, put
@@ -22,6 +24,8 @@ arg_build = None
 arg_upload = None
 arg_all = None
 arg_ota = None
+
+script_dir = os.path.dirname(os.path.realpath(__file__))
 
 
 def main(argv):
@@ -42,7 +46,7 @@ def main(argv):
         count = int(input)
 
     except ValueError:
-        sys.exit("Invalid number")
+        sys.exit('Invalid number')
 
     for i in range(count):
 
@@ -117,7 +121,7 @@ def init_argparse():
 
 def run_flash(device_room, device_id):
 
-    process = Popen(['./flash.sh', device_room, device_id], stdout=PIPE, stderr=STDOUT)
+    process = Popen(['bash', script_dir + '/flash.sh', device_room, device_id], stdout=PIPE, stderr=STDOUT)
 
     for line in iter(process.stdout.readline, ''):
         print(line.strip())
@@ -125,7 +129,7 @@ def run_flash(device_room, device_id):
 
 def run_build(device_room, device_id):
 
-    process = Popen(['./build.sh', device_room, device_id], stdout=PIPE, stderr=STDOUT)
+    process = Popen(['bash', script_dir + '/build.sh', device_room, device_id], stdout=PIPE, stderr=STDOUT)
 
     for line in iter(process.stdout.readline, ''):
         print(line.strip())
@@ -133,14 +137,30 @@ def run_build(device_room, device_id):
 
 def run_upload(device_id, version_code):
 
-    src = '../../ESP32/window_alert/build/window_alert.bin'
+    src = os.path.normpath(script_dir + '/../../ESP32/window_alert/build/window_alert.bin')
     dest = '/var/www/html/{DEVICE_ID}/{VERSION_CODE}'.format(DEVICE_ID=device_id, VERSION_CODE=version_code)
 
     put(src, dest, use_sudo=True)
 
 
 def get_version_code():
-    return 1
+
+    path = os.path.normpath(script_dir + '/../../ESP32/window_alert/main/MANIFEST.h')
+    process = Popen(['grep "APP_VERSION_CODE" ' + path], stdout=PIPE, stderr=STDOUT, shell=True)
+
+    output = process.communicate()[0]
+
+    index_equal = output.rfind('=')
+    index_semicolon = output.rfind(';')
+    output_substring = output[index_equal+1:index_semicolon].strip()
+
+    try:
+        version_code = int(output_substring)
+
+    except ValueError:
+        sys.exit('Can not cast version code "%s" to int' % output_substring)
+
+    return version_code
 
 
 if __name__ == '__main__':

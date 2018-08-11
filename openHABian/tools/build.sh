@@ -7,13 +7,15 @@ if [ $# -ne 2 ]; then
     exit 1
 fi
 
+script_dir=$(cd `dirname $0` && pwd)
+
 deviceRoom='"'$1'"'
 deviceID='"'$2'"'
 
-sed -i "/CONFIG_DEVICE_ROOM=/c\CONFIG_DEVICE_ROOM=$deviceRoom" ../../ESP32/window_alert/sdkconfig
-sed -i "/CONFIG_DEVICE_ID=/c\CONFIG_DEVICE_ID=$deviceID" ../../ESP32/window_alert/sdkconfig
+sed -i "/CONFIG_DEVICE_ROOM=/c\CONFIG_DEVICE_ROOM=$deviceRoom" $script_dir/../../ESP32/window_alert/sdkconfig
+sed -i "/CONFIG_DEVICE_ID=/c\CONFIG_DEVICE_ID=$deviceID" $script_dir/../../ESP32/window_alert/sdkconfig
 
 dir=$(pwd)
-cd ../../ESP32/window_alert/
+cd $script_dir/../../ESP32/window_alert/
 make app
 cd $dir
