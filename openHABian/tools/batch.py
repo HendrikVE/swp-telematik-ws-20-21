@@ -1,10 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
+"""
+execute this script with
+    python -m tools.batch
+"""
+
 import argparse
 import sys
-import subprocess
 from subprocess import PIPE, Popen, STDOUT
+
+from fabric.api import env, sudo, put
+
+from config import config as config
+
+env.host_string = config.SERVER_IP
+env.user = config.SSH_USERNAME
 
 
 def main(argv):
@@ -85,7 +96,7 @@ def init_argparse():
 
 def run_flash(device_room, device_id):
 
-    process = subprocess.Popen(['./flash.sh', device_room, device_id], stdout=PIPE, stderr=STDOUT)
+    process = Popen(['./flash.sh', device_room, device_id], stdout=PIPE, stderr=STDOUT)
 
     for line in iter(process.stdout.readline, ''):
         print(line.strip())
@@ -93,7 +104,7 @@ def run_flash(device_room, device_id):
 
 def run_build(device_room, device_id):
 
-    process = subprocess.Popen(['./build.sh', device_room, device_id], stdout=PIPE, stderr=STDOUT)
+    process = Popen(['./build.sh', device_room, device_id], stdout=PIPE, stderr=STDOUT)
 
     for line in iter(process.stdout.readline, ''):
         print(line.strip())
@@ -101,10 +112,7 @@ def run_build(device_room, device_id):
 
 def run_upload():
 
-    process = subprocess.Popen(['./upload.sh'], stdout=PIPE, stderr=STDOUT)
-
-    for line in iter(process.stdout.readline, ''):
-        print(line.strip())
+    put('file', 'remote file')
 
 
 if __name__ == '__main__':
