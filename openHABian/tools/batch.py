@@ -17,6 +17,12 @@ from config import config as config
 env.host_string = config.SERVER_IP
 env.user = config.SSH_USERNAME
 
+arg_flash = None
+arg_build = None
+arg_upload = None
+arg_all = None
+arg_ota = None
+
 
 def main(argv):
 
@@ -29,20 +35,7 @@ def main(argv):
         print(str(e))
         return
 
-    flash = args.flash
-    build = args.build
-    upload = args.upload
-    all = args.all
-    ota = args.ota
-
-    if all:
-        flash = True
-        build = True
-        upload = True
-
-    if ota:
-        build = True
-        upload = True
+    evaluate_args(args)
 
     input = raw_input('number of batch jobs: ')
     try:
@@ -53,18 +46,41 @@ def main(argv):
 
     for i in range(count):
 
-        if flash:
+        if arg_flash:
             room = raw_input('room: ')
             id = raw_input('deviceID: ')
             run_flash(room, id)
 
-        if build:
+        if arg_build:
             room = raw_input('room: ')
             id = raw_input('deviceID: ')
             run_build(room, id)
 
-        if upload:
+        if arg_upload:
             run_upload()
+
+
+def evaluate_args(args):
+
+    global arg_flash, arg_build, arg_upload, arg_all, arg_ota
+
+    arg_flash = args.flash
+    arg_build = args.build
+    arg_upload = args.upload
+    arg_all = args.all
+    arg_ota = args.ota
+
+    if arg_all:
+        arg_flash = True
+        arg_build = True
+        arg_upload = True
+
+    if arg_ota:
+        arg_build = True
+        arg_upload = True
+
+    if arg_upload:
+        arg_build = True
 
 
 def init_argparse():
