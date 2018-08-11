@@ -46,18 +46,23 @@ def main(argv):
 
     for i in range(count):
 
-        if arg_flash:
+        room = None
+        device_id = None
+
+        if arg_flash or arg_build:
             room = raw_input('room: ')
-            id = raw_input('deviceID: ')
-            run_flash(room, id)
+
+        if arg_flash or arg_build or arg_upload:
+            device_id = raw_input('deviceID: ')
+
+        if arg_flash:
+            run_flash(room, device_id)
 
         if arg_build:
-            room = raw_input('room: ')
-            id = raw_input('deviceID: ')
-            run_build(room, id)
+            run_build(room, device_id)
 
         if arg_upload:
-            run_upload()
+            run_upload(device_id, get_version_code())
 
 
 def evaluate_args(args):
@@ -126,9 +131,16 @@ def run_build(device_room, device_id):
         print(line.strip())
 
 
-def run_upload():
+def run_upload(device_id, version_code):
 
-    put('file', 'remote file')
+    src = '../../ESP32/window_alert/build/window_alert.bin'
+    dest = '/var/www/html/{DEVICE_ID}/{VERSION_CODE}'.format(DEVICE_ID=device_id, VERSION_CODE=version_code)
+
+    put(src, dest, use_sudo=True)
+
+
+def get_version_code():
+    return 1
 
 
 if __name__ == '__main__':
