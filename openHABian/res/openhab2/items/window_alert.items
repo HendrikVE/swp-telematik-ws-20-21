@@ -1,6 +1,6 @@
 // security items
 Switch SecuritySystem "Security System"
-String wifi_quality "WiFi quality [%s]" <network> {mqtt="[<broker>:environment/wifi/quality:state:default]"}
+String wifi_quality "WiFi quality [%s]" <network> {mqtt="<[<broker>:environment/wifi/quality:state:default]"}
 
 Group:Contact:OR(OPEN,CLOSED) gWindowSensor "Window sensors" <contact>
 
