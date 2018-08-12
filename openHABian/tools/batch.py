@@ -140,7 +140,7 @@ def run_upload(device_id, version_code):
     src = os.path.normpath(script_dir + '/../../ESP32/window_alert/build/window_alert.bin')
     dest = '/var/www/html/{DEVICE_ID}/{VERSION_CODE}'.format(DEVICE_ID=device_id, VERSION_CODE=version_code)
 
-    sudo("mkdir -p %s" % dest, user="www-data")
+    sudo('mkdir -p %s' % dest)
 
     put(src, dest, use_sudo=True)
 
