@@ -192,22 +192,26 @@ void publishEnvironmentData() {
     mqttClient.publish(topicHumidity, strHumidity, false, 2);
     mqttClient.publish(topicPressure, strPressure, false, 2);
 
-    if (pEnvironmentSensor->supportingGasResistence()) {
+    #if CONFIG_SENSOR_MQTT_TOPIC_GAS
 
-        float gasResistance(NAN);
-        gasResistance = pEnvironmentSensor->readGasResistence();
+        if (pEnvironmentSensor->supportingGasResistence()) {
 
-        char strGasResistence[32];
-        sprintf(strGasResistence, "%d", (int) round(gasResistance));
+            float gasResistance(NAN);
+            gasResistance = pEnvironmentSensor->readGasResistence();
 
-        Serial.print("gas resistence: ");
-        Serial.println(strGasResistence);
+            char strGasResistence[32];
+            sprintf(strGasResistence, "%d", (int) round(gasResistance));
 
-        char topicGas[128];
-        buildTopic(topicGas, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_GAS);
+            Serial.print("gas resistence: ");
+            Serial.println(strGasResistence);
 
-        mqttClient.publish(topicGas, strGasResistence, false, 2);
-    }
+            char topicGas[128];
+            buildTopic(topicGas, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_GAS);
+
+            mqttClient.publish(topicGas, strGasResistence, false, 2);
+        }
+
+    #endif /*CONFIG_SENSOR_MQTT_TOPIC_GAS*/
 }
 
 void startDeviceSleep(int sleepIntervalMS) {
@@ -289,7 +293,7 @@ void startDeviceSleep(int sleepIntervalMS) {
     #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
 }
 
-void setup(){
+void setup() {
 
     Serial.begin(115200);
 
@@ -319,7 +323,7 @@ void setup(){
     pEnvironmentSensor->init();
 }
 
-void loop(){
+void loop() {
 
     Serial.println("loop");
 
