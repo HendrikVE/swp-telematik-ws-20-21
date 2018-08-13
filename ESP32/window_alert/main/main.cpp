@@ -327,6 +327,8 @@ void loop() {
 
     Serial.println("loop");
 
+    queuePaused = false;
+
     #if CONFIG_SENSOR_WINDOW_1_ENABLED
         isrWindowSensor1();
     #endif /*CONFIG_SENSOR_WINDOW_1_ENABLED*/
@@ -340,8 +342,6 @@ void loop() {
 
     connectivityManager.checkWifiConnection();
     connectivityManager.checkMqttConnection();
-
-    queuePaused = false;
 
     publishEnvironmentData();
 
