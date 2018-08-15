@@ -29,7 +29,7 @@ public:
         }
     }
 
-    bool supportingGasResistence() {
+    bool supportingGasResistance() {
         return mSensor == Sensor::BME680;
     }
 
@@ -95,7 +95,7 @@ public:
         throw "Sensor type is UNDEFINED!";
     }
 
-    float readGasResistence() {
+    float readGasResistance() {
 
         prepareMeasurements();
 

@@ -194,10 +194,10 @@ void publishEnvironmentData() {
 
     #if CONFIG_SENSOR_MQTT_TOPIC_GAS
 
-        if (pEnvironmentSensor->supportingGasResistence()) {
+        if (pEnvironmentSensor->supportingGasResistance()) {
 
             float gasResistance(NAN);
-            gasResistance = pEnvironmentSensor->readGasResistence();
+            gasResistance = pEnvironmentSensor->readGasResistance();
 
             char strGasResistence[32];
             sprintf(strGasResistence, "%d", (int) round(gasResistance));
