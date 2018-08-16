@@ -6,7 +6,7 @@
 #include <string.h>
 #include <math.h>
 
-#include "bmx280_params.h"
+#include "saul_reg.h"
 #include "bmx280.h"
 #include "xtimer.h"
 
@@ -25,50 +25,33 @@ void build_topic(char *output, const char *room, const char *boardID, const char
 
 void publish_environment_data(void) {
 
-    int16_t temperature;
-    uint16_t humidity;
-    uint32_t pressure;
+    phydat_t temperature;
+    phydat_t humidity;
+    phydat_t pressure;
 
-    temperature = bmx280_read_temperature(&mBme280);
-    humidity = bme280_read_humidity(&mBme280);
-    pressure = bmx280_read_pressure(&mBme280);
+    saul_reg_t* devTemp = saul_reg_find_type(SAUL_SENSE_TEMP);
+    saul_reg_t* devHum = saul_reg_find_type(SAUL_SENSE_HUM);
+    saul_reg_t* devPres = saul_reg_find_type(SAUL_SENSE_PRESS);
+
+    saul_reg_read(devTemp, &temperature);
+    saul_reg_read(devHum, &humidity);
+    saul_reg_read(devPres, &pressure);
+
 
     printf("temperature: ");
-    printf("%.1f\n", temperature / 100.0);
+    printf("%.1f\n", round(temperature.val[0] * pow(10, temperature.scale) * 10.0) / 10.0);
 
     printf("humidity: ");
-    printf("%d\n", (int) humidity);
+    printf("%d\n", (int) round(humidity.val[0] * pow(10, humidity.scale)));
 
     printf("pressure: ");
-    printf("%d\n", (int) pressure);
+    printf("%d\n", (int) round(pressure.val[0] * pow(10, pressure.scale)));
 }
 
 bool setup(void) {
 
     printf("device is running version: ");
     printf("%s (%i)\n", APP_VERSION_NAME, APP_VERSION_CODE);
-
-    bmx280_params_t mBme280_params = {
-        .i2c_dev = I2C_DEV(0),
-        .i2c_addr = 0x76,
-        .t_sb = BMX280_SB_0_5,
-        .filter = BMX280_FILTER_OFF,
-        .run_mode = BMX280_MODE_FORCED,
-        .temp_oversample = BMX280_OSRS_X16,
-        .press_oversample = BMX280_OSRS_X16,
-        .humid_oversample = BMX280_OSRS_X16,
-    };
-
-    int result = bmx280_init(&mBme280, &mBme280_params);
-    if (result == -1) {
-        puts("[Error] The given i2c is not enabled");
-        return false;
-    }
-
-    if (result == -2) {
-        printf("[Error] The sensor did not answer correctly at address 0x%02X\n", bmx280_params[0].i2c_addr);
-        return false;
-    }
 
     return true;
 }
