@@ -7,7 +7,6 @@
 #include <math.h>
 
 #include "saul_reg.h"
-#include "bmx280.h"
 #include "xtimer.h"
 
 #define CONFIG_DEVICE_ROOM "livingroom"
@@ -15,8 +14,6 @@
 
 #define CONFIG_ESP_WIFI_SSID "SSID"
 #define CONFIG_ESP_WIFI_PASSWORD "PASSWORD"
-
-bmx280_t mBme280;
 
 void build_topic(char *output, const char *room, const char *boardID, const char *measurement) {
 
@@ -36,7 +33,6 @@ void publish_environment_data(void) {
     saul_reg_read(devTemp, &temperature);
     saul_reg_read(devHum, &humidity);
     saul_reg_read(devPres, &pressure);
-
 
     printf("temperature: ");
     printf("%.1f\n", round(temperature.val[0] * pow(10, temperature.scale) * 10.0) / 10.0);
