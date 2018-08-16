@@ -214,7 +214,7 @@ void publishEnvironmentData() {
     #endif /*CONFIG_SENSOR_MQTT_TOPIC_GAS*/
 }
 
-void startDeviceSleep(int sleepIntervalMS) {
+void startDeviceSleep(uint64_t sleepIntervalMS) {
 
     WiFi.disconnect();
     WiFi.mode(WIFI_OFF);
@@ -263,7 +263,7 @@ void startDeviceSleep(int sleepIntervalMS) {
         rtc_gpio_hold_en(windowSensor2Output);
     #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
 
-    esp_sleep_enable_timer_wakeup(sleepIntervalMS * 1000L);
+    esp_sleep_enable_timer_wakeup(sleepIntervalMS * 1000ULL);
 
     esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
     esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_SLOW_MEM, ESP_PD_OPTION_OFF);
