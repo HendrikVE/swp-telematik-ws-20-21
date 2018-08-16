@@ -9,12 +9,6 @@
 #include "saul_reg.h"
 #include "xtimer.h"
 
-#define CONFIG_DEVICE_ROOM "livingroom"
-#define CONFIG_DEVICE_ID "esp32-riot"
-
-#define CONFIG_ESP_WIFI_SSID "SSID"
-#define CONFIG_ESP_WIFI_PASSWORD "PASSWORD"
-
 void build_topic(char *output, const char *room, const char *boardID, const char *measurement) {
 
     sprintf(output, "room/%s/%s/%s", room, boardID, measurement);

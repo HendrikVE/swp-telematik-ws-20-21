@@ -21,6 +21,9 @@ CFLAGS += -DBMX280_PARAM_I2C_ADDR=0x76
 CFLAGS += -DCONFIG_WIFI_STA_SSID="SSID"
 CFLAGS += -DCONFIG_WIFI_STA_PASSWORD="PASSWORD"
 
+CFLAGS += -DCONFIG_DEVICE_ROOM="livingroom"
+CFLAGS += -DCONFIG_DEVICE_ID="esp32-riot"
+
 # Change this to 0 show compiler invocation lines by default:
 QUIET ?= 1
 
