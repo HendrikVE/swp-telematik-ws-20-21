@@ -8,6 +8,13 @@ struct window_sensor {
 
     gpio_cb_t isr;
     int interrupt_debounce;
+    unsigned long timestamp_last_interrupt;
 
+    char last_state;
     char* mqtt_topic;
+};
+
+struct window_sensor_event {
+    struct window_sensor* window_sensor;
+    bool level;
 };
