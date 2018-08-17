@@ -66,6 +66,7 @@ static void* window_sensor_task(void* arg) {
     struct window_sensor_event event;
 
     while (true) {
+
         msg_receive(&message);
         event = *((struct window_sensor_event*) message.content.ptr);
         ws = event.window_sensor;
@@ -214,7 +215,7 @@ int main(void) {
 
     while (true) {
         publish_environment_data();
-        xtimer_sleep(60);
+        xtimer_usleep(CONFIG_SENSOR_POLL_INTERVAL_MS * 1000);
     }
 
     return 0;
