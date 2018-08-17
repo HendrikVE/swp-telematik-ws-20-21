@@ -9,13 +9,22 @@
 #include "saul_reg.h"
 #include "xtimer.h"
 #include "periph/gpio.h"
+#include "msg.h"
+#include "thread.h"
 
 #include "window_sensor.h"
 
 #define LOW 0
 #define HIGH 1
 
+#define RCV_QUEUE_SIZE  (8)
+
 struct window_sensor window_sensor_1, window_sensor_2;
+
+static kernel_pid_t rcv_pid;
+static char rcv_stack[THREAD_STACKSIZE_DEFAULT + THREAD_EXTRA_STACKSIZE_PRINTF];
+static msg_t rcv_queue[RCV_QUEUE_SIZE];
+
 
 void build_topic(char *output, const char *room, const char *boardID, const char *measurement) {
 
@@ -46,14 +55,38 @@ void publish_environment_data(void) {
     printf("%d\n", (int) round(pressure.val[0] * pow(10, pressure.scale)));
 }
 
+static void* rcv(void* arg) {
+
+    msg_t message;
+    (void) arg;
+
+    msg_init_queue(rcv_queue, RCV_QUEUE_SIZE);
+
+    while (true) {
+        msg_receive(&message);
+        struct window_sensor ws = *((struct window_sensor*) message.content.ptr);
+        printf("Received %d\n", ws.gpio_output);
+    }
+
+    return NULL;
+}
+
 void isr_window_sensor_1(void* arg) {
 
-    printf("window sensor #1\n");
+    msg_t message;
+    message.content.ptr = &window_sensor_1;
+    if (msg_try_send(&message, rcv_pid) == 0) {
+        printf("Receiver queue full.\n");
+    }
 }
 
 void isr_window_sensor_2(void* arg) {
 
-    printf("window sensor #2\n");
+    msg_t message;
+    message.content.ptr = &window_sensor_2;
+    if (msg_try_send(&message, rcv_pid) == 0) {
+        printf("Receiver queue full.\n");
+    }
 }
 
 void init_window_sensor(struct window_sensor ws) {
@@ -102,12 +135,20 @@ void configureWindowSensorSystem(void) {
     #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
 }
 
+void initWindowSensorSystem(void) {
+
+    printf("init task queue\n");
+    rcv_pid = thread_create(rcv_stack, sizeof(rcv_stack), THREAD_PRIORITY_MAIN - 1, 0, rcv, NULL, "rcv");
+
+    configureWindowSensorSystem();
+}
+
 bool setup(void) {
 
     printf("device is running version: ");
     printf("%s (%i)\n", APP_VERSION_NAME, APP_VERSION_CODE);
 
-    configureWindowSensorSystem();
+    initWindowSensorSystem();
 
     return true;
 }
@@ -120,8 +161,10 @@ int main(void) {
         return false;
     }
 
-    while (1) {
+    while (true) {
         publish_environment_data();
         xtimer_sleep(2);
     }
+
+    return 0;
 }
