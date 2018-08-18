@@ -10,4 +10,4 @@ extern const uint8_t client_crt_end[] asm("_binary_client_crt_end");
 extern const uint8_t client_key_start[] asm("_binary_client_key_start");
 extern const uint8_t client_key_end[] asm("_binary_client_key_end");
 
-#endif //WINDOW_ALERT_FLASHSTORAGE_H
+#endif /*WINDOW_ALERT_FLASHSTORAGE_H*/
