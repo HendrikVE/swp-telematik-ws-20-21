@@ -15,13 +15,16 @@
 #include "Arduino.h"
 #include "math.h"
 
-#include "hardware/EnvironmentSensor.cpp"
 #include "hardware/WindowSensor.cpp"
 #include "manager/ConnectivityManager.cpp"
 #include "manager/UpdateManager.cpp"
 #include "storage/FlashStorage.h"
 
-EnvironmentSensor* pEnvironmentSensor;
+#ifndef CONFIG_SENSOR_NONE
+    #include "hardware/EnvironmentSensor.cpp"
+    EnvironmentSensor* pEnvironmentSensor;
+#endif /*CONFIG_SENSOR_NONE*/
+
 WindowSensor *pWindowSensor1, *pWindowSensor2;
 
 ConnectivityManager connectivityManager;
@@ -148,7 +151,7 @@ void initWindowSensorSystem() {
     configureWindowSensorSystem();
 }
 
-
+#ifndef CONFIG_SENSOR_NONE
 void publishEnvironmentData() {
 
     float temperature(NAN), humidity(NAN), pressure(NAN);
@@ -213,6 +216,7 @@ void publishEnvironmentData() {
 
     #endif /*CONFIG_SENSOR_MQTT_TOPIC_GAS*/
 }
+#endif /*CONFIG_SENSOR_NONE*/
 
 void startDeviceSleep(uint64_t sleepIntervalMS) {
 
@@ -309,15 +313,19 @@ void setup() {
 
     initWindowSensorSystem();
 
-    #if CONFIG_SENSOR_BME_280
-        pEnvironmentSensor = new EnvironmentSensor(Sensor::BME280);
-    #endif /*CONFIG_SENSOR_BME_280*/
+    #ifndef CONFIG_SENSOR_NONE
 
-    #if CONFIG_SENSOR_BME_680
-        pEnvironmentSensor = new EnvironmentSensor(Sensor::BME680);
-    #endif /*CONFIG_SENSOR_BME_680*/
+        #if CONFIG_SENSOR_BME_280
+            pEnvironmentSensor = new EnvironmentSensor(Sensor::BME280);
+        #endif /*CONFIG_SENSOR_BME_280*/
 
-    pEnvironmentSensor->init();
+        #if CONFIG_SENSOR_BME_680
+            pEnvironmentSensor = new EnvironmentSensor(Sensor::BME680);
+        #endif /*CONFIG_SENSOR_BME_680*/
+
+        pEnvironmentSensor->init();
+
+    #endif /*CONFIG_SENSOR_NONE*/
 }
 
 void loop() {
@@ -338,7 +346,9 @@ void loop() {
     connectivityManager.checkWifiConnection();
     connectivityManager.checkMqttConnection();
 
-    publishEnvironmentData();
+    #ifndef CONFIG_SENSOR_NONE
+        publishEnvironmentData();
+    #endif /*CONFIG_SENSOR_NONE*/
 
     // dont go to sleep before all tasks in queue are executed
     while (uxQueueMessagesWaiting(windowSensorEventQueue) > 0) {
