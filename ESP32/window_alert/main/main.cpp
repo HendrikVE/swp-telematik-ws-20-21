@@ -223,7 +223,6 @@ void startDeviceSleep(uint64_t sleepIntervalMS) {
         detachInterrupt(digitalPinToInterrupt(pWindowSensor1->getInputGpio()));
 
         gpio_num_t windowSensor1Input = (gpio_num_t) pWindowSensor1->getInputGpio();
-        gpio_num_t windowSensor1Output = (gpio_num_t) pWindowSensor1->getOutputGpio();
 
         pWindowSensor1->initRtcGpio();
 
@@ -242,7 +241,6 @@ void startDeviceSleep(uint64_t sleepIntervalMS) {
         detachInterrupt(digitalPinToInterrupt(pWindowSensor2->getInputGpio()));
 
         gpio_num_t windowSensor2Input = (gpio_num_t) pWindowSensor2->getInputGpio();
-        gpio_num_t windowSensor2Output = (gpio_num_t) pWindowSensor2->getOutputGpio();
 
         pWindowSensor2->initRtcGpio();
 
