@@ -43,6 +43,9 @@ public:
         gpio_pulldown_en(inputGPIO);
 
         rtc_gpio_set_level(outputGPIO, HIGH);
+
+        rtc_gpio_hold_en(inputGPIO);
+        rtc_gpio_hold_en(outputGPIO);
     }
 
     void deinitRtcGpio() {

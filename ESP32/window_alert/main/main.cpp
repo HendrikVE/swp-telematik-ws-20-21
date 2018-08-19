@@ -235,9 +235,6 @@ void startDeviceSleep(uint64_t sleepIntervalMS) {
         else if (pWindowSensor1->getLastState() == HIGH) {
             esp_sleep_enable_ext0_wakeup(windowSensor1Input, LOW);
         }
-
-        rtc_gpio_hold_en(windowSensor1Input);
-        rtc_gpio_hold_en(windowSensor1Output);
     #endif /*CONFIG_SENSOR_WINDOW_1_ENABLED*/
 
     #if CONFIG_SENSOR_WINDOW_2_ENABLED
@@ -257,9 +254,6 @@ void startDeviceSleep(uint64_t sleepIntervalMS) {
         else if (pWindowSensor2->getLastState() == HIGH) {
             esp_sleep_enable_ext1_wakeup(BIT(windowSensor2Input), ESP_EXT1_WAKEUP_ALL_LOW);
         }
-
-        rtc_gpio_hold_en(windowSensor2Input);
-        rtc_gpio_hold_en(windowSensor2Output);
     #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
 
     esp_sleep_enable_timer_wakeup(sleepIntervalMS * 1000ULL);
