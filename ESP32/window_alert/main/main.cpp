@@ -316,8 +316,6 @@ void setup() {
 
 void loop() {
 
-    Serial.println("loop");
-
     queuePaused = false;
 
     #if CONFIG_SENSOR_WINDOW_1_ENABLED
