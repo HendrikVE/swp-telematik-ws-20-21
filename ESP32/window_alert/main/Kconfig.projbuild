@@ -12,6 +12,16 @@ menu "Device config"
         help
             Device ID (e.g. used as MQTT client ID and for building the MQTT topic)
 
+    choice DEVICE_SLEEP_MODE
+        prompt "Sleep mode to use"
+        default DEEP_SLEEP
+
+        config DEEP_SLEEP
+            bool "Deep sleep"
+        config LIGHT_SLEEP
+            bool "Light sleep"
+    endchoice
+
 endmenu
 
 

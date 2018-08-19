@@ -264,7 +264,13 @@ void startDeviceSleep(uint64_t sleepIntervalMS) {
     // give a chance for serial prints
     delay(500);
 
-    esp_deep_sleep_start();
+    #if CONFIG_DEEP_SLEEP
+        esp_deep_sleep_start();
+    #endif /*DEEP_SLEEP*/
+
+    #if CONFIG_LIGHT_SLEEP
+        esp_light_sleep_start();
+    #endif /*LIGHT_SLEEP*/
 
     Serial.println("woke up");
 
