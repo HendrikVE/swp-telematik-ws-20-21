@@ -44,7 +44,11 @@ public:
         checkWifiConnection();
     }
 
-    void shutdownWifi() {
+    void turnOnWifi() {
+        WiFi.mode(WIFI_STA);
+    }
+
+    void turnOffWifi() {
         WiFi.disconnect();
         WiFi.mode(WIFI_OFF);
     }

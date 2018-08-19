@@ -216,7 +216,7 @@ void publishEnvironmentData() {
 
 void startDeviceSleep(uint64_t sleepIntervalMS) {
 
-    connectivityManager.shutdownWifi();
+    connectivityManager.turnOnWifi();
 
     #if CONFIG_SENSOR_WINDOW_1_ENABLED
 
@@ -270,7 +270,7 @@ void startDeviceSleep(uint64_t sleepIntervalMS) {
 
     Serial.println("woke up");
 
-    WiFi.mode(WIFI_STA);
+    connectivityManager.turnOnWifi();
 
     // RTC GPIO pins need to be reconfigured as digital GPIO after sleep
     #if CONFIG_SENSOR_WINDOW_1_ENABLED
