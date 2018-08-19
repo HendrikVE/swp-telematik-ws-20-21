@@ -216,8 +216,7 @@ void publishEnvironmentData() {
 
 void startDeviceSleep(uint64_t sleepIntervalMS) {
 
-    WiFi.disconnect();
-    WiFi.mode(WIFI_OFF);
+    connectivityManager.shutdownWifi();
 
     #if CONFIG_SENSOR_WINDOW_1_ENABLED
 

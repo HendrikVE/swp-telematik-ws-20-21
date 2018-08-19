@@ -44,6 +44,11 @@ public:
         checkWifiConnection();
     }
 
+    void shutdownWifi() {
+        WiFi.disconnect();
+        WiFi.mode(WIFI_OFF);
+    }
+
     void checkMqttConnection() {
 
         if (xSemaphoreTake(mMqttMutex, (TickType_t) 10 ) == pdTRUE) {
