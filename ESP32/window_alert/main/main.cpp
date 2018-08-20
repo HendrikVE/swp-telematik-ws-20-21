@@ -36,6 +36,8 @@ RTC_DATA_ATTR int bootCount = 0;
 static boolean queuePaused = false;
 static xQueueHandle windowSensorEventQueue = NULL;
 
+void startDeviceSleep(uint64_t sleepIntervalMS);
+
 void buildTopic(char* output, const char* room, const char* boardID, const char* measurement) {
 
     sprintf(output, "room/%s/%s/%s", room, boardID, measurement);
@@ -70,8 +72,12 @@ static void gpioTask(void* arg) {
     while (true) {
         if (xQueueReceive(windowSensorEventQueue, &event, portMAX_DELAY)) {
 
-            connectivityManager.checkWifiConnection();
-            connectivityManager.checkMqttConnection();
+            bool successWiFi = connectivityManager.checkWifiConnection();
+            bool successMqtt = connectivityManager.checkMqttConnection();
+
+            if (!successWiFi || !successMqtt) {
+                startDeviceSleep(CONFIG_SENSOR_POLL_INTERVAL_MS);
+            }
 
             windowSensor = event.windowSensor;
             bool currentState = event.level;
@@ -397,8 +403,12 @@ void loop() {
     mqttClient.loop();
     delay(10); // <- fixes some issues with WiFi stability
 
-    connectivityManager.checkWifiConnection();
-    connectivityManager.checkMqttConnection();
+    bool successWiFi = connectivityManager.checkWifiConnection();
+    bool successMqtt = connectivityManager.checkMqttConnection();
+
+    if (!successWiFi || !successMqtt) {
+        startDeviceSleep(CONFIG_SENSOR_POLL_INTERVAL_MS);
+    }
 
     handleWakeup();
 
