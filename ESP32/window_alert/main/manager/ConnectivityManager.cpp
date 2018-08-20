@@ -24,13 +24,13 @@ public:
                 while (WiFi.status() != WL_CONNECTED) {
 
                     attempts++;
-                    if (attempts >= 15) {
+                    if (attempts >= 30) {
                         // restart device in case WiFi library wont connect
                         ESP.restart();
                     }
 
                     Serial.print(".");
-                    delay(1000);
+                    delay(500);
                 }
             }
 
@@ -39,7 +39,6 @@ public:
     }
 
     void initWifi() {
-
         WiFi.onEvent(WiFiEvent);
         checkWifiConnection();
     }
@@ -62,7 +61,7 @@ public:
 
                 while (!mMqttClient.connect(CONFIG_DEVICE_ID, CONFIG_MQTT_USER, CONFIG_MQTT_PASSWORD)) {
                     Serial.print(".");
-                    delay(1000);
+                    delay(500);
                 }
             }
 
