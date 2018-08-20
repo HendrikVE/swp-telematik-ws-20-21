@@ -356,7 +356,9 @@ void startDeviceSleep(uint64_t sleepIntervalMS) {
 
 void setup() {
 
-    Serial.begin(115200);
+    if (DEBUG) {
+        Serial.begin(115200);
+    }
 
     connectivityManager.initWifi();
     connectivityManager.initMqtt();
