@@ -220,6 +220,28 @@ void publishEnvironmentData() {
 }
 #endif /*CONFIG_SENSOR_NONE*/
 
+void updateWindowState() {
+
+    #if CONFIG_SENSOR_WINDOW_1_ENABLED
+        isrWindowSensor1();
+    #endif /*CONFIG_SENSOR_WINDOW_1_ENABLED*/
+
+    #if CONFIG_SENSOR_WINDOW_2_ENABLED
+        isrWindowSensor2();
+    #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
+}
+
+void updateAll() {
+
+    updateWindowState();
+
+    #ifndef CONFIG_SENSOR_NONE
+        publishEnvironmentData();
+    #endif /*CONFIG_SENSOR_NONE*/
+
+    updateManager.checkForOTAUpdate();
+}
+
 void handleWakeup(){
 
     esp_sleep_wakeup_cause_t wakeupReason = esp_sleep_get_wakeup_cause();
@@ -228,15 +250,17 @@ void handleWakeup(){
 
         case 1:
             Serial.println("Wakeup caused by external signal using RTC_IO");
+            updateWindowState();
             break;
 
         case 2:
             Serial.println("Wakeup caused by external signal using RTC_CNTL");
+            updateWindowState();
             break;
 
         case 3:
             Serial.println("Wakeup caused by timer");
-            updateManager.checkForOTAUpdate();
+            updateAll();
             break;
 
         case 4:
@@ -249,6 +273,7 @@ void handleWakeup(){
 
         default:
             Serial.println("Wakeup was not caused by deep sleep");
+            updateAll();
             break;
     }
 }
@@ -367,31 +392,19 @@ void loop() {
 
     queuePaused = false;
 
-    #if CONFIG_SENSOR_WINDOW_1_ENABLED
-        isrWindowSensor1();
-    #endif /*CONFIG_SENSOR_WINDOW_1_ENABLED*/
-
-    #if CONFIG_SENSOR_WINDOW_2_ENABLED
-        isrWindowSensor2();
-    #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
-
     mqttClient.loop();
     delay(10); // <- fixes some issues with WiFi stability
 
     connectivityManager.checkWifiConnection();
     connectivityManager.checkMqttConnection();
 
-    #ifndef CONFIG_SENSOR_NONE
-        publishEnvironmentData();
-    #endif /*CONFIG_SENSOR_NONE*/
+    handleWakeup();
 
     // dont go to sleep before all tasks in queue are executed
     while (uxQueueMessagesWaiting(windowSensorEventQueue) > 0) {
         delay(1000);
     }
     queuePaused = true;
-
-    handleWakeup();
 
     Serial.println("go to sleep");
     startDeviceSleep(CONFIG_SENSOR_POLL_INTERVAL_MS);
