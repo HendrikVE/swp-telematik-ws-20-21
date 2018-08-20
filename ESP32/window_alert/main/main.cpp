@@ -31,6 +31,8 @@ ConnectivityManager connectivityManager;
 UpdateManager updateManager;
 MQTTClient mqttClient;
 
+RTC_DATA_ATTR int bootCount = 0;
+
 static boolean queuePaused = false;
 static xQueueHandle windowSensorEventQueue = NULL;
 
@@ -218,6 +220,39 @@ void publishEnvironmentData() {
 }
 #endif /*CONFIG_SENSOR_NONE*/
 
+void handleWakeup(){
+
+    esp_sleep_wakeup_cause_t wakeupReason = esp_sleep_get_wakeup_cause();
+
+    switch(wakeupReason) {
+
+        case 1:
+            Serial.println("Wakeup caused by external signal using RTC_IO");
+            break;
+
+        case 2:
+            Serial.println("Wakeup caused by external signal using RTC_CNTL");
+            break;
+
+        case 3:
+            Serial.println("Wakeup caused by timer");
+            updateManager.checkForOTAUpdate();
+            break;
+
+        case 4:
+            Serial.println("Wakeup caused by touchpad");
+            break;
+
+        case 5:
+            Serial.println("Wakeup caused by ULP program");
+            break;
+
+        default:
+            Serial.println("Wakeup was not caused by deep sleep");
+            break;
+    }
+}
+
 void startDeviceSleep(uint64_t sleepIntervalMS) {
 
     connectivityManager.turnOnWifi();
@@ -261,8 +296,8 @@ void startDeviceSleep(uint64_t sleepIntervalMS) {
     esp_sleep_enable_timer_wakeup(sleepIntervalMS * 1000ULL);
 
     esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
-    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_SLOW_MEM, ESP_PD_OPTION_OFF);
-    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_FAST_MEM, ESP_PD_OPTION_OFF);
+    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_SLOW_MEM, ESP_PD_OPTION_ON);
+    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_FAST_MEM, ESP_PD_OPTION_ON);
     esp_sleep_pd_config(ESP_PD_DOMAIN_MAX, ESP_PD_OPTION_OFF);
 
     // give a chance for serial prints
@@ -356,8 +391,7 @@ void loop() {
     }
     queuePaused = true;
 
-    // after work is done, check for update before sleeping
-    updateManager.checkForOTAUpdate();
+    handleWakeup();
 
     Serial.println("go to sleep");
     startDeviceSleep(CONFIG_SENSOR_POLL_INTERVAL_MS);
