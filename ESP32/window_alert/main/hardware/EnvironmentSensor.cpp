@@ -33,24 +33,46 @@ public:
         return mSensor == Sensor::BME680;
     }
 
-    void init() {
+    bool init() {
 
         if (mSensor == Sensor::BME280) {
             Wire.begin(CONFIG_I2C_SDA_GPIO_PIN, CONFIG_I2C_SDC_GPIO_PIN);
 
+            int attempts = 0;
             while(!mpBme280->begin(BME_280_I2C_ADDRESS)) {
                 Serial.println("Could not find BME280 sensor!");
-                delay(1000);
+
+                attempts++;
+                if (attempts >= 10) {
+                    return false;
+                }
+
+                delay(500);
             }
         }
         else if (mSensor == Sensor::BME680) {
             Wire.begin(CONFIG_I2C_SDA_GPIO_PIN, CONFIG_I2C_SDC_GPIO_PIN);
 
+            int attempts = 0;
             while(!mpBme680->begin(BME_680_I2C_ADDRESS)) {
                 Serial.println("Could not find BME680 sensor!");
-                delay(1000);
+
+                attempts++;
+                if (attempts >= 10) {
+                    return false;
+                }
+
+                delay(500);
             }
         }
+
+        this->mInitiated = true;
+
+        return true;
+    }
+
+    bool isInitialized() {
+        return this->mInitiated;
     }
 
     float readTemperature() {
@@ -115,6 +137,8 @@ private:
 
     Adafruit_BME280* mpBme280;
     Adafruit_BME680* mpBme680;
+
+    bool mInitiated = false;
 
     bool prepareMeasurements() {
 

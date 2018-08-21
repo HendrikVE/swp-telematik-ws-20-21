@@ -162,6 +162,11 @@ void initWindowSensorSystem() {
 #ifndef CONFIG_SENSOR_NONE
 void publishEnvironmentData() {
 
+    if (!pEnvironmentSensor->isInitialized()) {
+        Serial.println("Environment sensor is not initialized. Skip");
+        return;
+    }
+
     float temperature(NAN), humidity(NAN), pressure(NAN);
 
     temperature = pEnvironmentSensor->readTemperature();
