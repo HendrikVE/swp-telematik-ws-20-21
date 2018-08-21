@@ -65,7 +65,7 @@ void IRAM_ATTR isrWindowSensor2() {
     xQueueSendFromISR(windowSensorEventQueue, &event, NULL);
 }
 
-static void gpioTask(void* arg) {
+static void windowSensorTask(void* arg) {
 
     WindowSensor* windowSensor;
     WindowSensorEvent event;
@@ -154,7 +154,7 @@ void initWindowSensorSystem() {
 
     Serial.println("init task queue");
     windowSensorEventQueue = xQueueCreate(10, sizeof(struct WindowSensorEvent));
-    xTaskCreate(gpioTask, "gpioTask", 2048, NULL, 10, NULL);
+    xTaskCreate(windowSensorTask, "windowSensorTask", 2048, NULL, 10, NULL);
 
     configureWindowSensorSystem();
 }
