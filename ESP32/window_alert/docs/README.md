@@ -8,6 +8,7 @@
     3. Compiler options -> Enable C++ exceptions (make a tick here)
     4. Arduino Configuration -> Autostart Arduino setup and loop on boot (make a tick here)
     5. Partition Table -> Partition Table -> Factory app, two OTA definitions
+    6. Component config -> ESP32-specific -> CPU frequency (set it to 240 MHz for low latency of the system)
 3. Hardware
     1. Dont use the 5V pin when using battery, this pin is only powered when connected to USB
 
@@ -15,6 +16,6 @@
 Within **make menuconfig** do the following (optional) configurations:
 1. To save energy
     - enable **Component config -> FreeRTOS -> Run FreeRTOS only on first core**
-    - set **Component config -> ESP32-specific -> CPU frequency** to 80 MHz
+    - DON'T set **Component config -> ESP32-specific -> CPU frequency** to 80 MHz
 2. To fix problem with MQTT (https://github.com/tuanpmt/espmqtt/issues/48)
     - enable **Component config -> LWIP -> Support LWIP socket select() only**
