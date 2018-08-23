@@ -1,3 +1,5 @@
+#include <stdbool.h>
+
 #include "Arduino.h"
 #include "WiFiClientSecure.h"
 #include "MQTT.h"
@@ -12,64 +14,84 @@ public:
         mMqttMutex = xSemaphoreCreateMutex();
     }
 
-    void checkWifiConnection() {
+    bool checkWifiConnection() {
 
         if (xSemaphoreTake(mWifiMutex, (TickType_t) 10 ) == pdTRUE) {
 
             if (WiFi.status() != WL_CONNECTED) {
                 Serial.println("Connect to WiFi...");
-                WiFi.begin(CONFIG_ESP_WIFI_SSID, CONFIG_ESP_WIFI_PASSWORD);
 
                 int attempts = 0;
                 while (WiFi.status() != WL_CONNECTED) {
 
                     attempts++;
-                    if (attempts >= 15) {
-                        // restart device in case WiFi library wont connect
-                        ESP.restart();
+                    if (attempts >= 60) {
+                        return false;
                     }
 
                     Serial.print(".");
-                    delay(1000);
+                    delay(500);
                 }
             }
 
             xSemaphoreGive(mWifiMutex);
         }
+
+        return true;
     }
 
-    void initWifi() {
-
+    bool initWifi() {
         WiFi.onEvent(WiFiEvent);
-        checkWifiConnection();
+        WiFi.begin(CONFIG_ESP_WIFI_SSID, CONFIG_ESP_WIFI_PASSWORD);
+
+        return checkWifiConnection();
     }
 
-    void checkMqttConnection() {
+    void turnOnWifi() {
+        WiFi.mode(WIFI_STA);
+    }
+
+    void turnOffWifi() {
+        WiFi.disconnect();
+        WiFi.mode(WIFI_OFF);
+    }
+
+    bool checkMqttConnection() {
 
         if (xSemaphoreTake(mMqttMutex, (TickType_t) 10 ) == pdTRUE) {
 
             if (!mMqttClient.connected()) {
                 Serial.println("Connect to MQTT broker...");
 
+                int attempts = 0;
                 while (!mMqttClient.connect(CONFIG_DEVICE_ID, CONFIG_MQTT_USER, CONFIG_MQTT_PASSWORD)) {
+                    //connect has timeout set by mMqttClient.setOptions()
+
+                    attempts++;
+                    if (attempts >= 60) {
+                        return false;
+                    }
+
                     Serial.print(".");
-                    delay(1000);
                 }
             }
 
             xSemaphoreGive(mMqttMutex);
         }
+
+        return true;
     }
 
-    void initMqtt() {
+    bool initMqtt() {
 
         mWifiClientSecure.setCACert((char*) ca_crt_start);
         mWifiClientSecure.setCertificate((char*) client_crt_start);
         mWifiClientSecure.setPrivateKey((char*) client_key_start);
 
+        mMqttClient.setOptions(10, true, 500);
         mMqttClient.begin(CONFIG_MQTT_SERVER_IP, CONFIG_MQTT_SERVER_PORT, mWifiClientSecure);
 
-        checkMqttConnection();
+        return checkMqttConnection();
     }
 
     MQTTClient* getMqttClient() {

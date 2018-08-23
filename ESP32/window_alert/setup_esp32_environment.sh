@@ -37,9 +37,8 @@ tar -xzf $file && rm $file
 
 printf "\nsetup esp-idf\n"
 git clone https://github.com/espressif/esp-idf.git
-git checkout v3.0.1
-git submodule update --init --recursive
-# git submodule add https://github.com/tuanpmt/espmqtt.git components/espmqtt
+git -C esp-idf checkout v3.0.3
+git -C esp-idf submodule update --init --recursive
 
 printf "\nupdate ~/.profile\n"
 echo "# ESP32" >> ~/.profile

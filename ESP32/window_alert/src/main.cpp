@@ -15,21 +15,28 @@
 #include "Arduino.h"
 #include "math.h"
 
-#include "hardware/EnvironmentSensor.cpp"
 #include "hardware/WindowSensor.cpp"
 #include "manager/ConnectivityManager.cpp"
 #include "manager/UpdateManager.cpp"
 #include "storage/FlashStorage.h"
 
-EnvironmentSensor* pEnvironmentSensor;
+#ifndef CONFIG_SENSOR_NONE
+    #include "hardware/EnvironmentSensor.cpp"
+    EnvironmentSensor* pEnvironmentSensor;
+#endif /*CONFIG_SENSOR_NONE*/
+
 WindowSensor *pWindowSensor1, *pWindowSensor2;
 
 ConnectivityManager connectivityManager;
 UpdateManager updateManager;
 MQTTClient mqttClient;
 
+RTC_DATA_ATTR int bootCount = 0;
+
 static boolean queuePaused = false;
 static xQueueHandle windowSensorEventQueue = NULL;
+
+void startDeviceSleep(uint64_t sleepIntervalMS);
 
 void buildTopic(char* output, const char* room, const char* boardID, const char* measurement) {
 
@@ -58,15 +65,19 @@ void IRAM_ATTR isrWindowSensor2() {
     xQueueSendFromISR(windowSensorEventQueue, &event, NULL);
 }
 
-static void gpioTask(void* arg) {
+static void windowSensorTask(void* arg) {
 
     WindowSensor* windowSensor;
     WindowSensorEvent event;
     while (true) {
         if (xQueueReceive(windowSensorEventQueue, &event, portMAX_DELAY)) {
 
-            connectivityManager.checkWifiConnection();
-            connectivityManager.checkMqttConnection();
+            bool successWiFi = connectivityManager.checkWifiConnection();
+            bool successMqtt = connectivityManager.checkMqttConnection();
+
+            if (!successWiFi || !successMqtt) {
+                startDeviceSleep(CONFIG_SENSOR_POLL_INTERVAL_MS);
+            }
 
             windowSensor = event.windowSensor;
             bool currentState = event.level;
@@ -143,13 +154,18 @@ void initWindowSensorSystem() {
 
     Serial.println("init task queue");
     windowSensorEventQueue = xQueueCreate(10, sizeof(struct WindowSensorEvent));
-    xTaskCreate(gpioTask, "gpioTask", 2048, NULL, 10, NULL);
+    xTaskCreate(windowSensorTask, "windowSensorTask", 2048, NULL, 10, NULL);
 
     configureWindowSensorSystem();
 }
 
-
+#ifndef CONFIG_SENSOR_NONE
 void publishEnvironmentData() {
+
+    if (!pEnvironmentSensor->isInitialized()) {
+        Serial.println("Environment sensor is not initialized. Skip");
+        return;
+    }
 
     float temperature(NAN), humidity(NAN), pressure(NAN);
 
@@ -213,18 +229,75 @@ void publishEnvironmentData() {
 
     #endif /*CONFIG_SENSOR_MQTT_TOPIC_GAS*/
 }
+#endif /*CONFIG_SENSOR_NONE*/
+
+void updateWindowState() {
+
+    #if CONFIG_SENSOR_WINDOW_1_ENABLED
+        isrWindowSensor1();
+    #endif /*CONFIG_SENSOR_WINDOW_1_ENABLED*/
+
+    #if CONFIG_SENSOR_WINDOW_2_ENABLED
+        isrWindowSensor2();
+    #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
+}
+
+void updateAll() {
+
+    updateWindowState();
+
+    #ifndef CONFIG_SENSOR_NONE
+        publishEnvironmentData();
+    #endif /*CONFIG_SENSOR_NONE*/
+
+    updateManager.checkForOTAUpdate();
+}
+
+void handleWakeup(){
+
+    esp_sleep_wakeup_cause_t wakeupReason = esp_sleep_get_wakeup_cause();
+
+    switch(wakeupReason) {
+
+        case 1:
+            Serial.println("Wakeup caused by external signal using RTC_IO");
+            updateWindowState();
+            break;
+
+        case 2:
+            Serial.println("Wakeup caused by external signal using RTC_CNTL");
+            updateWindowState();
+            break;
+
+        case 3:
+            Serial.println("Wakeup caused by timer");
+            updateAll();
+            break;
+
+        case 4:
+            Serial.println("Wakeup caused by touchpad");
+            break;
+
+        case 5:
+            Serial.println("Wakeup caused by ULP program");
+            break;
+
+        default:
+            Serial.println("Wakeup was not caused by deep sleep");
+            updateAll();
+            break;
+    }
+}
 
 void startDeviceSleep(uint64_t sleepIntervalMS) {
 
-    WiFi.disconnect();
-    WiFi.mode(WIFI_OFF);
+    connectivityManager.turnOnWifi();
 
     #if CONFIG_SENSOR_WINDOW_1_ENABLED
 
         detachInterrupt(digitalPinToInterrupt(pWindowSensor1->getInputGpio()));
 
         gpio_num_t windowSensor1Input = (gpio_num_t) pWindowSensor1->getInputGpio();
-        gpio_num_t windowSensor1Output = (gpio_num_t) pWindowSensor1->getOutputGpio();
 
         pWindowSensor1->initRtcGpio();
 
@@ -236,9 +309,6 @@ void startDeviceSleep(uint64_t sleepIntervalMS) {
         else if (pWindowSensor1->getLastState() == HIGH) {
             esp_sleep_enable_ext0_wakeup(windowSensor1Input, LOW);
         }
-
-        rtc_gpio_hold_en(windowSensor1Input);
-        rtc_gpio_hold_en(windowSensor1Output);
     #endif /*CONFIG_SENSOR_WINDOW_1_ENABLED*/
 
     #if CONFIG_SENSOR_WINDOW_2_ENABLED
@@ -246,7 +316,6 @@ void startDeviceSleep(uint64_t sleepIntervalMS) {
         detachInterrupt(digitalPinToInterrupt(pWindowSensor2->getInputGpio()));
 
         gpio_num_t windowSensor2Input = (gpio_num_t) pWindowSensor2->getInputGpio();
-        gpio_num_t windowSensor2Output = (gpio_num_t) pWindowSensor2->getOutputGpio();
 
         pWindowSensor2->initRtcGpio();
 
@@ -258,26 +327,29 @@ void startDeviceSleep(uint64_t sleepIntervalMS) {
         else if (pWindowSensor2->getLastState() == HIGH) {
             esp_sleep_enable_ext1_wakeup(BIT(windowSensor2Input), ESP_EXT1_WAKEUP_ALL_LOW);
         }
-
-        rtc_gpio_hold_en(windowSensor2Input);
-        rtc_gpio_hold_en(windowSensor2Output);
     #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
 
     esp_sleep_enable_timer_wakeup(sleepIntervalMS * 1000ULL);
 
     esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
-    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_SLOW_MEM, ESP_PD_OPTION_OFF);
-    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_FAST_MEM, ESP_PD_OPTION_OFF);
+    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_SLOW_MEM, ESP_PD_OPTION_ON);
+    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_FAST_MEM, ESP_PD_OPTION_ON);
     esp_sleep_pd_config(ESP_PD_DOMAIN_MAX, ESP_PD_OPTION_OFF);
 
     // give a chance for serial prints
     delay(500);
 
-    esp_deep_sleep_start();
+    #if CONFIG_DEEP_SLEEP
+        esp_deep_sleep_start();
+    #endif /*DEEP_SLEEP*/
+
+    #if CONFIG_LIGHT_SLEEP
+        esp_light_sleep_start();
+    #endif /*LIGHT_SLEEP*/
 
     Serial.println("woke up");
 
-    WiFi.mode(WIFI_STA);
+    connectivityManager.turnOnWifi();
 
     // RTC GPIO pins need to be reconfigured as digital GPIO after sleep
     #if CONFIG_SENSOR_WINDOW_1_ENABLED
@@ -295,7 +367,9 @@ void startDeviceSleep(uint64_t sleepIntervalMS) {
 
 void setup() {
 
-    Serial.begin(115200);
+    if (DEBUG) {
+        Serial.begin(115200);
+    }
 
     connectivityManager.initWifi();
     connectivityManager.initMqtt();
@@ -312,47 +386,42 @@ void setup() {
 
     initWindowSensorSystem();
 
-    #if CONFIG_SENSOR_BME_280
-        pEnvironmentSensor = new EnvironmentSensor(Sensor::BME280);
-    #endif /*CONFIG_SENSOR_BME_280*/
+    #ifndef CONFIG_SENSOR_NONE
 
-    #if CONFIG_SENSOR_BME_680
-        pEnvironmentSensor = new EnvironmentSensor(Sensor::BME680);
-    #endif /*CONFIG_SENSOR_BME_680*/
+        #if CONFIG_SENSOR_BME_280
+            pEnvironmentSensor = new EnvironmentSensor(Sensor::BME280);
+        #endif /*CONFIG_SENSOR_BME_280*/
 
-    pEnvironmentSensor->init();
+        #if CONFIG_SENSOR_BME_680
+            pEnvironmentSensor = new EnvironmentSensor(Sensor::BME680);
+        #endif /*CONFIG_SENSOR_BME_680*/
+
+        pEnvironmentSensor->init();
+
+    #endif /*CONFIG_SENSOR_NONE*/
 }
 
 void loop() {
 
-    Serial.println("loop");
-
     queuePaused = false;
-
-    #if CONFIG_SENSOR_WINDOW_1_ENABLED
-        isrWindowSensor1();
-    #endif /*CONFIG_SENSOR_WINDOW_1_ENABLED*/
-
-    #if CONFIG_SENSOR_WINDOW_2_ENABLED
-        isrWindowSensor2();
-    #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
 
     mqttClient.loop();
     delay(10); // <- fixes some issues with WiFi stability
 
-    connectivityManager.checkWifiConnection();
-    connectivityManager.checkMqttConnection();
+    bool successWiFi = connectivityManager.checkWifiConnection();
+    bool successMqtt = connectivityManager.checkMqttConnection();
 
-    publishEnvironmentData();
+    if (!successWiFi || !successMqtt) {
+        startDeviceSleep(CONFIG_SENSOR_POLL_INTERVAL_MS);
+    }
+
+    handleWakeup();
 
     // dont go to sleep before all tasks in queue are executed
     while (uxQueueMessagesWaiting(windowSensorEventQueue) > 0) {
         delay(1000);
     }
     queuePaused = true;
-
-    // after work is done, check for update before sleeping
-    updateManager.checkForOTAUpdate();
 
     Serial.println("go to sleep");
     startDeviceSleep(CONFIG_SENSOR_POLL_INTERVAL_MS);

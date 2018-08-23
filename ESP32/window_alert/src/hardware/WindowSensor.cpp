@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <string.h>
 
 #include "Arduino.h"
 
@@ -43,6 +44,9 @@ public:
         gpio_pulldown_en(inputGPIO);
 
         rtc_gpio_set_level(outputGPIO, HIGH);
+
+        rtc_gpio_hold_en(inputGPIO);
+        rtc_gpio_hold_en(outputGPIO);
     }
 
     void deinitRtcGpio() {
@@ -66,7 +70,7 @@ public:
         return this->mGpioOutput;
     }
 
-    int getTimestampLastInterrupt() {
+    unsigned long getTimestampLastInterrupt() {
         return this->mTimestampLastInterrupt;
     }
 
