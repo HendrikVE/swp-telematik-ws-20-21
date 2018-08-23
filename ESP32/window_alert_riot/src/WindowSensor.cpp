@@ -1,4 +1,7 @@
 #include <stdbool.h>
+#include <string.h>
+
+#include "periph/gpio.h"
 
 #define LOW 0
 #define HIGH 1
