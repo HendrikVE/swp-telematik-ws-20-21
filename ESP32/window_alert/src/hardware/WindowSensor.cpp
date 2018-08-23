@@ -69,7 +69,7 @@ public:
         return this->mGpioOutput;
     }
 
-    int getTimestampLastInterrupt() {
+    unsigned long getTimestampLastInterrupt() {
         return this->mTimestampLastInterrupt;
     }
 
