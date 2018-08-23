@@ -22,9 +22,9 @@
 
 WindowSensor *pWindowSensor1, *pWindowSensor2;
 
-static kernel_pid_t window_sensor_task_pid;
-static char rcv_stack[THREAD_STACKSIZE_DEFAULT + THREAD_EXTRA_STACKSIZE_PRINTF];
-static msg_t rcv_queue[RCV_QUEUE_SIZE];
+static kernel_pid_t windowSensorTaskPid;
+static char rcvStack[THREAD_STACKSIZE_DEFAULT + THREAD_EXTRA_STACKSIZE_PRINTF];
+static msg_t rcvQueue[RCV_QUEUE_SIZE];
 
 
 void build_topic(char *output, const char *room, const char *boardID, const char *measurement) {
@@ -32,7 +32,7 @@ void build_topic(char *output, const char *room, const char *boardID, const char
     sprintf(output, "room/%s/%s/%s", room, boardID, measurement);
 }
 
-void publish_environment_data() {
+void publishEnvironmentData() {
 
     phydat_t temperature;
     phydat_t humidity;
@@ -56,11 +56,11 @@ void publish_environment_data() {
     printf("%d\n", (int) round(pressure.val[0] * pow(10, pressure.scale)));
 }
 
-static void* window_sensor_task(void* arg) {
+static void* windowSensorTask(void* arg) {
 
     msg_t message;
 
-    msg_init_queue(rcv_queue, RCV_QUEUE_SIZE);
+    msg_init_queue(rcvQueue, RCV_QUEUE_SIZE);
 
     WindowSensor* windowSensor;
     WindowSensorEvent event;
@@ -120,7 +120,7 @@ void isrWindowSensor1(void* arg) {
     event.level = gpio_read(pWindowSensor1->getInputGpio());
 
     message.content.ptr = &event;
-    if (msg_try_send(&message, window_sensor_task_pid) == 0) {
+    if (msg_try_send(&message, windowSensorTaskPid) == 0) {
         printf("Receiver queue full.\n");
     }
 }
@@ -134,7 +134,7 @@ void isrWindowSensor2(void* arg) {
     event.level = gpio_read(pWindowSensor2->getInputGpio());
 
     message.content.ptr = &event;
-    if (msg_try_send(&message, window_sensor_task_pid) == 0) {
+    if (msg_try_send(&message, windowSensorTaskPid) == 0) {
         printf("Receiver queue full.\n");
     }
 }
@@ -179,7 +179,7 @@ void configureWindowSensorSystem() {
 void initWindowSensorSystem() {
 
     printf("init task queue\n");
-    window_sensor_task_pid = thread_create(rcv_stack, sizeof(rcv_stack), THREAD_PRIORITY_MAIN - 1, 0, window_sensor_task, NULL, "window_sensor_task");
+    windowSensorTaskPid = thread_create(rcvStack, sizeof(rcvStack), THREAD_PRIORITY_MAIN - 1, 0, windowSensorTask, NULL, "windowSensorTask");
 
     configureWindowSensorSystem();
 }
@@ -203,7 +203,7 @@ int main() {
     }
 
     while (true) {
-        publish_environment_data();
+        publishEnvironmentData();
         xtimer_usleep(CONFIG_SENSOR_POLL_INTERVAL_MS * 1000);
     }
 
