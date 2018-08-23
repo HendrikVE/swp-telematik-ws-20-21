@@ -12,7 +12,7 @@
 #include "msg.h"
 #include "thread.h"
 
-#include "hardware/WindowSensor.cpp"
+#include "WindowSensor.cpp"
 
 #define LOW 0
 #define HIGH 1

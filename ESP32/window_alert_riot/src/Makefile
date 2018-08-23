@@ -56,7 +56,6 @@ QUIET ?= 1
 
 include $(RIOTBASE)/Makefile.include
 
-
 CERT_PATH := $(BINDIR)/crt/$(MODULE)
 # add directory of generated *.crt.h files to include path
 CFLAGS += -I$(CERT_PATH)
@@ -91,3 +90,4 @@ $(KEY_H): $(KEY_PATH)/%.key.h: %.key
 	xxd -i $< | sed 's/^unsigned/const unsigned/g' > $@
 
 $(RIOTBUILD_CONFIG_HEADER_C): $(KEY_H)
+
