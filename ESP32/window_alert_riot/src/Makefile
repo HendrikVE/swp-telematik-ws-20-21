@@ -5,7 +5,7 @@ APPLICATION = window_alert
 BOARD ?= esp32-generic
 
 # This has to be the absolute path to the RIOT base directory:
-RIOTBASE ?= $(CURDIR)/../../../..
+RIOTBASE ?= $(CURDIR)/../../../../..
 
 USEMODULE += esp_wifi
 
