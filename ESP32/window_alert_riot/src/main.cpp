@@ -13,6 +13,7 @@
 #include "thread.h"
 
 #include "WindowSensor.cpp"
+#include "FlashStorage.h"
 
 #define LOW 0
 #define HIGH 1

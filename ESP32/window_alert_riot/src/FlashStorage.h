@@ -1,13 +1,10 @@
 #ifndef WINDOW_ALERT_FLASHSTORAGE_H
 #define WINDOW_ALERT_FLASHSTORAGE_H
 
-extern const uint8_t ca_crt_start[] asm("_binary_ca_crt_start");
-extern const uint8_t ca_crt_end[] asm("_binary_ca_crt_end");
+const uint8_t ca_crt[] = "# ca certificate for TLS connection with the serverz";
 
-extern const uint8_t client_crt_start[] asm("_binary_client_crt_start");
-extern const uint8_t client_crt_end[] asm("_binary_client_crt_end");
+const uint8_t client_crt[] = "# certificate for client authentication";
 
-extern const uint8_t client_key_start[] asm("_binary_client_key_start");
-extern const uint8_t client_key_end[] asm("_binary_client_key_end");
+const uint8_t client_key[] = "# key for client authentication";
 
 #endif /*WINDOW_ALERT_FLASHSTORAGE_H*/

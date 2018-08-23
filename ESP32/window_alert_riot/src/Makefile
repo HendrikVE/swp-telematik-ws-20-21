@@ -55,39 +55,3 @@ CXXEXFLAGS += -std=c++11
 QUIET ?= 1
 
 include $(RIOTBASE)/Makefile.include
-
-CERT_PATH := $(BINDIR)/crt/$(MODULE)
-# add directory of generated *.crt.h files to include path
-CFLAGS += -I$(CERT_PATH)
-
-# generate .crt.h header files of .crt files
-CERT = $(wildcard *.crt)
-CERT_H := $(CERT:%.crt=$(CERT_PATH)/%.crt.h)
-
-$(CERT_PATH)/:
-	@mkdir -p $@
-
-$(CERT_H): | $(CERT_PATH)/
-$(CERT_H): $(CERT_PATH)/%.crt.h: %.crt
-	xxd -i $< | sed 's/^unsigned/const unsigned/g' > $@
-
-$(RIOTBUILD_CONFIG_HEADER_C): $(CERT_H)
-
-
-KEY_PATH := $(BINDIR)/key/$(MODULE)
-# add directory of generated *.key.h files to include path
-CFLAGS += -I$(KEY_PATH)
-
-# generate .key.h header files of .key files
-KEY = $(wildcard *.key)
-KEY_H := $(KEY:%.key=$(KEY_PATH)/%.key.h)
-
-$(KEY_PATH)/:
-	@mkdir -p $@
-
-$(KEY_H): | $(KEY_PATH)/
-$(KEY_H): $(KEY_PATH)/%.key.h: %.key
-	xxd -i $< | sed 's/^unsigned/const unsigned/g' > $@
-
-$(RIOTBUILD_CONFIG_HEADER_C): $(KEY_H)
-
