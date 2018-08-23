@@ -4,6 +4,7 @@
 #
 
 PROJECT_NAME := window_alert
+EXTRA_COMPONENT_DIRS += src
 
 include $(IDF_PATH)/make/project.mk
 
