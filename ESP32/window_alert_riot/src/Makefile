@@ -46,6 +46,8 @@ CFLAGS += -DCONFIG_SENSOR_WINDOW_2_MQTT_TOPIC=\"WindowSensor2\"
 
 FEATURES_REQUIRED += cpp
 
+CXXEXFLAGS += -std=c++11
+
 # Change this to 0 show compiler invocation lines by default:
 QUIET ?= 1
 

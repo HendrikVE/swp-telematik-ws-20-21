@@ -12,14 +12,14 @@
 #include "msg.h"
 #include "thread.h"
 
-#include "window_sensor.h"
+#include "hardware/WindowSensor.cpp"
 
 #define LOW 0
 #define HIGH 1
 
 #define RCV_QUEUE_SIZE (8)
 
-struct window_sensor window_sensor_1, window_sensor_2;
+WindowSensor *pWindowSensor1, *pWindowSensor2;
 
 static kernel_pid_t window_sensor_task_pid;
 static char rcv_stack[THREAD_STACKSIZE_DEFAULT + THREAD_EXTRA_STACKSIZE_PRINTF];
@@ -31,7 +31,7 @@ void build_topic(char *output, const char *room, const char *boardID, const char
     sprintf(output, "room/%s/%s/%s", room, boardID, measurement);
 }
 
-void publish_environment_data(void) {
+void publish_environment_data() {
 
     phydat_t temperature;
     phydat_t humidity;
@@ -58,66 +58,65 @@ void publish_environment_data(void) {
 static void* window_sensor_task(void* arg) {
 
     msg_t message;
-    (void) arg;
 
     msg_init_queue(rcv_queue, RCV_QUEUE_SIZE);
 
-    struct window_sensor* ws;
-    struct window_sensor_event event;
+    WindowSensor* windowSensor;
+    WindowSensorEvent event;
 
     while (true) {
 
         msg_receive(&message);
-        event = *((struct window_sensor_event*) message.content.ptr);
-        ws = event.window_sensor;
+        event = *((WindowSensorEvent*) message.content.ptr);
 
+        windowSensor = event.windowSensor;
         bool currentState = event.level;
 
         unsigned long current_time = (unsigned long) xtimer_now_usec64() / 1000;
 
-        unsigned long time_diff = 0;
+        unsigned long timeDiff = 0;
 
-        if (current_time < ws->timestamp_last_interrupt) {
+        if (current_time < windowSensor->getTimestampLastInterrupt()) {
             // catch overflow
-            time_diff = ws->interrupt_debounce + 1;
+            timeDiff = windowSensor->getInterruptDebounce() + 1;
         }
         else {
-            time_diff = current_time - ws->timestamp_last_interrupt;
+            timeDiff = current_time - windowSensor->getTimestampLastInterrupt();
         }
 
-        if (time_diff <= (unsigned long) ws->interrupt_debounce) {
+        if (timeDiff <= (unsigned long) windowSensor->getInterruptDebounce()) {
             // not within debounce time -> ignore interrupt
             continue;
         }
 
         char output[128];
-        sprintf(output, "window sensor #%i: ", ws->id);
-        printf("%s\n", output);
+        sprintf(output, "window sensor #%i: ", windowSensor->getId());
+        printf("%s", output);
 
         if (currentState == LOW) {
-            printf("open\n");
-            ws->last_state = LOW;
-            //mqttClient.publish(ws.mqtt_topic, "OPEN", false, 2);
+            printf("open");
+            windowSensor->setLastState(LOW);
+            //mqttClient.publish(windowSensor->getMqttTopic(), "OPEN", false, 2);
         }
         else if (currentState == HIGH) {
-            printf("closed\n");
-            ws->last_state = HIGH;
-            //mqttClient.publish(ws.mqtt_topic, "CLOSED", false, 2);
+            printf("closed");
+            windowSensor->setLastState(HIGH);
+            //mqttClient.publish(windowSensor->getMqttTopic(), "CLOSED", false, 2);
         }
 
-        ws->timestamp_last_interrupt = current_time;
+        windowSensor->setTimestampLastInterrupt(current_time);
     }
 
     return NULL;
 }
 
-void isr_window_sensor_1(void* arg) {
+void isrWindowSensor1(void* arg) {
 
     msg_t message;
 
-    struct window_sensor_event event;
-    event.window_sensor = &window_sensor_1;
-    event.level = gpio_read(window_sensor_1.gpio_intput);
+    WindowSensorEvent event;
+    event.windowSensor = pWindowSensor1;
+    event.level = gpio_read(pWindowSensor1->getInputGpio());
 
     message.content.ptr = &event;
     if (msg_try_send(&message, window_sensor_task_pid) == 0) {
@@ -125,13 +124,13 @@ void isr_window_sensor_1(void* arg) {
     }
 }
 
-void isr_window_sensor_2(void* arg) {
+void isrWindowSensor2(void* arg) {
 
     msg_t message;
 
-    struct window_sensor_event event;
-    event.window_sensor = &window_sensor_2;
-    event.level = gpio_read(window_sensor_2.gpio_intput);
+    WindowSensorEvent event;
+    event.windowSensor = pWindowSensor2;
+    event.level = gpio_read(pWindowSensor2->getInputGpio());
 
     message.content.ptr = &event;
     if (msg_try_send(&message, window_sensor_task_pid) == 0) {
@@ -139,18 +138,7 @@ void isr_window_sensor_2(void* arg) {
     }
 }
 
-void init_window_sensor(struct window_sensor ws) {
-
-    gpio_init_int(ws.gpio_intput, GPIO_IN_PD, GPIO_BOTH, ws.isr, NULL);
-    gpio_irq_enable(ws.gpio_intput);
-
-    gpio_init(ws.gpio_output, GPIO_OUT);
-
-    // output always on to detect changes on input
-    gpio_write(ws.gpio_output, HIGH);
-}
-
-void configureWindowSensorSystem(void) {
+void configureWindowSensorSystem() {
 
     char topic[128];
 
@@ -158,15 +146,15 @@ void configureWindowSensorSystem(void) {
 
         build_topic(topic, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_WINDOW_1_MQTT_TOPIC);
 
-        window_sensor_1.id = 1;
-        window_sensor_1.gpio_intput = CONFIG_SENSOR_WINDOW_1_GPIO_INPUT;
-        window_sensor_1.gpio_output = CONFIG_SENSOR_WINDOW_1_GPIO_OUTPUT;
-        window_sensor_1.isr = (gpio_cb_t)isr_window_sensor_1;
-        window_sensor_1.interrupt_debounce = CONFIG_SENSOR_WINDOW_1_INTERRUPT_DEBOUNCE_MS;
-        window_sensor_1.timestamp_last_interrupt = 0;
-        window_sensor_1.mqtt_topic = topic;
+        WindowSensor windowSensor1(
+                CONFIG_SENSOR_WINDOW_1_GPIO_INPUT,
+                CONFIG_SENSOR_WINDOW_1_GPIO_OUTPUT,
+                CONFIG_SENSOR_WINDOW_1_INTERRUPT_DEBOUNCE_MS,
+                topic);
 
-        init_window_sensor(window_sensor_1);
+        pWindowSensor1 = &windowSensor1;
+
+        pWindowSensor1->initGpio(&isrWindowSensor1);
 
     #endif /*CONFIG_SENSOR_WINDOW_1_ENABLED*/
 
@@ -174,20 +162,20 @@ void configureWindowSensorSystem(void) {
 
     build_topic(topic, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_WINDOW_2_MQTT_TOPIC);
 
-        window_sensor_2.id = 2;
-        window_sensor_2.gpio_intput = CONFIG_SENSOR_WINDOW_2_GPIO_INPUT;
-        window_sensor_2.gpio_output = CONFIG_SENSOR_WINDOW_2_GPIO_OUTPUT;
-        window_sensor_2.isr = (gpio_cb_t)isr_window_sensor_2;
-        window_sensor_2.interrupt_debounce = CONFIG_SENSOR_WINDOW_2_INTERRUPT_DEBOUNCE_MS;
-        window_sensor_2.timestamp_last_interrupt = 0;
-        window_sensor_2.mqtt_topic = topic;
+        WindowSensor windowSensor2(
+                CONFIG_SENSOR_WINDOW_2_GPIO_INPUT,
+                CONFIG_SENSOR_WINDOW_2_GPIO_OUTPUT,
+                CONFIG_SENSOR_WINDOW_2_INTERRUPT_DEBOUNCE_MS,
+                topic);
 
-        init_window_sensor(window_sensor_2);
+        pWindowSensor2 = &windowSensor2;
+
+        pWindowSensor2->initGpio(&isrWindowSensor2);
 
     #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
 }
 
-void initWindowSensorSystem(void) {
+void initWindowSensorSystem() {
 
     printf("init task queue\n");
     window_sensor_task_pid = thread_create(rcv_stack, sizeof(rcv_stack), THREAD_PRIORITY_MAIN - 1, 0, window_sensor_task, NULL, "window_sensor_task");
@@ -195,7 +183,7 @@ void initWindowSensorSystem(void) {
     configureWindowSensorSystem();
 }
 
-bool setup(void) {
+bool setup() {
 
     printf("device is running version: ");
     printf("%s (%i)\n", APP_VERSION_NAME, APP_VERSION_CODE);
@@ -205,7 +193,7 @@ bool setup(void) {
     return true;
 }
 
-int main(void) {
+int main() {
 
     bool success = setup();
 
