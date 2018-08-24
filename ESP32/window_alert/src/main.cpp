@@ -13,6 +13,7 @@
 #include "esp_sleep.h"
 
 #include "Arduino.h"
+#include "ArduinoLog.h"
 #include "math.h"
 
 #include "hardware/WindowSensor.cpp"
@@ -30,6 +31,8 @@ WindowSensor *pWindowSensor1, *pWindowSensor2;
 ConnectivityManager connectivityManager;
 UpdateManager updateManager;
 MQTTClient mqttClient;
+
+Logging logger;
 
 RTC_DATA_ATTR int bootCount = 0;
 
@@ -101,15 +104,15 @@ static void windowSensorTask(void* arg) {
 
             char output[128];
             sprintf(output, "window sensor #%i: ", windowSensor->getId());
-            Serial.print(output);
+            logger.notice(output);
 
             if (currentState == LOW) {
-                Serial.println("open");
+                logger.notice("open");
                 windowSensor->setLastState(LOW);
                 mqttClient.publish(windowSensor->getMqttTopic(), "OPEN", false, 2);
             }
             else if (currentState == HIGH) {
-                Serial.println("closed");
+                logger.notice("closed");
                 windowSensor->setLastState(HIGH);
                 mqttClient.publish(windowSensor->getMqttTopic(), "CLOSED", false, 2);
             }
@@ -152,7 +155,7 @@ void configureWindowSensorSystem() {
 
 void initWindowSensorSystem() {
 
-    Serial.println("init task queue");
+    logger.notice("init task queue");
     windowSensorEventQueue = xQueueCreate(10, sizeof(struct WindowSensorEvent));
     xTaskCreate(windowSensorTask, "windowSensorTask", 2048, NULL, 10, NULL);
 
@@ -163,7 +166,7 @@ void initWindowSensorSystem() {
 void publishEnvironmentData() {
 
     if (!pEnvironmentSensor->isInitialized()) {
-        Serial.println("Environment sensor is not initialized. Skip");
+        logger.notice("Environment sensor is not initialized. Skip");
         return;
     }
 
@@ -177,22 +180,18 @@ void publishEnvironmentData() {
     char strTemperature[32];
     sprintf(strTemperature, "%.1f", round(temperature * 10.0) / 10.0);
 
-    Serial.print("temperature: ");
-    Serial.println(strTemperature);
-
+    logger.notice("temperature: %s", strTemperature);
 
     char strHumidity[32];
     sprintf(strHumidity, "%d", (int) round(humidity));
 
-    Serial.print("humidity: ");
-    Serial.println(strHumidity);
+    logger.notice("humidity: %s", strHumidity);
 
 
     char strPressure[32];
     sprintf(strPressure, "%d", (int) round(pressure));
 
-    Serial.print("pressure: ");
-    Serial.println(strPressure);
+    logger.notice("pressure: %s", strPressure);
 
 
     char topicTemperature[128];
@@ -218,8 +217,7 @@ void publishEnvironmentData() {
             char strGasResistence[32];
             sprintf(strGasResistence, "%d", (int) round(gasResistance));
 
-            Serial.print("gas resistence: ");
-            Serial.println(strGasResistence);
+            logger.notice("gas resistence: %s", strGasResistence);
 
             char topicGas[128];
             buildTopic(topicGas, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_GAS);
@@ -260,30 +258,30 @@ void handleWakeup(){
     switch(wakeupReason) {
 
         case 1:
-            Serial.println("Wakeup caused by external signal using RTC_IO");
+            logger.notice("Wakeup caused by external signal using RTC_IO");
             updateWindowState();
             break;
 
         case 2:
-            Serial.println("Wakeup caused by external signal using RTC_CNTL");
+            logger.notice("Wakeup caused by external signal using RTC_CNTL");
             updateWindowState();
             break;
 
         case 3:
-            Serial.println("Wakeup caused by timer");
+            logger.notice("Wakeup caused by timer");
             updateAll();
             break;
 
         case 4:
-            Serial.println("Wakeup caused by touchpad");
+            logger.notice("Wakeup caused by touchpad");
             break;
 
         case 5:
-            Serial.println("Wakeup caused by ULP program");
+            logger.notice("Wakeup caused by ULP program");
             break;
 
         default:
-            Serial.println("Wakeup was not caused by deep sleep");
+            logger.notice("Wakeup was not caused by deep sleep");
             updateAll();
             break;
     }
@@ -347,7 +345,7 @@ void startDeviceSleep(uint64_t sleepIntervalMS) {
         esp_light_sleep_start();
     #endif /*LIGHT_SLEEP*/
 
-    Serial.println("woke up");
+    logger.notice("woke up");
 
     connectivityManager.turnOnWifi();
 
@@ -365,15 +363,31 @@ void startDeviceSleep(uint64_t sleepIntervalMS) {
     #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
 }
 
+static void printTag(Print* _logOutput) {
+    char c[12];
+    sprintf(c, "%s ", "[MAIN] ");
+    _logOutput->print(c);
+}
+
+static void printNewline(Print* _logOutput) {
+    _logOutput->print("\n");
+}
+
 void setup() {
 
     if (DEBUG) {
         Serial.begin(115200);
+        logger.begin(LOG_LEVEL_VERBOSE, &Serial);
+        logger.setPrefix(printTag);
+        logger.setSuffix(printNewline);
     }
 
+    connectivityManager.begin();
     connectivityManager.initWifi();
     connectivityManager.initMqtt();
     mqttClient = *connectivityManager.getMqttClient();
+
+    updateManager.begin();
 
     char strVersion[128];
     sprintf(strVersion, "%s (%i)", APP_VERSION_NAME, APP_VERSION_CODE);
@@ -382,7 +396,7 @@ void setup() {
     buildTopic(topicVersion, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, "version");
     mqttClient.publish(topicVersion, strVersion, true, 2);
 
-    Serial.println("device is running version: " + String(strVersion));
+    logger.notice("device is running version: %s", strVersion);
 
     initWindowSensorSystem();
 
@@ -396,7 +410,7 @@ void setup() {
             pEnvironmentSensor = new EnvironmentSensor(Sensor::BME680);
         #endif /*CONFIG_SENSOR_BME_680*/
 
-        pEnvironmentSensor->init();
+        pEnvironmentSensor->begin();
 
     #endif /*CONFIG_SENSOR_NONE*/
 }
@@ -423,6 +437,6 @@ void loop() {
     }
     queuePaused = true;
 
-    Serial.println("go to sleep");
+    logger.notice("go to sleep");
     startDeviceSleep(CONFIG_SENSOR_POLL_INTERVAL_MS);
 }

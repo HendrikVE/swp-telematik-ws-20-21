@@ -1,5 +1,6 @@
 #include <stdbool.h>
 
+#include "ArduinoLog.h"
 #include "Wire.h"
 
 #include "Adafruit_Sensor.h"
@@ -33,14 +34,18 @@ public:
         return mSensor == Sensor::BME680;
     }
 
-    bool init() {
+    bool begin() {
+
+        logger.begin(LOG_LEVEL_VERBOSE, &Serial);
+        logger.setPrefix(printTag);
+        logger.setSuffix(printNewline);
 
         if (mSensor == Sensor::BME280) {
             Wire.begin(CONFIG_I2C_SDA_GPIO_PIN, CONFIG_I2C_SDC_GPIO_PIN);
 
             int attempts = 0;
             while(!mpBme280->begin(BME_280_I2C_ADDRESS)) {
-                Serial.println("Could not find BME280 sensor!");
+                logger.notice("Could not find BME280 sensor!");
 
                 attempts++;
                 if (attempts >= 10) {
@@ -55,7 +60,7 @@ public:
 
             int attempts = 0;
             while(!mpBme680->begin(BME_680_I2C_ADDRESS)) {
-                Serial.println("Could not find BME680 sensor!");
+                logger.notice("Could not find BME680 sensor!");
 
                 attempts++;
                 if (attempts >= 10) {
@@ -138,13 +143,15 @@ private:
     Adafruit_BME280* mpBme280;
     Adafruit_BME680* mpBme680;
 
+    Logging logger;
+
     bool mInitiated = false;
 
     bool prepareMeasurements() {
 
         if (mSensor == Sensor::BME680) {
             if (!mpBme680->performReading()) {
-                Serial.println("Failed to perform reading");
+                logger.notice("Failed to perform reading");
                 return false;
             }
 
@@ -152,6 +159,16 @@ private:
         }
 
         return true;
+    }
+
+    static void printTag(Print* _logOutput) {
+        char c[12];
+        sprintf(c, "%s ", "[EnvironmentSensor] ");
+        _logOutput->print(c);
+    }
+
+    static void printNewline(Print* _logOutput) {
+        _logOutput->print("\n");
     }
 
 };

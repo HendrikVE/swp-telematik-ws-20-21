@@ -1,6 +1,7 @@
 #include <stdbool.h>
 
 #include "Arduino.h"
+#include "ArduinoLog.h"
 #include "WiFiClientSecure.h"
 #include "MQTT.h"
 #include "../storage/FlashStorage.h"
@@ -14,12 +15,18 @@ public:
         mMqttMutex = xSemaphoreCreateMutex();
     }
 
+    void begin() {
+        logger.begin(LOG_LEVEL_VERBOSE, &Serial);
+        logger.setPrefix(printTag);
+        logger.setSuffix(printNewline);
+    }
+
     bool checkWifiConnection() {
 
         if (xSemaphoreTake(mWifiMutex, (TickType_t) 10 ) == pdTRUE) {
 
             if (WiFi.status() != WL_CONNECTED) {
-                Serial.println("Connect to WiFi...");
+                logger.notice("Connect to WiFi...");
 
                 int attempts = 0;
                 while (WiFi.status() != WL_CONNECTED) {
@@ -29,9 +36,9 @@ public:
                         return false;
                     }
 
-                    Serial.print(".");
                     delay(500);
                 }
+                logger.notice("Connected");
             }
 
             xSemaphoreGive(mWifiMutex);
@@ -41,7 +48,7 @@ public:
     }
 
     bool initWifi() {
-        WiFi.onEvent(WiFiEvent);
+        //WiFi.onEvent(WiFiEvent);
         WiFi.begin(CONFIG_ESP_WIFI_SSID, CONFIG_ESP_WIFI_PASSWORD);
 
         return checkWifiConnection();
@@ -61,7 +68,7 @@ public:
         if (xSemaphoreTake(mMqttMutex, (TickType_t) 10 ) == pdTRUE) {
 
             if (!mMqttClient.connected()) {
-                Serial.println("Connect to MQTT broker...");
+                logger.notice("Connect to MQTT broker...");
 
                 int attempts = 0;
                 while (!mMqttClient.connect(CONFIG_DEVICE_ID, CONFIG_MQTT_USER, CONFIG_MQTT_PASSWORD)) {
@@ -71,9 +78,8 @@ public:
                     if (attempts >= 60) {
                         return false;
                     }
-
-                    Serial.print(".");
                 }
+                logger.notice("Connected");
             }
 
             xSemaphoreGive(mMqttMutex);
@@ -102,6 +108,8 @@ private:
 
     WiFiClientSecure mWifiClientSecure;
     MQTTClient mMqttClient;
+
+    Logging logger;
 
     SemaphoreHandle_t mWifiMutex = NULL;
     SemaphoreHandle_t mMqttMutex = NULL;
@@ -133,6 +141,16 @@ private:
             default:
                 break;
         }
+    }
+
+    static void printTag(Print* _logOutput) {
+        char c[12];
+        sprintf(c, "%s ", "[ConnectivityManager] ");
+        _logOutput->print(c);
+    }
+
+    static void printNewline(Print* _logOutput) {
+        _logOutput->print("\n");
     }
 
 };
