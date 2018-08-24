@@ -450,7 +450,7 @@ void loop() {
 
     // dont go to sleep before all tasks in queue are executed
     while (uxQueueMessagesWaiting(windowSensorEventQueue) > 0) {
-        delay(1000);
+        delay(100);
     }
     queuePaused = true;
 
