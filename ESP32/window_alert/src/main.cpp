@@ -26,6 +26,14 @@
     EnvironmentSensor* pEnvironmentSensor;
 #endif /*CONFIG_SENSOR_NONE*/
 
+#ifdef CONFIG_BUILD_DEBUG
+    #define DEBUG true
+#endif
+#ifndef CONFIG_BUILD_DEBUG
+    #define DEBUG false
+    #define DISABLE_LOGGING
+#endif
+
 WindowSensor *pWindowSensor1, *pWindowSensor2;
 
 ConnectivityManager connectivityManager;

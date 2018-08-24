@@ -1,3 +1,17 @@
+menu "Build"
+
+    choice BUILD_VARIANT
+        prompt "Product environment"
+        default BUILD_DEBUG
+
+        config BUILD_DEBUG
+            bool "Debug"
+        config BUILD_PRODUCTION
+            bool "Production"
+    endchoice
+
+endmenu
+
 menu "Device config"
 
     config DEVICE_ROOM
