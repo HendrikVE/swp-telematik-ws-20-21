@@ -37,7 +37,7 @@
 WindowSensor *pWindowSensor1, *pWindowSensor2;
 
 ConnectivityManager connectivityManager;
-UpdateManager updateManager;
+UpdateManager* updateManager;
 MQTTClient mqttClient;
 
 Logging logger;
@@ -48,6 +48,8 @@ static boolean queuePaused = false;
 static xQueueHandle windowSensorEventQueue = NULL;
 
 void startDeviceSleep(uint64_t sleepIntervalMS);
+
+void lazySetup();
 
 void buildTopic(char* output, const char* room, const char* boardID, const char* measurement) {
 
@@ -250,13 +252,15 @@ void updateWindowState() {
 
 void updateAll() {
 
+    lazySetup();
+
     updateWindowState();
 
     #ifndef CONFIG_SENSOR_NONE
         publishEnvironmentData();
     #endif /*CONFIG_SENSOR_NONE*/
 
-    updateManager.checkForOTAUpdate();
+    updateManager->checkForOTAUpdate();
 }
 
 void handleWakeup(){
@@ -381,6 +385,36 @@ static void printNewline(Print* _logOutput) {
     _logOutput->print("\n");
 }
 
+// lazy setup is only necessary if handleWakeup() calls updateAll()
+void lazySetup() {
+
+    char strVersion[128];
+    sprintf(strVersion, "%s (%i)", APP_VERSION_NAME, APP_VERSION_CODE);
+
+    char topicVersion[128];
+    buildTopic(topicVersion, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, "version");
+
+    mqttClient.publish(topicVersion, strVersion, true, 2);
+    logger.notice("device is running version: %s", strVersion);
+
+    updateManager = new UpdateManager();
+    updateManager->begin();
+
+    #ifndef CONFIG_SENSOR_NONE
+
+    #if CONFIG_SENSOR_BME_280
+        pEnvironmentSensor = new EnvironmentSensor(Sensor::BME280);
+    #endif /*CONFIG_SENSOR_BME_280*/
+
+    #if CONFIG_SENSOR_BME_680
+        pEnvironmentSensor = new EnvironmentSensor(Sensor::BME680);
+    #endif /*CONFIG_SENSOR_BME_680*/
+
+        pEnvironmentSensor->begin();
+
+    #endif /*CONFIG_SENSOR_NONE*/
+}
+
 void setup() {
 
     if (DEBUG) {
@@ -395,32 +429,7 @@ void setup() {
     connectivityManager.initMqtt();
     mqttClient = *connectivityManager.getMqttClient();
 
-    updateManager.begin();
-
-    char strVersion[128];
-    sprintf(strVersion, "%s (%i)", APP_VERSION_NAME, APP_VERSION_CODE);
-
-    char topicVersion[128];
-    buildTopic(topicVersion, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, "version");
-    mqttClient.publish(topicVersion, strVersion, true, 2);
-
-    logger.notice("device is running version: %s", strVersion);
-
     initWindowSensorSystem();
-
-    #ifndef CONFIG_SENSOR_NONE
-
-        #if CONFIG_SENSOR_BME_280
-            pEnvironmentSensor = new EnvironmentSensor(Sensor::BME280);
-        #endif /*CONFIG_SENSOR_BME_280*/
-
-        #if CONFIG_SENSOR_BME_680
-            pEnvironmentSensor = new EnvironmentSensor(Sensor::BME680);
-        #endif /*CONFIG_SENSOR_BME_680*/
-
-        pEnvironmentSensor->begin();
-
-    #endif /*CONFIG_SENSOR_NONE*/
 }
 
 void loop() {
