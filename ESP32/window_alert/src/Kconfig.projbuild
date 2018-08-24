@@ -1,7 +1,7 @@
 menu "Build"
 
     choice BUILD_VARIANT
-        prompt "Product environment"
+        prompt "Build variant"
         default BUILD_DEBUG
 
         config BUILD_DEBUG
