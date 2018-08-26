@@ -182,9 +182,10 @@ void publishEnvironmentData() {
 
     float temperature(NAN), humidity(NAN), pressure(NAN);
 
-    temperature = pEnvironmentSensor->readTemperature();
     humidity = pEnvironmentSensor->readHumidity();
     pressure = pEnvironmentSensor->readPressure();
+    // don't read temperature first, as the value is in 50 % of executions -105 °C
+    temperature = pEnvironmentSensor->readTemperature();
 
 
     char strTemperature[32];
