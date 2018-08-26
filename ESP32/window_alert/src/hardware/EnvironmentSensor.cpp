@@ -36,8 +36,9 @@ bool EnvironmentSensor::begin() {
     logger.setPrefix(printTag);
     logger.setSuffix(printNewline);
 
+    Wire.begin(CONFIG_I2C_SDA_GPIO_PIN, CONFIG_I2C_SDC_GPIO_PIN);
+
     if (mSensor == Sensor::BME280) {
-        Wire.begin(CONFIG_I2C_SDA_GPIO_PIN, CONFIG_I2C_SDC_GPIO_PIN);
 
         int attempts = 0;
         while(!mpBme280->begin(BME_280_I2C_ADDRESS)) {
@@ -52,7 +53,6 @@ bool EnvironmentSensor::begin() {
         }
     }
     else if (mSensor == Sensor::BME680) {
-        Wire.begin(CONFIG_I2C_SDA_GPIO_PIN, CONFIG_I2C_SDC_GPIO_PIN);
 
         int attempts = 0;
         while(!mpBme680->begin(BME_680_I2C_ADDRESS)) {
