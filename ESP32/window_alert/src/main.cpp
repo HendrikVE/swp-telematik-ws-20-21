@@ -402,13 +402,13 @@ void lazySetup() {
 
     #ifndef CONFIG_SENSOR_NONE
 
-    #if CONFIG_SENSOR_BME_280
-        pEnvironmentSensor = new EnvironmentSensor(Sensor::BME280);
-    #endif /*CONFIG_SENSOR_BME_280*/
+        #if CONFIG_SENSOR_BME_280
+            pEnvironmentSensor = new EnvironmentSensor(Sensor::BME280);
+        #endif /*CONFIG_SENSOR_BME_280*/
 
-    #if CONFIG_SENSOR_BME_680
-        pEnvironmentSensor = new EnvironmentSensor(Sensor::BME680);
-    #endif /*CONFIG_SENSOR_BME_680*/
+        #if CONFIG_SENSOR_BME_680
+            pEnvironmentSensor = new EnvironmentSensor(Sensor::BME680);
+        #endif /*CONFIG_SENSOR_BME_680*/
 
         pEnvironmentSensor->begin();
 
