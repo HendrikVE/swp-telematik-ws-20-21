@@ -11,25 +11,55 @@
 #include "periph/gpio.h"
 #include "msg.h"
 #include "thread.h"
+#include "net/emcute.h"
+#include "net/ipv6/addr.h"
 
 #include "WindowSensor.cpp"
+#include "ConnectivityManager.cpp"
 #include "FlashStorage.h"
 
 #define LOW 0
 #define HIGH 1
 
-#define RCV_QUEUE_SIZE (8)
+#define RCV_QUEUE_SIZE  8
+#define MQTT_QUEUE_SIZE 8
+
+#define EMCUTE_PRIO (THREAD_PRIORITY_MAIN - 1)
+
+#define NUMOFSUBS       16U
+#define TOPIC_MAXLEN    64U
 
 WindowSensor *pWindowSensor1, *pWindowSensor2;
+
+ConnectivityManager connectivityManager;
 
 static kernel_pid_t windowSensorTaskPid;
 static char rcvStack[THREAD_STACKSIZE_DEFAULT + THREAD_EXTRA_STACKSIZE_PRINTF];
 static msg_t rcvQueue[RCV_QUEUE_SIZE];
 
+static char mqttStack[THREAD_STACKSIZE_DEFAULT];
+//static msg_t mqttQueue[MQTT_QUEUE_SIZE];
 
-void build_topic(char *output, const char *room, const char *boardID, const char *measurement) {
+
+void buildTopic(char *output, const char *room, const char *boardID, const char *measurement) {
 
     sprintf(output, "room/%s/%s/%s", room, boardID, measurement);
+}
+
+void publishMqtt(char* topicName, char* data) {
+
+    emcute_topic_t topic;
+    unsigned flags = EMCUTE_QOS_0;
+    flags |= EMCUTE_QOS_2;
+
+    topic.name = topicName;
+    if (emcute_reg(&topic) != EMCUTE_OK) {
+        puts("error: unable to obtain topic ID");
+    }
+
+    if (emcute_pub(&topic, data, strlen(data), flags) != EMCUTE_OK) {
+        printf("error: unable to publish data to topic '%s [%i]'\n", topic.name, (int)topic.id);
+    }
 }
 
 void publishEnvironmentData() {
@@ -46,14 +76,38 @@ void publishEnvironmentData() {
     saul_reg_read(devHum, &humidity);
     saul_reg_read(devPres, &pressure);
 
-    printf("temperature: ");
-    printf("%.1f\n", round(temperature.val[0] * pow(10, temperature.scale) * 10.0) / 10.0);
 
-    printf("humidity: ");
-    printf("%d\n", (int) round(humidity.val[0] * pow(10, humidity.scale)));
+    char strTemperature[32];
+    sprintf(strTemperature, "%.1f", round(temperature.val[0] * pow(10, temperature.scale) * 10.0) / 10.0);
 
-    printf("pressure: ");
-    printf("%d\n", (int) round(pressure.val[0] * pow(10, pressure.scale)));
+    printf("temperature: %s\n", strTemperature);
+
+    char strHumidity[32];
+    sprintf(strHumidity, "%d", (int) round(humidity.val[0] * pow(10, humidity.scale)));
+
+    printf("humidity: %s\n", strHumidity);
+
+    char strPressure[32];
+    sprintf(strPressure, "%d", (int) round(pressure.val[0] * pow(10, pressure.scale)));
+
+    printf("pressure: %s\n", strPressure);
+
+
+    char topicTemperature[128];
+    buildTopic(topicTemperature, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_TEMPERATURE);
+
+    char topicHumidity[128];
+    buildTopic(topicHumidity, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_HUMIDITY);
+
+    char topicPressure[128];
+    buildTopic(topicPressure, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_PRESSURE);
+
+    publishMqtt(topicTemperature, strTemperature);
+    publishMqtt(topicHumidity, strHumidity);
+    publishMqtt(topicPressure, strPressure);
+
+
+    printf("\n");
 }
 
 static void* windowSensorTask(void* arg) {
@@ -94,15 +148,33 @@ static void* windowSensorTask(void* arg) {
         sprintf(output, "window sensor #%i: ", windowSensor->getId());
         printf("%s", output);
 
+        const char* windowState;
+
         if (currentState == LOW) {
             printf("open");
             windowSensor->setLastState(LOW);
-            //mqttClient.publish(windowSensor->getMqttTopic(), "OPEN", false, 2);
+            windowState = "OPEN";
         }
         else if (currentState == HIGH) {
             printf("closed");
             windowSensor->setLastState(HIGH);
-            //mqttClient.publish(windowSensor->getMqttTopic(), "CLOSED", false, 2);
+            windowState = "CLOSED";
+        }
+        printf("\n");
+
+        emcute_topic_t topic;
+        unsigned flags = EMCUTE_QOS_0;
+        flags |= EMCUTE_QOS_2;
+
+        topic.name = windowSensor->getMqttTopic();
+        if (emcute_reg(&topic) != EMCUTE_OK) {
+            puts("error: unable to obtain topic ID");
+            return NULL;
+        }
+
+        if (emcute_pub(&topic, windowState, strlen(windowState), flags) != EMCUTE_OK) {
+            printf("error: unable to publish data to topic '%s [%i]'\n", topic.name, (int)topic.id);
+            return NULL;
         }
 
         windowSensor->setTimestampLastInterrupt(current_time);
@@ -145,7 +217,7 @@ void configureWindowSensorSystem() {
 
     #if CONFIG_SENSOR_WINDOW_1_ENABLED
 
-        build_topic(topic, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_WINDOW_1_MQTT_TOPIC);
+    buildTopic(topic, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_WINDOW_1_MQTT_TOPIC);
 
         WindowSensor windowSensor1(
                 CONFIG_SENSOR_WINDOW_1_GPIO_INPUT,
@@ -161,7 +233,7 @@ void configureWindowSensorSystem() {
 
     #if CONFIG_SENSOR_WINDOW_2_ENABLED
 
-    build_topic(topic, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_WINDOW_2_MQTT_TOPIC);
+    buildTopic(topic, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_WINDOW_2_MQTT_TOPIC);
 
         WindowSensor windowSensor2(
                 CONFIG_SENSOR_WINDOW_2_GPIO_INPUT,
@@ -176,12 +248,21 @@ void configureWindowSensorSystem() {
     #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
 }
 
+static void* emcuteThread(void* arg) {
+
+    emcute_run(CONFIG_MQTT_SERVER_PORT, CONFIG_DEVICE_ID);
+
+    return NULL;
+}
+
 void initWindowSensorSystem() {
 
     printf("init task queue\n");
     windowSensorTaskPid = thread_create(rcvStack, sizeof(rcvStack), THREAD_PRIORITY_MAIN - 1, 0, windowSensorTask, NULL, "windowSensorTask");
 
     configureWindowSensorSystem();
+
+    thread_create(mqttStack, sizeof(mqttStack), EMCUTE_PRIO, 0, emcuteThread, NULL, "emcute");
 }
 
 bool setup() {
@@ -190,6 +271,9 @@ bool setup() {
     printf("%s (%i)\n", APP_VERSION_NAME, APP_VERSION_CODE);
 
     initWindowSensorSystem();
+
+    connectivityManager.begin();
+    connectivityManager.initMqtt();
 
     return true;
 }
