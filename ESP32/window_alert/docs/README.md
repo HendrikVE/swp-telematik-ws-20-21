@@ -19,6 +19,20 @@ Within **make menuconfig** do the following (optional) configurations:
     - DON'T set **Component config -> ESP32-specific -> CPU frequency** to 80 MHz
 2. To fix problem with MQTT (https://github.com/tuanpmt/espmqtt/issues/48)
     - enable **Component config -> LWIP -> Support LWIP socket select() only**
+3. To make binary smaller
+    - Arduino Configuration -> Include only specific Arduino libraries (make a tick here)
+        - only include the following:
+            - HTTPClient
+            - SPI
+            - Update
+            - WiFi
+            - WiFiClientSecure
+            - Wire
+            - Adafruit_BME280
+            - Adafruit_BME680
+            - Adafruit_Sensor
+            - Arduino_Log
+            - arduino_mqtt
 
 # Build for production use
 1. Log output -> Default log verbosity -> No output (make a tick here)
