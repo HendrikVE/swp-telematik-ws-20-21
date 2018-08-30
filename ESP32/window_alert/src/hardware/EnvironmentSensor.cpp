@@ -36,7 +36,7 @@ bool EnvironmentSensor::begin() {
     logger.setPrefix(printTag);
     logger.setSuffix(printNewline);
 
-    Wire.begin(CONFIG_I2C_SDA_GPIO_PIN, CONFIG_I2C_SDC_GPIO_PIN);
+    Wire.begin(CONFIG_I2C_SDA_GPIO_PIN, CONFIG_I2C_SCL_GPIO_PIN);
 
     if (mSensor == Sensor::BME280) {
 

@@ -104,7 +104,7 @@ menu "I2C"
         int "GPIO pin for SDA"
         default 23
 
-    config I2C_SDC_GPIO_PIN
+    config I2C_SCL_GPIO_PIN
         int "GPIO pin for SCL"
         default 27
 
