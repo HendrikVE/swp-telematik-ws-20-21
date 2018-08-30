@@ -36,5 +36,6 @@ Within **make menuconfig** do the following (optional) configurations:
 
 # Build for production use
 1. Log output -> Default log verbosity -> No output (make a tick here)
-2. Build -> Build variant -> Production (make a tick here)
-3. Compiler options -> Optimization Level -> Release (-Os) (make a tick here)
+2. Arduino Configuration -> Debug Log Configuration -> Default log level -> No output (make a tick here)
+3. Build -> Build variant -> Production (make a tick here)
+4. Compiler options -> Optimization Level -> Release (-Os) (make a tick here)
