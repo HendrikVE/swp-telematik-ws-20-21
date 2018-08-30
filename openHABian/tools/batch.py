@@ -152,15 +152,15 @@ def get_version_code():
 
     output = process.communicate()[0]
 
-    index_equal = output.rfind('=')
-    index_semicolon = output.rfind(';')
-    output_substring = output[index_equal+1:index_semicolon].strip()
+    output = output.replace('#define', '')
+    output = output.replace('APP_VERSION_CODE', '')
+    output = output.strip()
 
     try:
-        version_code = int(output_substring)
+        version_code = int(output)
 
     except ValueError:
-        sys.exit('Can not cast version code "%s" to int' % output_substring)
+        sys.exit('Can not cast version code "%s" to int' % output)
 
     return version_code
 
