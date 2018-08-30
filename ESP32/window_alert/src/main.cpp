@@ -302,7 +302,7 @@ void handleWakeup(){
 
 void startDeviceSleep(uint64_t sleepIntervalMS) {
 
-    connectivityManager.turnOnWifi();
+    connectivityManager.turnOffWifi();
 
     #if CONFIG_SENSOR_WINDOW_1_ENABLED
 
