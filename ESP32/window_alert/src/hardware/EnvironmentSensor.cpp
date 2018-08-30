@@ -3,10 +3,6 @@
 #include "ArduinoLog.h"
 #include "Wire.h"
 
-#include "Adafruit_Sensor.h"
-#include "Adafruit_BME280.h"
-#include "Adafruit_BME680.h"
-
 #include "EnvironmentSensor.h"
 
 #define BME_280_I2C_ADDRESS 0x76
@@ -30,13 +26,13 @@ bool EnvironmentSensor::supportingGasResistance() {
     return mSensor == Sensor::BME680;
 }
 
-bool EnvironmentSensor::begin() {
+bool EnvironmentSensor::begin(int sdaPin, int sclPin) {
 
     logger.begin(LOG_LEVEL_VERBOSE, &Serial);
     logger.setPrefix(printTag);
     logger.setSuffix(printNewline);
 
-    Wire.begin(CONFIG_I2C_SDA_GPIO_PIN, CONFIG_I2C_SCL_GPIO_PIN);
+    Wire.begin(sdaPin, sclPin);
 
     if (mSensor == Sensor::BME280) {
 

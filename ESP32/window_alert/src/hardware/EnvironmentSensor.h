@@ -3,6 +3,10 @@
 
 #include <stdbool.h>
 
+#include "Adafruit_Sensor.h"
+#include "Adafruit_BME280.h"
+#include "Adafruit_BME680.h"
+
 enum class Sensor {UNDEFINED, BME280, BME680};
 
 class EnvironmentSensor {
@@ -13,7 +17,7 @@ public:
 
     bool supportingGasResistance();
 
-    bool begin();
+    bool begin(int sdaPin, int sclPin);
 
     bool isInitialized();
 

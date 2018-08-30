@@ -411,7 +411,7 @@ void lazySetup() {
             pEnvironmentSensor = new EnvironmentSensor(Sensor::BME680);
         #endif /*CONFIG_SENSOR_BME_680*/
 
-        pEnvironmentSensor->begin();
+        pEnvironmentSensor->begin(CONFIG_I2C_SDA_GPIO_PIN, CONFIG_I2C_SCL_GPIO_PIN);
 
     #endif /*CONFIG_SENSOR_NONE*/
 }
