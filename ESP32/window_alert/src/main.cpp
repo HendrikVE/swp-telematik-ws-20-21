@@ -16,13 +16,13 @@
 #include "ArduinoLog.h"
 #include "math.h"
 
-#include "hardware/WindowSensor.cpp"
-#include "manager/ConnectivityManager.cpp"
-#include "manager/UpdateManager.cpp"
+#include "hardware/WindowSensor.h"
+#include "manager/ConnectivityManager.h"
+#include "manager/UpdateManager.h"
 #include "storage/FlashStorage.h"
 
 #ifndef CONFIG_SENSOR_NONE
-    #include "hardware/EnvironmentSensor.cpp"
+    #include "hardware/EnvironmentSensor.h"
     EnvironmentSensor* pEnvironmentSensor;
 #endif /*CONFIG_SENSOR_NONE*/
 
