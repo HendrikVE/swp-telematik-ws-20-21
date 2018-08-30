@@ -7,7 +7,6 @@
 #include "ArduinoLog.h"
 #include "WiFiClientSecure.h"
 #include "MQTT.h"
-#include "../storage/FlashStorage.h"
 
 class ConnectivityManager {
 

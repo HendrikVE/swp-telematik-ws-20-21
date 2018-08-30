@@ -56,8 +56,6 @@ private:
 
 };
 
-int WindowSensor::msInstanceID = -1;
-
 struct WindowSensorEvent {
     WindowSensor* windowSensor;
     bool level;

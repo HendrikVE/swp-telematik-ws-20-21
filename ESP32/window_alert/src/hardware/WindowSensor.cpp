@@ -1,9 +1,13 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include "driver/rtc_io.h"
+
 #include "Arduino.h"
 
 #include "WindowSensor.h"
+
+int WindowSensor::msInstanceID = -1;
 
 WindowSensor::WindowSensor(int gpioInput, int gpioOutput, int interruptDebounce, char* mqttTopic) {
 

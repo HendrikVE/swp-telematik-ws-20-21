@@ -3,6 +3,8 @@
 #include "ArduinoLog.h"
 
 #include "UpdateManager.h"
+#include "../storage/FlashStorage.h"
+#include "../MANIFEST.h"
 
 void UpdateManager::begin() {
     logger.begin(LOG_LEVEL_VERBOSE, &Serial);
