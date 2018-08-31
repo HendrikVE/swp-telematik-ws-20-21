@@ -6,19 +6,26 @@
 #include "../storage/FlashStorage.h"
 #include "../MANIFEST.h"
 
-void UpdateManager::begin() {
+void UpdateManager::begin(const char* host, const char* filename, const char* user, const char* password, const char* deviceID) {
+
     logger.begin(LOG_LEVEL_VERBOSE, &Serial);
     logger.setPrefix(printTag);
     logger.setSuffix(printNewline);
+
+    this->mHost = host;
+    this->mFilename = filename;
+    this->mUser = user;
+    this->mPassword = password;
+    this->mDeviceID = deviceID;
 }
 
 void UpdateManager::checkForOTAUpdate() {
 
     char request[256];
-    sprintf(request, "https://%s/%s/%s/%s", (char*) CONFIG_OTA_HOST, (char*) CONFIG_DEVICE_ID, String(APP_VERSION_CODE + 1).c_str(), (char*) CONFIG_OTA_FILENAME);
+    sprintf(request, "https://%s/%s/%s/%s", this->mHost, this->mDeviceID, String(APP_VERSION_CODE + 1).c_str(), this->mFilename);
 
-    mHttpClient.begin((char*) CONFIG_OTA_HOST, 4443, request, (char*) ca_crt_start, (char*) client_crt_start, (char*) client_key_start);
-    mHttpClient.setAuthorization(CONFIG_OTA_SERVER_USERNAME, CONFIG_OTA_SERVER_PASSWORD);
+    mHttpClient.begin(this->mHost, 4443, request, (char*) ca_crt_start, (char*) client_crt_start, (char*) client_key_start);
+    mHttpClient.setAuthorization(this->mUser, this->mPassword);
 
     int httpCode = mHttpClient.GET();
 

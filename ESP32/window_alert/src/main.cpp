@@ -399,7 +399,7 @@ void lazySetup() {
     logger.notice("device is running version: %s", strVersion);
 
     updateManager = new UpdateManager();
-    updateManager->begin();
+    updateManager->begin(CONFIG_OTA_HOST, CONFIG_OTA_FILENAME, CONFIG_OTA_SERVER_USERNAME, CONFIG_OTA_SERVER_PASSWORD, CONFIG_DEVICE_ID);
 
     #ifndef CONFIG_SENSOR_NONE
 

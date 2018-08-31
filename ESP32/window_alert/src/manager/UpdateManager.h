@@ -9,13 +9,19 @@ class UpdateManager {
 
 public:
 
-    void begin();
+    void begin(const char* host, const char* filename, const char* user, const char* password, const char* deviceID);
 
     void checkForOTAUpdate();
 
 private:
 
     HTTPClient mHttpClient;
+
+    const char* mHost;
+    const char* mFilename;
+    const char* mUser;
+    const char* mPassword;
+    const char* mDeviceID;
 
     Logging logger;
 
