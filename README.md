@@ -1,7 +1,7 @@
 # smarthome2
 Arndt, Robert und Hendrik
 
-Clone this repository with **"git clone --recurse-submodules https://github.com/fu-ilab-swp18/smarthome2"**
+Clone this repository with **"git clone --recurse-submodules https://github.com/HendrikVE/smarthome2"**
 
 This project consists of 3 basic components:
 - openHABian (not included here)
