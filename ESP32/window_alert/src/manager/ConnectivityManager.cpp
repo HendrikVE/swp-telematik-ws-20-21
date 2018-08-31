@@ -45,9 +45,9 @@ bool ConnectivityManager::checkWifiConnection() {
     return true;
 }
 
-bool ConnectivityManager::initWifi() {
+bool ConnectivityManager::initWifi(const char* ssid, const char* password) {
     //WiFi.onEvent(wifiEvent);
-    WiFi.begin(CONFIG_ESP_WIFI_SSID, CONFIG_ESP_WIFI_PASSWORD);
+    WiFi.begin(ssid, password);
 
     return checkWifiConnection();
 }
@@ -69,7 +69,7 @@ bool ConnectivityManager::checkMqttConnection() {
             logger.notice("Connect to MQTT broker...");
 
             int attempts = 0;
-            while (!mMqttClient.connect(CONFIG_DEVICE_ID, CONFIG_MQTT_USER, CONFIG_MQTT_PASSWORD)) {
+            while (!mMqttClient.connect(this->mMqttClientID, this->mMqttUser, this->mMqttPassword)) {
                 //connect has timeout set by mMqttClient.setOptions()
 
                 attempts++;
@@ -86,14 +86,18 @@ bool ConnectivityManager::checkMqttConnection() {
     return true;
 }
 
-bool ConnectivityManager::initMqtt() {
+bool ConnectivityManager::initMqtt(const char* address, int port, const char* user, const char* password, const char* clientID) {
 
     mWifiClientSecure.setCACert((char*) ca_crt_start);
     mWifiClientSecure.setCertificate((char*) client_crt_start);
     mWifiClientSecure.setPrivateKey((char*) client_key_start);
 
+    this->mMqttUser = user;
+    this->mMqttPassword = password;
+    this->mMqttClientID = clientID;
+
     mMqttClient.setOptions(10, true, 500);
-    mMqttClient.begin(CONFIG_MQTT_SERVER_IP, CONFIG_MQTT_SERVER_PORT, mWifiClientSecure);
+    mMqttClient.begin(address, port, mWifiClientSecure);
 
     return checkMqttConnection();
 }

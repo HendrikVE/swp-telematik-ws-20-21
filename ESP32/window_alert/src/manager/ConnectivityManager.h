@@ -18,7 +18,7 @@ public:
 
     bool checkWifiConnection();
 
-    bool initWifi();
+    bool initWifi(const char* ssid, const char* password);
 
     void turnOnWifi();
 
@@ -26,7 +26,7 @@ public:
 
     bool checkMqttConnection();
 
-    bool initMqtt();
+    bool initMqtt(const char* address, int port, const char* user, const char* password, const char* clientID);
 
     MQTTClient* getMqttClient();
 
@@ -34,6 +34,10 @@ private:
 
     WiFiClientSecure mWifiClientSecure;
     MQTTClient mMqttClient;
+
+    const char* mMqttUser;
+    const char* mMqttPassword;
+    const char* mMqttClientID;
 
     Logging logger;
 
