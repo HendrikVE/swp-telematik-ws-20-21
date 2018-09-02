@@ -26,19 +26,19 @@ public:
 
         sock_udp_ep_t gw;
         gw.family = AF_INET;
-        gw.port = CONFIG_MQTT_BROKER_PORT;
+        gw.port = CONFIG_MQTTSN_GATEWAY_PORT;
 
-        ipv6_addr_from_str((ipv6_addr_t*) &gw.addr.ipv6, CONFIG_MQTT_BROKER_IP);
+        ipv6_addr_from_str((ipv6_addr_t*) &gw.addr.ipv6, CONFIG_MQTTSN_GATEWAY_IP);
 
         char *topic = NULL;
         char *message = NULL;
         size_t len = 0;
 
         if (emcute_con(&gw, true, topic, message, len, 0) != EMCUTE_OK) {
-            printf("error: unable to connect to [%s]:%i\n", CONFIG_MQTT_BROKER_IP, (int)gw.port);
+            printf("error: unable to connect to [%s]:%i\n", CONFIG_MQTTSN_GATEWAY_IP, (int)gw.port);
             return false;
         }
-        printf("Successfully connected to gateway at [%s]:%i\n", CONFIG_MQTT_BROKER_IP, (int)gw.port);
+        printf("Successfully connected to gateway at [%s]:%i\n", CONFIG_MQTTSN_GATEWAY_IP, (int)gw.port);
 
         mutex_unlock(&mMqttMutex);
 
