@@ -162,20 +162,7 @@ static void* windowSensorTask(void* arg) {
         }
         printf("\n");
 
-        emcute_topic_t topic;
-        unsigned flags = EMCUTE_QOS_0;
-        flags |= EMCUTE_QOS_2;
-
-        topic.name = windowSensor->getMqttTopic();
-        if (emcute_reg(&topic) != EMCUTE_OK) {
-            puts("error: unable to obtain topic ID");
-            return NULL;
-        }
-
-        if (emcute_pub(&topic, windowState, strlen(windowState), flags) != EMCUTE_OK) {
-            printf("error: unable to publish data to topic '%s [%i]'\n", topic.name, (int)topic.id);
-            return NULL;
-        }
+        publishMqtt(windowSensor->getMqttTopic(), (char*) windowState);
 
         windowSensor->setTimestampLastInterrupt(current_time);
     }
