@@ -250,7 +250,7 @@ void configureWindowSensorSystem() {
 
 static void* emcuteThread(void* arg) {
 
-    emcute_run(CONFIG_MQTT_SERVER_PORT, CONFIG_DEVICE_ID);
+    emcute_run(CONFIG_MQTT_BROKER_PORT, CONFIG_DEVICE_ID);
 
     return NULL;
 }
