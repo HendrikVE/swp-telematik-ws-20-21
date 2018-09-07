@@ -98,7 +98,7 @@ tar -xzf $file && rm $file
 
 printf "\nSetting up esp-idf...\n"
 git clone --recursive https://github.com/espressif/esp-idf.git
-git -C esp-idf checkout v3.0.3
+git -C esp-idf checkout v3.1
 git -C esp-idf submodule update --init --recursive
 
 printf "\nUpdating ~/.bash_profile...\n"
