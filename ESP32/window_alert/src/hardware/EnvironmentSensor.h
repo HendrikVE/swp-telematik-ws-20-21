@@ -6,6 +6,7 @@
 #include "Adafruit_Sensor.h"
 #include "Adafruit_BME280.h"
 #include "Adafruit_BME680.h"
+#include "bme680.h"
 
 enum class Sensor {UNDEFINED, BME280, BME680};
 

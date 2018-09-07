@@ -47,6 +47,13 @@ bool EnvironmentSensor::begin(int sdaPin, int sclPin) {
 
             delay(500);
         }
+
+        mpBme280->setSampling(Adafruit_BME280::MODE_FORCED,
+                              Adafruit_BME280::SAMPLING_X1,
+                              Adafruit_BME280::SAMPLING_X1,
+                              Adafruit_BME280::SAMPLING_X1,
+                              Adafruit_BME280::FILTER_OFF,
+                              Adafruit_BME280::STANDBY_MS_0_5);
     }
     else if (mSensor == Sensor::BME680) {
 
@@ -61,6 +68,11 @@ bool EnvironmentSensor::begin(int sdaPin, int sclPin) {
 
             delay(500);
         }
+
+        mpBme680->setTemperatureOversampling(BME680_OS_1X);
+        mpBme680->setPressureOversampling(BME680_OS_1X);
+        mpBme680->setHumidityOversampling(BME680_OS_1X);
+        mpBme680->setIIRFilterSize(BME680_FILTER_SIZE_0);
     }
 
     this->mInitiated = true;
