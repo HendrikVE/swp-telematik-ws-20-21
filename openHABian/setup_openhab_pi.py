@@ -218,7 +218,7 @@ def setup_CA():
         certificates generated as shown here: https://jamielinux.com/docs/openssl-certificate-authority/index.html
         """
 
-    print('setup SSL for Mosquitto MQTT broker')
+    print('setup CA')
 
     host_ipv4 = get_host_ipv4()
     host_name = get_host_name()
@@ -250,10 +250,10 @@ def setup_CA():
                                                                                                     HOSTNAME=host_ipv4,
                                                                                                     CLIENT_NAME=client_name))
 
-            get('ca.crt', os.path.join('..', 'ESP32', 'window_alert', 'main', 'storage', 'certs', 'ca.crt'), use_sudo=True)
-            get('%s.crt' % client_name, os.path.join('..', 'ESP32', 'window_alert', 'main', 'storage', 'certs', 'client.crt'),
+            get('ca.crt', os.path.join('..', 'ESP32', 'window_alert', 'src', 'storage', 'certs', 'ca.crt'), use_sudo=True)
+            get('%s.crt' % client_name, os.path.join('..', 'ESP32', 'window_alert', 'src', 'storage', 'certs', 'client.crt'),
                 use_sudo=True)
-            get('%s.key' % client_name, os.path.join('..', 'ESP32', 'window_alert', 'main', 'storage', 'certs', 'client.key'),
+            get('%s.key' % client_name, os.path.join('..', 'ESP32', 'window_alert', 'src', 'storage', 'certs', 'client.key'),
                 use_sudo=True)
 
         sudo('chown -R openhab:openhabian %s' % ca_dir)
