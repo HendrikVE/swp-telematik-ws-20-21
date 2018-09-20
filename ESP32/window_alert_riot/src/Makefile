@@ -2,9 +2,9 @@
 APPLICATION = window_alert
 
 # If no BOARD is found in the environment, use this default:
-BOARD ?= esp32-generic
+BOARD ?= esp32-wroom-32
 
-BOARD_WHITELIST := esp32-generic
+BOARD_WHITELIST := esp32-wroom-32
 
 # This has to be the absolute path to the RIOT base directory:
 RIOTBASE ?= $(CURDIR)/../../../../..
