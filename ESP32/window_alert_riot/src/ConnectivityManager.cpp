@@ -1,11 +1,12 @@
 #include <stdbool.h>
 
 #include "mutex.h"
-#include "msg.h"
+/*#include "msg.h"
 #include "net/ipv6/addr.h"
 #include "net/gnrc.h"
 #include "net/gnrc/netif.h"
 #include "net/emcute.h"
+*/
 
 
 class ConnectivityManager {
@@ -24,7 +25,7 @@ public:
 
         mutex_lock(&mMqttMutex);
 
-        sock_udp_ep_t gw;
+        /*sock_udp_ep_t gw;
         gw.family = AF_INET;
         gw.port = CONFIG_MQTTSN_GATEWAY_PORT;
 
@@ -38,7 +39,7 @@ public:
             printf("error: unable to connect to [%s]:%i\n", CONFIG_MQTTSN_GATEWAY_IP, (int)gw.port);
             return false;
         }
-        printf("Successfully connected to gateway at [%s]:%i\n", CONFIG_MQTTSN_GATEWAY_IP, (int)gw.port);
+        printf("Successfully connected to gateway at [%s]:%i\n", CONFIG_MQTTSN_GATEWAY_IP, (int)gw.port);*/
 
         mutex_unlock(&mMqttMutex);
 

@@ -9,7 +9,7 @@ BOARD_WHITELIST := esp32-wroom-32
 # This has to be the absolute path to the RIOT base directory:
 RIOTBASE ?= $(CURDIR)/../../../../..
 
-USEMODULE += esp_wifi
+# USEMODULE += esp_wifi
 
 USEMODULE += saul_default
 USEMODULE += bme280
@@ -17,11 +17,11 @@ USEMODULE += bme280
 USEMODULE += xtimer
 USEMODULE += periph_gpio_irq
 
-USEMODULE += gnrc_netdev_default
+# USEMODULE += gnrc_netdev_default
 # USEMODULE += auto_init_gnrc_netif
-USEMODULE += gnrc_sock_udp
-USEMODULE += gnrc_ipv6_default
-USEMODULE += emcute
+# USEMODULE += gnrc_sock_udp
+# USEMODULE += gnrc_ipv6_default
+# USEMODULE += emcute
 
 # Comment this out to disable code in RIOT that does safety checking
 # which is not needed in a production environment but helps in the

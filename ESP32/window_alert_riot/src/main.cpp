@@ -9,10 +9,13 @@
 #include "saul_reg.h"
 #include "xtimer.h"
 #include "periph/gpio.h"
-#include "msg.h"
+
 #include "thread.h"
+/*
+#include "msg.h"
 #include "net/emcute.h"
 #include "net/ipv6/addr.h"
+*/
 
 #include "WindowSensor.cpp"
 #include "ConnectivityManager.cpp"
@@ -48,7 +51,7 @@ void buildTopic(char *output, const char *room, const char *boardID, const char 
 
 void publishMqtt(char* topicName, char* data) {
 
-    emcute_topic_t topic;
+    /*emcute_topic_t topic;
     unsigned flags = EMCUTE_QOS_0;
     flags |= EMCUTE_QOS_2;
 
@@ -59,7 +62,7 @@ void publishMqtt(char* topicName, char* data) {
 
     if (emcute_pub(&topic, data, strlen(data), flags) != EMCUTE_OK) {
         printf("error: unable to publish data to topic '%s [%i]'\n", topic.name, (int)topic.id);
-    }
+    }*/
 }
 
 void publishEnvironmentData() {
@@ -237,7 +240,7 @@ void configureWindowSensorSystem() {
 
 static void* emcuteThread(void* arg) {
 
-    emcute_run(CONFIG_MQTTSN_GATEWAY_PORT, CONFIG_DEVICE_ID);
+    //emcute_run(CONFIG_MQTTSN_GATEWAY_PORT, CONFIG_DEVICE_ID);
 
     return NULL;
 }
