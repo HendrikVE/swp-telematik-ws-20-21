@@ -1,3 +1,5 @@
+CFLAGS += -include $(APPDIR)/periph_conf.h
+
 # name of your application
 APPLICATION = window_alert
 
