@@ -7,6 +7,7 @@
 #include <math.h>
 
 #include "saul_reg.h"
+#include "fmt.h"
 #include "xtimer.h"
 #include "periph/gpio.h"
 
@@ -81,18 +82,15 @@ void publishEnvironmentData() {
 
 
     char strTemperature[32];
-    sprintf(strTemperature, "%.1f", round(temperature.val[0] * pow(10, temperature.scale) * 10.0) / 10.0);
-
+    fmt_float(strTemperature, (float) (round((temperature.val[0] * pow(10, temperature.scale) * 10.0)) / 10.0), 1);
     printf("temperature: %s\n", strTemperature);
 
     char strHumidity[32];
     sprintf(strHumidity, "%d", (int) round(humidity.val[0] * pow(10, humidity.scale)));
-
     printf("humidity: %s\n", strHumidity);
 
     char strPressure[32];
     sprintf(strPressure, "%d", (int) round(pressure.val[0] * pow(10, pressure.scale)));
-
     printf("pressure: %s\n", strPressure);
 
 
@@ -108,7 +106,6 @@ void publishEnvironmentData() {
     publishMqtt(topicTemperature, strTemperature);
     publishMqtt(topicHumidity, strHumidity);
     publishMqtt(topicPressure, strPressure);
-
 
     printf("\n");
 }
