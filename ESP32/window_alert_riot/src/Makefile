@@ -15,6 +15,7 @@ USEMODULE += saul_default
 USEMODULE += bme280
 
 USEMODULE += xtimer
+USEMODULE += periph_gpio_irq
 
 USEMODULE += gnrc_netdev_default
 # USEMODULE += auto_init_gnrc_netif
