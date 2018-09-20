@@ -1,4 +1,5 @@
-CFLAGS += -include $(APPDIR)/periph_conf.h
+CFLAGS += -include $(APPDIR)/overrides/bmx280_params.h
+CFLAGS += -include $(APPDIR)/overrides/periph_conf.h
 
 # name of your application
 APPLICATION = window_alert
@@ -29,11 +30,6 @@ USEMODULE += periph_gpio_irq
 # which is not needed in a production environment but helps in the
 # development process:
 CFLAGS += -DDEVELHELP
-
-CFLAGS += -DBMX280_PARAM_I2C_ADDR=0x76
-
-# CFLAGS += -DI2C0_SCL_ADDR=GPIO27
-# CFLAGS += -DI2C0_SDA=GPIO23
 
 CFLAGS += -DCONFIG_SENSOR_WINDOW_1_ENABLED=1
 CFLAGS += -DCONFIG_SENSOR_WINDOW_2_ENABLED=1
