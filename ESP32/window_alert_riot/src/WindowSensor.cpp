@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "periph/gpio.h"
 
