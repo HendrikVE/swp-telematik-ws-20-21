@@ -82,7 +82,11 @@ void publishEnvironmentData() {
 
 
     char strTemperature[32];
-    fmt_float(strTemperature, (float) (round((temperature.val[0] * pow(10, temperature.scale) * 10.0)) / 10.0), 1);
+    int len = fmt_float(strTemperature, (float) (round((temperature.val[0] * pow(10, temperature.scale) * 10.0)) / 10.0), 1);
+    strTemperature[len] = '\0';
+    printf("temperature: %s\n", strTemperature);
+
+    sprintf(strTemperature, "%.1f", round((temperature.val[0] * pow(10, temperature.scale) * 10.0)) / 10.0);
     printf("temperature: %s\n", strTemperature);
 
     char strHumidity[32];
