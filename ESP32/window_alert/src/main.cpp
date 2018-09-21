@@ -11,6 +11,7 @@
 
 #include "driver/rtc_io.h"
 #include "esp_sleep.h"
+#include "nvs_flash.h"
 
 #include "Arduino.h"
 #include "ArduinoLog.h"
@@ -360,7 +361,7 @@ void startDeviceSleep(uint64_t sleepIntervalMS) {
 
     logger.notice("woke up");
 
-    connectivityManager.turnOnWifi();
+    //connectivityManager.turnOnWifi();
 
     // RTC GPIO pins need to be reconfigured as digital GPIO after sleep
     #if CONFIG_SENSOR_WINDOW_1_ENABLED
@@ -424,6 +425,14 @@ void setup() {
         logger.setPrefix(printTag);
         logger.setSuffix(printNewline);
     }
+
+    //Initialize NVS
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        ret = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK(ret);
 
     connectivityManager.begin();
     connectivityManager.initWifi(CONFIG_ESP_WIFI_SSID, CONFIG_ESP_WIFI_PASSWORD);
