@@ -1,0 +1,239 @@
+menu "Build"
+
+    choice BUILD_VARIANT
+        prompt "Build variant"
+        default BUILD_DEBUG
+
+        config BUILD_DEBUG
+            bool "Debug"
+        config BUILD_PRODUCTION
+            bool "Production"
+    endchoice
+
+endmenu
+
+menu "Device config"
+
+    config DEVICE_ROOM
+        string "Room"
+        default "livingroom"
+        help
+            Room, where the device is placed (e.g. used for building the mqtt topic)
+
+    config DEVICE_ID
+        string "Device ID"
+        default "esp32-1"
+        help
+            Device ID (e.g. used as MQTT client ID and for building the MQTT topic)
+
+    choice DEVICE_SLEEP_MODE
+        prompt "Sleep mode to use"
+        default DEEP_SLEEP
+
+        config DEEP_SLEEP
+            bool "Deep sleep"
+        config LIGHT_SLEEP
+            bool "Light sleep"
+    endchoice
+
+endmenu
+
+
+menu "OTA config"
+
+    config OTA_HOST
+        string "OTA server address"
+        default "openhabianpi"
+
+    config OTA_FILENAME
+        string "OTA filename"
+        default "window_alert.bin"
+
+    config OTA_SERVER_USERNAME
+        string "OTA server username"
+        default "esp32_OTA"
+
+    config OTA_SERVER_PASSWORD
+        string "OTA server password"
+        default "your_password"
+
+endmenu
+
+
+menu "WiFi config"
+
+    config ESP_WIFI_SSID
+        string "WiFi SSID"
+        default "your_network_name"
+        help
+            SSID (network name) for the example to connect to.
+
+    config ESP_WIFI_PASSWORD
+        string "WiFi Password"
+        default "your_password"
+        help
+            WiFi password (WPA or WPA2) for the example to use.
+
+endmenu
+
+
+menu "MQTT config"
+
+    config MQTT_USER
+        string "MQTT username"
+        default "your_username"
+
+    config MQTT_PASSWORD
+        string "MQTT password"
+        default "your_password"
+
+    config MQTT_SERVER_IP
+        string "MQTT server ip"
+        default "openhabianpi"
+
+    config MQTT_SERVER_PORT
+        int "MQTT server port"
+        default 8883
+
+endmenu
+
+
+menu "I2C"
+
+    config I2C_SDA_GPIO_PIN
+        int "GPIO pin for SDA"
+        default 23
+
+    config I2C_SCL_GPIO_PIN
+        int "GPIO pin for SCL"
+        default 27
+
+endmenu
+
+
+menu "Sensor config"
+
+    config SENSOR_POLL_INTERVAL_MS
+        int "interval to poll sensor data (in ms)"
+        default 5400000
+
+    menu "Battery check"
+
+        config BATTERY_CHECK_ENABLED
+            bool "enable sensor"
+            default n
+            help
+                Whether the battery level should be checked or not
+
+    endmenu
+
+    menu "Environmental sensor"
+
+        choice ENVIRONMENTAL_SENSOR
+            prompt "Sensor to use"
+            default SENSOR_NONE
+
+            config SENSOR_NONE
+                bool "None"
+            config SENSOR_BME_280
+                bool "BME 280"
+            config SENSOR_BME_680
+                bool "BME 680"
+        endchoice
+
+        config SENSOR_MQTT_TOPIC_TEMPERATURE
+            string "MQTT subtopic for temperature"
+            default "temperature"
+
+        config SENSOR_MQTT_TOPIC_HUMIDITY
+            string "MQTT subtopic for humidity"
+            default "humidity"
+
+        config SENSOR_MQTT_TOPIC_PRESSURE
+            string "MQTT subtopic for pressure"
+            default "pressure"
+
+        config SENSOR_MQTT_TOPIC_GAS
+            string "MQTT subtopic for gas"
+            default "gas"
+            depends on SENSOR_BME_680
+
+    endmenu
+
+    menu "Window sensor 1"
+
+        config SENSOR_WINDOW_1_ENABLED
+            bool "enable sensor"
+            default y
+            help
+                Whether the window sensor 1 should be enabled or disabled
+
+        config SENSOR_WINDOW_1_GPIO_INPUT
+            int "GPIO input pin"
+            default 14
+            help
+                GPIO input pin number
+            depends on SENSOR_WINDOW_1_ENABLED
+
+        config SENSOR_WINDOW_1_GPIO_OUTPUT
+            int "GPIO output pin"
+            default 15
+            help
+                GPIO output pin number
+            depends on SENSOR_WINDOW_1_ENABLED
+
+        config SENSOR_WINDOW_1_INTERRUPT_DEBOUNCE_MS
+            int "Interrupt debounce"
+            default 100
+            help
+                debounce interval for interrupt in ms
+            depends on SENSOR_WINDOW_1_ENABLED
+
+        config SENSOR_WINDOW_1_MQTT_TOPIC
+            string "MQTT topic"
+            default "WindowSensor1"
+            help
+                MQTT subtopic for this sensor
+            depends on SENSOR_WINDOW_1_ENABLED
+
+    endmenu
+
+    menu "Window sensor 2"
+
+        config SENSOR_WINDOW_2_ENABLED
+            bool "enable sensor"
+            default n
+            help
+                Whether the window sensor 2 should be enabled or disabled
+
+        config SENSOR_WINDOW_2_GPIO_INPUT
+            int "GPIO input pin"
+            default 25
+            help
+                GPIO input pin number
+            depends on SENSOR_WINDOW_2_ENABLED
+
+        config SENSOR_WINDOW_2_GPIO_OUTPUT
+            int "GPIO output pin"
+            default 26
+            help
+                GPIO output pin number
+            depends on SENSOR_WINDOW_2_ENABLED
+
+        config SENSOR_WINDOW_2_INTERRUPT_DEBOUNCE_MS
+            int "Interrupt debounce"
+            default 100
+            help
+                debounce interval for interrupt in ms
+            depends on SENSOR_WINDOW_2_ENABLED
+
+        config SENSOR_WINDOW_2_MQTT_TOPIC
+            string "MQTT topic"
+            default "WindowSensor2"
+            help
+                MQTT subtopic for this sensor
+            depends on SENSOR_WINDOW_2_ENABLED
+
+    endmenu
+
+endmenu
