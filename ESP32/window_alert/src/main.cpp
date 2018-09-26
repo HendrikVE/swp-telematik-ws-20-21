@@ -87,7 +87,7 @@ static void windowSensorTask(void* arg) {
         if (xQueueReceive(windowSensorEventQueue, &event, portMAX_DELAY)) {
 
             bool successWiFi = connectivityManager.checkWifiConnection();
-            bool successMqtt = connectivityManager.checkMqttConnection();
+            bool successMqtt = true;//connectivityManager.checkMqttConnection();
 
             if (!successWiFi || !successMqtt) {
                 startDeviceSleep(CONFIG_SENSOR_POLL_INTERVAL_MS);
@@ -120,12 +120,12 @@ static void windowSensorTask(void* arg) {
             if (currentState == LOW) {
                 logger.notice("open");
                 windowSensor->setLastState(LOW);
-                mqttClient.publish(windowSensor->getMqttTopic(), "OPEN", false, 2);
+                //mqttClient.publish(windowSensor->getMqttTopic(), "OPEN", false, 2);
             }
             else if (currentState == HIGH) {
                 logger.notice("closed");
                 windowSensor->setLastState(HIGH);
-                mqttClient.publish(windowSensor->getMqttTopic(), "CLOSED", false, 2);
+                //mqttClient.publish(windowSensor->getMqttTopic(), "CLOSED", false, 2);
             }
 
             windowSensor->setTimestampLastInterrupt(current_time);
@@ -215,9 +215,9 @@ void publishEnvironmentData() {
     char topicPressure[128];
     buildTopic(topicPressure, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_PRESSURE);
 
-    mqttClient.publish(topicTemperature, strTemperature, false, 2);
-    mqttClient.publish(topicHumidity, strHumidity, false, 2);
-    mqttClient.publish(topicPressure, strPressure, false, 2);
+    //mqttClient.publish(topicTemperature, strTemperature, false, 2);
+    //mqttClient.publish(topicHumidity, strHumidity, false, 2);
+    //mqttClient.publish(topicPressure, strPressure, false, 2);
 
     #if CONFIG_SENSOR_MQTT_TOPIC_GAS
 
@@ -234,7 +234,7 @@ void publishEnvironmentData() {
             char topicGas[128];
             buildTopic(topicGas, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_GAS);
 
-            mqttClient.publish(topicGas, strGasResistence, false, 2);
+            //mqttClient.publish(topicGas, strGasResistence, false, 2);
         }
 
     #endif /*CONFIG_SENSOR_MQTT_TOPIC_GAS*/
@@ -396,7 +396,7 @@ void lazySetup() {
     char topicVersion[128];
     buildTopic(topicVersion, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, "version");
 
-    mqttClient.publish(topicVersion, strVersion, true, 2);
+    //mqttClient.publish(topicVersion, strVersion, true, 2);
     logger.notice("device is running version: %s", strVersion);
 
     updateManager = new UpdateManager();
@@ -450,7 +450,7 @@ void loop() {
     delay(10); // <- fixes some issues with WiFi stability
 
     bool successWiFi = connectivityManager.checkWifiConnection();
-    bool successMqtt = connectivityManager.checkMqttConnection();
+    bool successMqtt = true;//connectivityManager.checkMqttConnection();
 
     if (!successWiFi || !successMqtt) {
         startDeviceSleep(CONFIG_SENSOR_POLL_INTERVAL_MS);

@@ -174,7 +174,7 @@ bool ConnectivityManager::initMqtt(const char* address, int port, const char* us
     mMqttClient.setOptions(10, true, 500);
     mMqttClient.begin(address, port, mWifiClientSecure);
 
-    return checkMqttConnection();
+    return true;//checkMqttConnection();
 }
 
 MQTTClient* ConnectivityManager::getMqttClient() {
