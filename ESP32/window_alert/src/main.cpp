@@ -57,7 +57,7 @@ void buildTopic(char* output, const char* room, const char* boardID, const char*
     sprintf(output, "room/%s/%s/%s", room, boardID, measurement);
 }
 
-void IRAM_ATTR isrWindowSensor1() {
+void IRAM_ATTR isrWindowSensor1(void* arg) {
 
     if (queuePaused) return;
 
@@ -68,7 +68,7 @@ void IRAM_ATTR isrWindowSensor1() {
     xQueueSendFromISR(windowSensorEventQueue, &event, NULL);
 }
 
-void IRAM_ATTR isrWindowSensor2() {
+void IRAM_ATTR isrWindowSensor2(void* arg) {
 
     if (queuePaused) return;
 
@@ -244,11 +244,11 @@ void publishEnvironmentData() {
 void updateWindowState() {
 
     #if CONFIG_SENSOR_WINDOW_1_ENABLED
-        isrWindowSensor1();
+        isrWindowSensor1(NULL);
     #endif /*CONFIG_SENSOR_WINDOW_1_ENABLED*/
 
     #if CONFIG_SENSOR_WINDOW_2_ENABLED
-        isrWindowSensor2();
+        isrWindowSensor2(NULL);
     #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
 }
 

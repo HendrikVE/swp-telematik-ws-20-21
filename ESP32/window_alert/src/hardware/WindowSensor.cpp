@@ -1,11 +1,12 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include "driver/gpio.h"
 #include "driver/rtc_io.h"
 
-#include "Arduino.h"
-
 #include "WindowSensor.h"
+
+#define ESP_INTR_FLAG_DEFAULT 0
 
 int WindowSensor::msInstanceID = -1;
 
@@ -20,15 +21,47 @@ WindowSensor::WindowSensor(int gpioInput, int gpioOutput, int interruptDebounce,
     strcpy(this->mMqttTopic, mqttTopic);
 }
 
-void WindowSensor::initGpio(void (*isr)()) {
+void set_gpio_output(int gpio_pin) {
 
-    pinMode(this->getOutputGpio(), OUTPUT);
-    pinMode(this->getInputGpio(), INPUT_PULLDOWN);
+    gpio_config_t io_conf;
 
-    attachInterrupt(digitalPinToInterrupt(this->getInputGpio()), isr, CHANGE);
+    io_conf.intr_type = GPIO_INTR_DISABLE;
+    io_conf.mode = GPIO_MODE_OUTPUT;
+
+    io_conf.pin_bit_mask = (1ULL << gpio_pin);
+
+    io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
+    io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
+
+    gpio_config(&io_conf);
+}
+
+void set_gpio_input(int gpio_pin, bool pull_down, bool pull_up, gpio_int_type_t intr_type) {
+
+    gpio_config_t io_conf;
+
+    io_conf.intr_type = intr_type;
+    io_conf.mode = GPIO_MODE_INPUT;
+
+    io_conf.pin_bit_mask = (1ULL << gpio_pin);
+    
+    io_conf.pull_down_en = pull_down ? GPIO_PULLDOWN_ENABLE : GPIO_PULLDOWN_DISABLE;
+    io_conf.pull_up_en = pull_up ? GPIO_PULLUP_ENABLE : GPIO_PULLUP_DISABLE;
+
+    gpio_config(&io_conf);
+}
+
+void WindowSensor::initGpio(void (*isr)(void*)) {
+
+    set_gpio_output(this->getOutputGpio());
+    set_gpio_input(this->getInputGpio(), true, false, GPIO_INTR_ANYEDGE);
+
+    gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT);
+
+    gpio_isr_handler_add((gpio_num_t) this->getInputGpio(), isr, (void*) this->getInputGpio());
 
     // output always on to detect changes on input
-    digitalWrite(this->getOutputGpio(), HIGH);
+    gpio_set_level((gpio_num_t) this->getOutputGpio(), HIGH);
 }
 
 void WindowSensor::initRtcGpio() {

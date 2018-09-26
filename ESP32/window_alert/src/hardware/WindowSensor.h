@@ -4,7 +4,8 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "Arduino.h"
+#define HIGH 1
+#define LOW 0
 
 class WindowSensor {
 
@@ -12,7 +13,7 @@ public:
 
     WindowSensor(int gpioInput, int gpioOutput, int interruptDebounce, char* mqttTopic);
 
-    void initGpio(void (*isr)());
+    void initGpio(void (*isr)(void*));
 
     void initRtcGpio();
 
