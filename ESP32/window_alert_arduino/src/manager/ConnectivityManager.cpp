@@ -4,6 +4,10 @@
 #include "ArduinoLog.h"
 #include "WiFiClientSecure.h"
 #include "MQTT.h"
+#include "BLEDevice.h"
+#include "BLEUtils.h"
+#include "BLEServer.h"
+
 #include "../storage/FlashStorage.h"
 
 #include "ConnectivityManager.h"
@@ -104,4 +108,36 @@ bool ConnectivityManager::initMqtt(const char* address, int port, const char* us
 
 MQTTClient* ConnectivityManager::getMqttClient() {
     return &mMqttClient;
+}
+
+bool ConnectivityManager::initBluetoothConfig(BLECharacteristicCallbacks* callbacks) {
+
+    BLEDevice::init("MyESP32");
+    BLEServer *pServer = BLEDevice::createServer();
+
+    BLEService *pService = pServer->createService(SERVICE_UUID);
+
+    BLECharacteristic *pCharacteristic = pService->createCharacteristic(
+            CHARACTERISTIC_UUID,
+            BLECharacteristic::PROPERTY_READ |
+            BLECharacteristic::PROPERTY_WRITE
+    );
+
+    pCharacteristic->setCallbacks(callbacks);
+
+    pCharacteristic->setValue("Hello World");
+    pService->start();
+
+    BLEAdvertising *pAdvertising = pServer->getAdvertising();
+    pAdvertising->start();
+
+    return true;
+}
+
+void ConnectivityManager::turnOnBluetooth() {
+
+}
+
+void ConnectivityManager::turnOffBluetooth() {
+
 }

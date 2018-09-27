@@ -8,6 +8,9 @@
 #include "WiFiClientSecure.h"
 #include "MQTT.h"
 
+#define SERVICE_UUID        "2fa1dab8-3eef-40fc-8540-7fc496a10d75"
+#define CHARACTERISTIC_UUID "d3491796-683b-4b9c-aafb-f51a35459d43"
+
 class ConnectivityManager {
 
 public:
@@ -17,18 +20,17 @@ public:
     void begin();
 
     bool checkWifiConnection();
-
     bool initWifi(const char* ssid, const char* password);
-
     void turnOnWifi();
-
     void turnOffWifi();
 
     bool checkMqttConnection();
-
     bool initMqtt(const char* address, int port, const char* user, const char* password, const char* clientID);
-
     MQTTClient* getMqttClient();
+
+    bool initBluetoothConfig(BLECharacteristicCallbacks* callbacks);
+    void turnOnBluetooth();
+    void turnOffBluetooth();
 
 private:
 

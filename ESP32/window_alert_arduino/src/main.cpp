@@ -14,6 +14,7 @@
 
 #include "Arduino.h"
 #include "ArduinoLog.h"
+#include "BLEUtils.h"
 #include "math.h"
 
 #include "hardware/WindowSensor.h"
@@ -350,13 +351,18 @@ void startDeviceSleep(uint64_t sleepIntervalMS) {
     // give a chance for serial prints
     delay(500);
 
-    #if CONFIG_DEEP_SLEEP
-        esp_deep_sleep_start();
-    #endif /*DEEP_SLEEP*/
+    if (!DEBUG) {
+        #if CONFIG_DEEP_SLEEP
+            esp_deep_sleep_start();
+        #endif /*DEEP_SLEEP*/
 
-    #if CONFIG_LIGHT_SLEEP
-        esp_light_sleep_start();
-    #endif /*LIGHT_SLEEP*/
+        #if CONFIG_LIGHT_SLEEP
+            esp_light_sleep_start();
+        #endif /*LIGHT_SLEEP*/
+    }
+    else {
+        delay(sleepIntervalMS);
+    }
 
     logger.notice("woke up");
 
@@ -375,6 +381,22 @@ void startDeviceSleep(uint64_t sleepIntervalMS) {
         pWindowSensor2->initGpio(&isrWindowSensor2);
     #endif /*CONFIG_SENSOR_WINDOW_2_ENABLED*/
 }
+
+class MyCallbacks: public BLECharacteristicCallbacks {
+    void onWrite(BLECharacteristic *pCharacteristic) {
+        std::string value = pCharacteristic->getValue();
+
+        if (value.length() > 0) {
+            Serial.println("*********");
+            Serial.print("New value: ");
+            for (int i = 0; i < value.length(); i++)
+                Serial.print(value[i]);
+
+            Serial.println();
+            Serial.println("*********");
+        }
+    }
+};
 
 static void printTag(Print* _logOutput) {
     char c[12];
@@ -426,6 +448,8 @@ void setup() {
     }
 
     connectivityManager.begin();
+
+    connectivityManager.initBluetoothConfig(new MyCallbacks());
     connectivityManager.initWifi(CONFIG_ESP_WIFI_SSID, CONFIG_ESP_WIFI_PASSWORD);
     connectivityManager.initMqtt(CONFIG_MQTT_SERVER_IP, CONFIG_MQTT_SERVER_PORT, CONFIG_MQTT_USER, CONFIG_MQTT_PASSWORD, CONFIG_DEVICE_ID);
     mqttClient = *connectivityManager.getMqttClient();
