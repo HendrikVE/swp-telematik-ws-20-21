@@ -1,4 +1,12 @@
 <resources>
     <string name="app_name">WindowAlarmConfig</string>
     <string name="title_activity_main">MainActivity</string>
+
+    <string name="button_ok">OK</string>
+    <string name="button_cancel">Cancel</string>
+
+    <string name="dialog_request_coarse_location_title">Access to location not granted</string>
+    <string name="dialog_request_coarse_location_message">Please allow access to location, otherwise your device is not able to scan for BLE devices.</string>
+    <string name="dialog_coarse_location_permitted_title">Access to location permitted</string>
+    <string name="dialog_coarse_location_permitted_message">Please allow access to location, otherwise your device is not able to scan for BLE devices. You need to enable it manually in the app\'s settings page.</string>
 </resources>

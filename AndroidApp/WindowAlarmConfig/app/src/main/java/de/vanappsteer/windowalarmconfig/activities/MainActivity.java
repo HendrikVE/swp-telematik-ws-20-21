@@ -7,9 +7,13 @@ import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -23,9 +27,12 @@ import de.vanappsteer.windowalarmconfig.util.LoggingUtil;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final int ACTIVITY_RESULT_ENABLE_BT = 1;
+    private final int ACTIVITY_RESULT_ENABLE_BLUETOOTH = 1;
+    private final int ACTIVITY_RESULT_ENABLE_LOCATION_PERMISSION = 2;
 
     private final int REQUEST_PERMISSION_COARSE_LOCATION = 1;
+
+    private final String SHARED_PREFERENCES_ASKED_FOR_LOCATION = "SHARED_PREFERENCES_ASKED_FOR_LOCATION";
 
     private final long SCAN_PERIOD = 10 * 1000;
 
@@ -36,6 +43,8 @@ public class MainActivity extends AppCompatActivity {
 
     private ArrayList<BluetoothDevice> mLeDevices = new ArrayList<>();
 
+    private SharedPreferences mSP;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -45,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         mBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+        mSP = PreferenceManager.getDefaultSharedPreferences(this);
 
         checkPermissions();
     }
@@ -52,8 +62,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        if (requestCode == ACTIVITY_RESULT_ENABLE_BT) {
+        if (requestCode == ACTIVITY_RESULT_ENABLE_BLUETOOTH) {
             checkBluetooth();
+        }
+        else if (requestCode == ACTIVITY_RESULT_ENABLE_LOCATION_PERMISSION) {
+            checkPermissions();
         }
     }
 
@@ -66,7 +79,8 @@ public class MainActivity extends AppCompatActivity {
 
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     checkBluetooth();
-                } else {
+                }
+                else {
                     checkPermissions();
                 }
 
@@ -89,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent, ACTIVITY_RESULT_ENABLE_BT);
+            startActivityForResult(enableBtIntent, ACTIVITY_RESULT_ENABLE_BLUETOOTH);
         }
         else {
             LoggingUtil.debug("start scan for ble devices");
@@ -101,28 +115,60 @@ public class MainActivity extends AppCompatActivity {
 
         LoggingUtil.debug("checkPermissions");
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        boolean coarseLocationGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        if (! coarseLocationGranted) {
 
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_COARSE_LOCATION)) {
+            boolean showRationale = ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_COARSE_LOCATION);
+            boolean alreadyAskedBefore = mSP.getBoolean(SHARED_PREFERENCES_ASKED_FOR_LOCATION, false);
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setMessage("Please enable bluetooth on your device").setTitle("Bluetooth not enabled");
-                builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                    @Override
-                    public void onDismiss(DialogInterface dialogInterface) {
-                        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_PERMISSION_COARSE_LOCATION);
-                    }
-                });
-                AlertDialog dialog = builder.create();
-                dialog.show();
+            if ( !showRationale && alreadyAskedBefore) {// user CHECKED "never ask again"
+
+                showLocationRequestDialog(true);
             }
             else {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_PERMISSION_COARSE_LOCATION);
+                showLocationRequestDialog(false);
+
+                SharedPreferences.Editor editor = mSP.edit();
+                editor.putBoolean(SHARED_PREFERENCES_ASKED_FOR_LOCATION, true);
+                editor.apply();
             }
         }
         else {
             checkBluetooth();
         }
+    }
+
+    private void showLocationRequestDialog(boolean neverAskAgain) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        if (neverAskAgain) {
+            builder.setMessage(R.string.dialog_coarse_location_permitted_message).setTitle(R.string.dialog_coarse_location_permitted_title);
+            builder.setPositiveButton(R.string.button_ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    Intent intent = new Intent();
+                    intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                    Uri uri = Uri.fromParts("package", getPackageName(), null);
+                    intent.setData(uri);
+                    startActivityForResult(intent, ACTIVITY_RESULT_ENABLE_LOCATION_PERMISSION);
+                }
+            });
+        }
+        else {
+            builder.setMessage(R.string.dialog_request_coarse_location_message).setTitle(R.string.dialog_request_coarse_location_title);
+            builder.setPositiveButton(R.string.button_ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_PERMISSION_COARSE_LOCATION);
+                }
+            });
+        }
+
+        builder.setCancelable(false);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     private void scanLeDevice(boolean enable) {
