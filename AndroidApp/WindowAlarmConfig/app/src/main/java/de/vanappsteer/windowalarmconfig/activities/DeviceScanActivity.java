@@ -54,6 +54,7 @@ public class DeviceScanActivity extends AppCompatActivity {
     private MyAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
+    private BluetoothGatt mConnectedBluetoothGatt = null;
 
     private SharedPreferences mSP;
 
@@ -78,6 +79,15 @@ public class DeviceScanActivity extends AppCompatActivity {
 
         if (mBluetoothAdapter != null) {
             mBluetoothAdapter.stopLeScan(mLeScanCallback);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (mConnectedBluetoothGatt != null) {
+            mConnectedBluetoothGatt.disconnect();
         }
     }
 
@@ -138,7 +148,7 @@ public class DeviceScanActivity extends AppCompatActivity {
         mAdapter.setOnDeviceSelectionListener(new MyAdapter.OnDeviceSelectionListener() {
             @Override
             void onDeviceSelected(BluetoothDevice device) {
-                device.connectGatt(DeviceScanActivity.this, false, mGattCallback);
+                mConnectedBluetoothGatt = device.connectGatt(DeviceScanActivity.this, false, mGattCallback);
             }
         });
         recyclerView.setAdapter(mAdapter);
