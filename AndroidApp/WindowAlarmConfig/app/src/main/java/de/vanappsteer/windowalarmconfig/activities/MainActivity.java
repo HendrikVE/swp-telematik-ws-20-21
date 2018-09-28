@@ -4,6 +4,7 @@ import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -122,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
         mAdapter.setOnDeviceSelectionListener(new MyAdapter.OnDeviceSelectionListener() {
             @Override
             void onDeviceSelected(BluetoothDevice device) {
-                //BluetoothGatt mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
+                BluetoothGatt mBluetoothGatt = device.connectGatt(MainActivity.this, false, mGattCallback);
             }
         });
         recyclerView.setAdapter(mAdapter);
@@ -244,6 +245,14 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             });
+        }
+    };
+
+    private BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
+
+        @Override
+        public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
+            LoggingUtil.debug("new state: " + newState);
         }
     };
 
