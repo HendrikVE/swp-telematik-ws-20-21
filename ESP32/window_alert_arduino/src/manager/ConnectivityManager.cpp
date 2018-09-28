@@ -112,7 +112,7 @@ MQTTClient* ConnectivityManager::getMqttClient() {
 
 bool ConnectivityManager::initBluetoothConfig(BLECharacteristicCallbacks* callbacks) {
 
-    BLEDevice::init("MyESP32");
+    BLEDevice::init("WindowAlertNode");
     BLEServer *pServer = BLEDevice::createServer();
 
     BLEService *pService = pServer->createService(SERVICE_UUID);
