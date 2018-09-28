@@ -110,26 +110,38 @@ MQTTClient* ConnectivityManager::getMqttClient() {
     return &mMqttClient;
 }
 
+void createCharacteristics(BLEService* bleService, BLECharacteristicCallbacks* callbacks) {
+
+    BLECharacteristic* characteristic;
+
+    for (int i = 0; i < sizeof(CHARACTERISTICS)/sizeof(CHARACTERISTICS[0]) - 1; i++) {
+
+        Serial.println(CHARACTERISTICS[i]);
+
+        characteristic = bleService->createCharacteristic(
+                CHARACTERISTICS[i],
+                BLECharacteristic::PROPERTY_READ |
+                BLECharacteristic::PROPERTY_WRITE
+        );
+
+        characteristic->setCallbacks(callbacks);
+        characteristic->setValue("Hello World");
+    }
+}
+
 bool ConnectivityManager::initBluetoothConfig(BLECharacteristicCallbacks* callbacks) {
 
     BLEDevice::init("WindowAlertNode");
-    BLEServer *pServer = BLEDevice::createServer();
+    BLEServer* bleServer = BLEDevice::createServer();
 
-    BLEService *pService = pServer->createService(SERVICE_UUID);
+    BLEService* bleService = bleServer->createService(SERVICE_UUID);
 
-    BLECharacteristic *pCharacteristic = pService->createCharacteristic(
-            CHARACTERISTIC_UUID,
-            BLECharacteristic::PROPERTY_READ |
-            BLECharacteristic::PROPERTY_WRITE
-    );
+    createCharacteristics(bleService, callbacks);
 
-    pCharacteristic->setCallbacks(callbacks);
+    bleService->start();
 
-    pCharacteristic->setValue("Hello World");
-    pService->start();
-
-    BLEAdvertising *pAdvertising = pServer->getAdvertising();
-    pAdvertising->start();
+    BLEAdvertising* advertising = bleServer->getAdvertising();
+    advertising->start();
 
     return true;
 }
