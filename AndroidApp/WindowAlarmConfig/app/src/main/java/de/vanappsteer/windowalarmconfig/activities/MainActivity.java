@@ -21,11 +21,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 import de.vanappsteer.windowalarmconfig.R;
 import de.vanappsteer.windowalarmconfig.util.LoggingUtil;
 
 public class MainActivity extends AppCompatActivity {
+
+    private final String BLE_SERVICE_UUID = "2fa1dab8-3eef-40fc-8540-7fc496a10d75";
 
     private final int ACTIVITY_RESULT_ENABLE_BLUETOOTH = 1;
     private final int ACTIVITY_RESULT_ENABLE_LOCATION_PERMISSION = 2;
@@ -41,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean mScanning;
     private Handler mHandler = new Handler();
 
-    private ArrayList<BluetoothDevice> mLeDevices = new ArrayList<>();
+    private Set<BluetoothDevice> bleDeviceSet = new HashSet<>();
 
     private SharedPreferences mSP;
 
@@ -50,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -178,18 +184,18 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     mScanning = false;
-                    LoggingUtil.debug("stop scan");
                     mBluetoothAdapter.stopLeScan(mLeScanCallback);
                 }
             }, SCAN_PERIOD);
 
             mScanning = true;
-            LoggingUtil.debug("start scan");
+            //UUID[] uuids = {UUID.fromString(BLE_SERVICE_UUID)};
+            //mBluetoothAdapter.startLeScan(uuids, mLeScanCallback);
+
             mBluetoothAdapter.startLeScan(mLeScanCallback);
         }
         else {
             mScanning = false;
-            LoggingUtil.debug("stop scan");
             mBluetoothAdapter.stopLeScan(mLeScanCallback);
         }
     }
@@ -199,12 +205,10 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
 
-            LoggingUtil.debug("found a new device: " + device.getName());
-
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mLeDevices.add(device);
+                    bleDeviceSet.add(device);
                 }
             });
         }
