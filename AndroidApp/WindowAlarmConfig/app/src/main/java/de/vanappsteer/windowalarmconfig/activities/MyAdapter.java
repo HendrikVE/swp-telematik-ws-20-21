@@ -16,15 +16,25 @@ import de.vanappsteer.windowalarmconfig.R;
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
     private List<BluetoothDevice> mDevices;
+    private OnDeviceSelectionListener mOnDeviceSelectionListener;
 
-    public static class MyViewHolder extends RecyclerView.ViewHolder {
+    static class MyViewHolder extends RecyclerView.ViewHolder {
 
-        public View mRootView;
+        private View mRootView;
 
-        public MyViewHolder(View v) {
+        MyViewHolder(View v) {
             super(v);
             mRootView = v;
         }
+
+        View getRootView() {
+            return mRootView;
+        }
+    }
+
+    static abstract class OnDeviceSelectionListener {
+
+        abstract void onDeviceSelected(BluetoothDevice device);
     }
 
     public MyAdapter() {
@@ -39,23 +49,31 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     public MyAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         View rootView = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item, parent, false);
+
         MyViewHolder vh = new MyViewHolder(rootView);
 
         return vh;
     }
 
     @Override
-    public void onBindViewHolder(MyViewHolder holder, int position) {
+    public void onBindViewHolder(MyViewHolder holder, final int position) {
+
+        holder.getRootView().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mOnDeviceSelectionListener.onDeviceSelected(mDevices.get(position));
+            }
+        });
 
         String deviceName = mDevices.get(position).getName();
         if (deviceName == null) {
             deviceName = "(name not available)";
         }
 
-        TextView textViewDeviceName = holder.mRootView.findViewById(R.id.textViewDeviceName);
+        TextView textViewDeviceName = holder.getRootView().findViewById(R.id.textViewDeviceName);
         textViewDeviceName.setText(deviceName);
 
-        TextView textViewDeviceAddress = holder.mRootView.findViewById(R.id.textViewDeviceAddress);
+        TextView textViewDeviceAddress = holder.getRootView().findViewById(R.id.textViewDeviceAddress);
         textViewDeviceAddress.setText(mDevices.get(position).getAddress());
 
     }
@@ -69,5 +87,9 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
         mDevices.clear();
         mDevices.addAll(deviceSet);
+    }
+
+    public void setOnDeviceSelectionListener(OnDeviceSelectionListener listener) {
+        mOnDeviceSelectionListener = listener;
     }
 }

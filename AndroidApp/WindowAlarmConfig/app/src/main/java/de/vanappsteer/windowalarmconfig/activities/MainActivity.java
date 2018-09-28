@@ -3,6 +3,7 @@ package de.vanappsteer.windowalarmconfig.activities;
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -21,12 +22,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.widget.ListView;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 import de.vanappsteer.windowalarmconfig.R;
 import de.vanappsteer.windowalarmconfig.util.LoggingUtil;
@@ -51,7 +49,6 @@ public class MainActivity extends AppCompatActivity {
 
     private Set<BluetoothDevice> bleDeviceSet = new HashSet<>();
 
-    private RecyclerView mRecyclerView;
     private MyAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
@@ -115,14 +112,20 @@ public class MainActivity extends AppCompatActivity {
 
     private void initRecyclerView() {
 
-        mRecyclerView = findViewById(R.id.my_recycler_view);
-        mRecyclerView.setHasFixedSize(true);
+        RecyclerView recyclerView = findViewById(R.id.recycler_view);
+        recyclerView.setHasFixedSize(true);
 
         mLayoutManager = new LinearLayoutManager(this);
-        mRecyclerView.setLayoutManager(mLayoutManager);
+        recyclerView.setLayoutManager(mLayoutManager);
 
         mAdapter = new MyAdapter();
-        mRecyclerView.setAdapter(mAdapter);
+        mAdapter.setOnDeviceSelectionListener(new MyAdapter.OnDeviceSelectionListener() {
+            @Override
+            void onDeviceSelected(BluetoothDevice device) {
+                //BluetoothGatt mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
+            }
+        });
+        recyclerView.setAdapter(mAdapter);
     }
 
     private void checkBluetooth() {
