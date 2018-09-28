@@ -18,7 +18,10 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -48,6 +51,11 @@ public class MainActivity extends AppCompatActivity {
 
     private Set<BluetoothDevice> bleDeviceSet = new HashSet<>();
 
+    private RecyclerView mRecyclerView;
+    private MyAdapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
+
+
     private SharedPreferences mSP;
 
     @Override
@@ -58,6 +66,8 @@ public class MainActivity extends AppCompatActivity {
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        initViews();
 
         mBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         mSP = PreferenceManager.getDefaultSharedPreferences(this);
@@ -97,6 +107,22 @@ public class MainActivity extends AppCompatActivity {
                 LoggingUtil.warning("unknown request code: " + requestCode);
                 break;
         }
+    }
+
+    private void initViews() {
+        initRecyclerView();
+    }
+
+    private void initRecyclerView() {
+
+        mRecyclerView = findViewById(R.id.my_recycler_view);
+        mRecyclerView.setHasFixedSize(true);
+
+        mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+
+        mAdapter = new MyAdapter();
+        mRecyclerView.setAdapter(mAdapter);
     }
 
     private void checkBluetooth() {
@@ -208,7 +234,11 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    bleDeviceSet.add(device);
+                    boolean added = bleDeviceSet.add(device);
+                    if (added) {
+                        mAdapter.setDevices(bleDeviceSet);
+                        mAdapter.notifyDataSetChanged();
+                    }
                 }
             });
         }
