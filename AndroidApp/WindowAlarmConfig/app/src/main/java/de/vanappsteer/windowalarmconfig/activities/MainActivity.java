@@ -5,7 +5,10 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothManager;
+import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -26,13 +29,15 @@ import android.support.v7.widget.Toolbar;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 import de.vanappsteer.windowalarmconfig.R;
 import de.vanappsteer.windowalarmconfig.util.LoggingUtil;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final String BLE_SERVICE_UUID = "2fa1dab8-3eef-40fc-8540-7fc496a10d75";
+    private final UUID BLE_SERVICE_UUID = UUID.fromString("2fa1dab8-3eef-40fc-8540-7fc496a10d75");
+    private final UUID BLE_CHARACTERISTIC_UUID = UUID.fromString("d3491796-683b-4b9c-aafb-f51a35459d43");
 
     private final int ACTIVITY_RESULT_ENABLE_BLUETOOTH = 1;
     private final int ACTIVITY_RESULT_ENABLE_LOCATION_PERMISSION = 2;
@@ -131,8 +136,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void checkBluetooth() {
 
-        LoggingUtil.debug("checkBluetooth");
-
         if (mBluetoothManager != null) {
             mBluetoothAdapter = mBluetoothManager.getAdapter();
         }
@@ -142,14 +145,11 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(enableBtIntent, ACTIVITY_RESULT_ENABLE_BLUETOOTH);
         }
         else {
-            LoggingUtil.debug("start scan for ble devices");
             scanLeDevice(true);
         }
     }
 
     private void checkPermissions() {
-
-        LoggingUtil.debug("checkPermissions");
 
         boolean coarseLocationGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
         if (! coarseLocationGranted) {
@@ -219,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
             }, SCAN_PERIOD);
 
             mScanning = true;
-            //UUID[] uuids = {UUID.fromString(BLE_SERVICE_UUID)};
+            //UUID[] uuids = {BLE_SERVICE_UUID};
             //mBluetoothAdapter.startLeScan(uuids, mLeScanCallback);
 
             mBluetoothAdapter.startLeScan(mLeScanCallback);
@@ -252,7 +252,34 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-            LoggingUtil.debug("new state: " + newState);
+
+            LoggingUtil.debug("onConnectionStateChange");
+
+            if (newState == BluetoothProfile.STATE_CONNECTED) {
+                LoggingUtil.debug("discoverServices");
+                gatt.discoverServices();
+            }
+        }
+
+        @Override
+        public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+
+            LoggingUtil.debug("onServicesDiscovered");
+
+            if (status != BluetoothGatt.GATT_SUCCESS) {
+                // TODO: Handle the error
+                LoggingUtil.error("status != BluetoothGatt.GATT_SUCCESS");
+                return;
+            }
+
+            BluetoothGattCharacteristic characteristic = gatt
+                    .getService(BLE_SERVICE_UUID)
+                    .getCharacteristic(BLE_CHARACTERISTIC_UUID);
+
+            characteristic.setValue("hallo");
+            gatt.writeCharacteristic(characteristic);
+
+            //gatt.setCharacteristicNotification(characteristic, true);
         }
     };
 
