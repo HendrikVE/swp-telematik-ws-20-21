@@ -50,8 +50,6 @@ public class MainActivity extends AppCompatActivity {
 
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
-    private boolean mScanning;
-    private Handler mHandler = new Handler();
 
     private Set<BluetoothDevice> bleDeviceSet = new HashSet<>();
 
@@ -74,6 +72,20 @@ public class MainActivity extends AppCompatActivity {
 
         mBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         mSP = PreferenceManager.getDefaultSharedPreferences(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        if (mBluetoothAdapter != null) {
+            mBluetoothAdapter.stopLeScan(mLeScanCallback);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
 
         checkPermissions();
     }
@@ -128,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
         mAdapter.setOnDeviceSelectionListener(new MyAdapter.OnDeviceSelectionListener() {
             @Override
             void onDeviceSelected(BluetoothDevice device) {
-                BluetoothGatt mBluetoothGatt = device.connectGatt(MainActivity.this, false, mGattCallback);
+                device.connectGatt(MainActivity.this, false, mGattCallback);
             }
         });
         recyclerView.setAdapter(mAdapter);
@@ -145,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(enableBtIntent, ACTIVITY_RESULT_ENABLE_BLUETOOTH);
         }
         else {
-            scanLeDevice(true);
+            mBluetoothAdapter.startLeScan(mLeScanCallback);
         }
     }
 
@@ -207,29 +219,6 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private void scanLeDevice(boolean enable) {
-
-        if (enable) {
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mScanning = false;
-                    mBluetoothAdapter.stopLeScan(mLeScanCallback);
-                }
-            }, SCAN_PERIOD);
-
-            mScanning = true;
-            //UUID[] uuids = {BLE_SERVICE_UUID};
-            //mBluetoothAdapter.startLeScan(uuids, mLeScanCallback);
-
-            mBluetoothAdapter.startLeScan(mLeScanCallback);
-        }
-        else {
-            mScanning = false;
-            mBluetoothAdapter.stopLeScan(mLeScanCallback);
-        }
-    }
-
     private BluetoothAdapter.LeScanCallback mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
 
         @Override
@@ -278,8 +267,6 @@ public class MainActivity extends AppCompatActivity {
 
             characteristic.setValue("hallo");
             gatt.writeCharacteristic(characteristic);
-
-            //gatt.setCharacteristicNotification(characteristic, true);
         }
     };
 
