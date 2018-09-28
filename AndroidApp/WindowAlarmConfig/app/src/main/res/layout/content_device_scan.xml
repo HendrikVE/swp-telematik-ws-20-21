@@ -5,8 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".activities.MainActivity"
-    tools:showIn="@layout/activity_main">
+    tools:context=".activities.DeviceScanActivity"
+    tools:showIn="@layout/activity_device_scan">
 
     <LinearLayout
         android:layout_width="match_parent"

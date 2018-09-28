@@ -6,7 +6,6 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
@@ -16,7 +15,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
@@ -34,7 +32,7 @@ import java.util.UUID;
 import de.vanappsteer.windowalarmconfig.R;
 import de.vanappsteer.windowalarmconfig.util.LoggingUtil;
 
-public class MainActivity extends AppCompatActivity {
+public class DeviceScanActivity extends AppCompatActivity {
 
     private final UUID BLE_SERVICE_UUID = UUID.fromString("2fa1dab8-3eef-40fc-8540-7fc496a10d75");
     private final UUID BLE_CHARACTERISTIC_UUID = UUID.fromString("d3491796-683b-4b9c-aafb-f51a35459d43");
@@ -63,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_device_scan);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -140,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
         mAdapter.setOnDeviceSelectionListener(new MyAdapter.OnDeviceSelectionListener() {
             @Override
             void onDeviceSelected(BluetoothDevice device) {
-                device.connectGatt(MainActivity.this, false, mGattCallback);
+                device.connectGatt(DeviceScanActivity.this, false, mGattCallback);
             }
         });
         recyclerView.setAdapter(mAdapter);
@@ -208,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
             builder.setPositiveButton(R.string.button_ok, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
-                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_PERMISSION_COARSE_LOCATION);
+                    ActivityCompat.requestPermissions(DeviceScanActivity.this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_PERMISSION_COARSE_LOCATION);
                 }
             });
         }
