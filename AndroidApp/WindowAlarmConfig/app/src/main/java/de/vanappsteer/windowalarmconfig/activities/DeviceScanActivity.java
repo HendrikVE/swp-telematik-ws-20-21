@@ -24,6 +24,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -147,6 +148,13 @@ public class DeviceScanActivity extends AppCompatActivity {
                 LoggingUtil.warning("unknown request code: " + requestCode);
                 break;
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.scan_menu, menu);
+
+        return true;
     }
 
     private void initViews() {
