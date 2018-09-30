@@ -19,15 +19,17 @@
 
             <ProgressBar
                 style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                android:id="@+id/scanProgressbar"
                 android:layout_width="match_parent"
                 android:layout_height="32dp"
                 android:layout_gravity="center"
-                android:indeterminate="true" />
+                android:indeterminate="true"
+                android:visibility="invisible"/>
 
         </FrameLayout>
 
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/recycler_view"
+            android:id="@+id/recyclerView"
             android:scrollbars="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>

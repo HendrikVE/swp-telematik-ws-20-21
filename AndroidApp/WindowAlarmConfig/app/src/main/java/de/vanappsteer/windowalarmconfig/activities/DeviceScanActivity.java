@@ -23,8 +23,12 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+import android.view.View;
+import android.widget.CompoundButton;
+import android.widget.ProgressBar;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -70,7 +74,11 @@ public class DeviceScanActivity extends AppCompatActivity {
     private Set<BluetoothDevice> bleDeviceSet = new HashSet<>();
 
     private MyAdapter mAdapter;
+    private boolean mScanSwitchEnabled = true;
+
     private RecyclerView.LayoutManager mLayoutManager;
+    private SwitchCompat mScanSwitch;
+    private ProgressBar mScanProgressbar;
 
     private BluetoothGatt mConnectedBluetoothGatt = null;
 
@@ -94,9 +102,14 @@ public class DeviceScanActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        stopScan();
+    }
 
-        if (mBluetoothAdapter != null) {
-            mBluetoothAdapter.stopLeScan(mLeScanCallback);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mScanSwitch != null && mScanSwitch.isChecked()) {
+            checkPermissions();
         }
     }
 
@@ -110,17 +123,15 @@ public class DeviceScanActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-
-        checkPermissions();
-    }
-
-    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         if (requestCode == ACTIVITY_RESULT_ENABLE_BLUETOOTH) {
-            checkBluetooth();
+            if (resultCode == RESULT_OK) {
+                checkPermissions();
+            }
+            else {
+                mScanSwitch.setChecked(false);
+            }
         }
         else if (requestCode == ACTIVITY_RESULT_ENABLE_LOCATION_PERMISSION) {
             checkPermissions();
@@ -152,18 +163,67 @@ public class DeviceScanActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+
+        super.onCreateOptionsMenu(menu);
+
         getMenuInflater().inflate(R.menu.scan_menu, menu);
+
+        mScanSwitch = menu.findItem(R.id.menuItemBluetoothSwitch).getActionView().findViewById(R.id.bluetoothScanSwitch);
+        mScanSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+
+                if (! mScanSwitchEnabled) {
+                    return;
+                }
+
+                if (isChecked) {
+                    checkPermissions();
+                }
+                else {
+                    stopScan();
+                }
+            }
+        });
+
+        checkPermissions();
 
         return true;
     }
 
+    private void startScan() {
+
+        LoggingUtil.debug(null);
+
+        mScanProgressbar.setVisibility(View.VISIBLE);
+
+        mScanSwitchEnabled = false;
+        mScanSwitch.setChecked(true);
+        mScanSwitchEnabled = true;
+
+        mBluetoothAdapter.startLeScan(mLeScanCallback);
+    }
+
+    private void stopScan() {
+
+        LoggingUtil.debug(null);
+
+        mScanProgressbar.setVisibility(View.INVISIBLE);
+
+        if (mBluetoothAdapter != null) {
+            mBluetoothAdapter.stopLeScan(mLeScanCallback);
+        }
+    }
+
     private void initViews() {
         initRecyclerView();
+        mScanProgressbar = findViewById(R.id.scanProgressbar);
     }
 
     private void initRecyclerView() {
 
-        RecyclerView recyclerView = findViewById(R.id.recycler_view);
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
 
         mLayoutManager = new LinearLayoutManager(this);
@@ -190,7 +250,7 @@ public class DeviceScanActivity extends AppCompatActivity {
             startActivityForResult(enableBtIntent, ACTIVITY_RESULT_ENABLE_BLUETOOTH);
         }
         else {
-            mBluetoothAdapter.startLeScan(mLeScanCallback);
+            startScan();
         }
     }
 
