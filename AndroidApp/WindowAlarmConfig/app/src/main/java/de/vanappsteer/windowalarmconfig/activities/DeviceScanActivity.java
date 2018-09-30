@@ -73,6 +73,7 @@ public class DeviceScanActivity extends AppCompatActivity {
 
     private MyAdapter mAdapter;
     private boolean mScanSwitchEnabled = true;
+    private boolean mIsScanning = false;
 
     private RecyclerView.LayoutManager mLayoutManager;
     private SwitchCompat mScanSwitch;
@@ -198,6 +199,7 @@ public class DeviceScanActivity extends AppCompatActivity {
         mScanSwitch.setChecked(true);
         mScanSwitchEnabled = true;
 
+        mIsScanning = true;
         mBluetoothAdapter.startLeScan(mLeScanCallback);
     }
 
@@ -205,8 +207,9 @@ public class DeviceScanActivity extends AppCompatActivity {
 
         mScanProgressbar.setVisibility(View.INVISIBLE);
 
-        // mBluetoothAdapter is null if only checkPermissions was called, but not checkBluetooth
+        // mBluetoothAdapter is null if only checkPermissions() was called, but not checkBluetooth()
         if (mBluetoothAdapter != null) {
+            mIsScanning = false;
             mBluetoothAdapter.stopLeScan(mLeScanCallback);
         }
 
@@ -319,6 +322,11 @@ public class DeviceScanActivity extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+
+                    if (! mIsScanning) {
+                        return;
+                    }
+
                     boolean added = bleDeviceSet.add(device);
                     if (added) {
                         mAdapter.setDevices(bleDeviceSet);
