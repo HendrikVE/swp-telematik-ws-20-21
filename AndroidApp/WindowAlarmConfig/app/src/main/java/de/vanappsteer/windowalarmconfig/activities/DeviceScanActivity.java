@@ -66,8 +66,6 @@ public class DeviceScanActivity extends AppCompatActivity {
 
     private final String SHARED_PREFERENCES_ASKED_FOR_LOCATION = "SHARED_PREFERENCES_ASKED_FOR_LOCATION";
 
-    private final long SCAN_PERIOD = 10 * 1000;
-
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
 
@@ -194,8 +192,6 @@ public class DeviceScanActivity extends AppCompatActivity {
 
     private void startScan() {
 
-        LoggingUtil.debug(null);
-
         mScanProgressbar.setVisibility(View.VISIBLE);
 
         mScanSwitchEnabled = false;
@@ -207,13 +203,16 @@ public class DeviceScanActivity extends AppCompatActivity {
 
     private void stopScan() {
 
-        LoggingUtil.debug(null);
-
         mScanProgressbar.setVisibility(View.INVISIBLE);
 
+        // mBluetoothAdapter is null if only checkPermissions was called, but not checkBluetooth
         if (mBluetoothAdapter != null) {
             mBluetoothAdapter.stopLeScan(mLeScanCallback);
         }
+
+        bleDeviceSet.clear();
+        mAdapter.setDevices(bleDeviceSet);
+        mAdapter.notifyDataSetChanged();
     }
 
     private void initViews() {
