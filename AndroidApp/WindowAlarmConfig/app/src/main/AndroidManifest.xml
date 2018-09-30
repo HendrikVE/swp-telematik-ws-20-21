@@ -20,7 +20,7 @@
         tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".activities.DeviceScanActivity"
-            android:label="@string/title_activity_main"
+            android:label="@string/title_activity_device_scan"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
