@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -87,9 +89,31 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
         mDevices.clear();
         mDevices.addAll(deviceSet);
+
+        Collections.sort(mDevices, new DeviceComparator());
     }
 
     public void setOnDeviceSelectionListener(OnDeviceSelectionListener listener) {
         mOnDeviceSelectionListener = listener;
+    }
+
+    private class DeviceComparator implements Comparator<BluetoothDevice> {
+
+        public int compare(BluetoothDevice first, BluetoothDevice second) {
+
+            if (first.getName() == null) {
+                return 1;
+            }
+
+            if (second.getName() == null) {
+                return -1;
+            }
+
+            if (first.getName() == null && second.getName() == null) {
+                return 0;
+            }
+
+            return first.getName().compareTo(second.getName());
+        }
     }
 }
