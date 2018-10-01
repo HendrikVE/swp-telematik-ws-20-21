@@ -29,6 +29,7 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -78,6 +79,7 @@ public class DeviceScanActivity extends AppCompatActivity {
     private RecyclerView.LayoutManager mLayoutManager;
     private SwitchCompat mScanSwitch;
     private ProgressBar mScanProgressbar;
+    private TextView mTextViewEnableBluetooth;
 
     private BluetoothGatt mConnectedBluetoothGatt = null;
 
@@ -199,6 +201,8 @@ public class DeviceScanActivity extends AppCompatActivity {
         mScanSwitch.setChecked(true);
         mScanSwitchEnabled = true;
 
+        mTextViewEnableBluetooth.setVisibility(View.GONE);
+
         mIsScanning = true;
         mBluetoothAdapter.startLeScan(mLeScanCallback);
     }
@@ -216,11 +220,14 @@ public class DeviceScanActivity extends AppCompatActivity {
         bleDeviceSet.clear();
         mAdapter.setDevices(bleDeviceSet);
         mAdapter.notifyDataSetChanged();
+
+        mTextViewEnableBluetooth.setVisibility(View.VISIBLE);
     }
 
     private void initViews() {
         initRecyclerView();
         mScanProgressbar = findViewById(R.id.scanProgressbar);
+        mTextViewEnableBluetooth = findViewById(R.id.textViewEnableBluetooth);
     }
 
     private void initRecyclerView() {
