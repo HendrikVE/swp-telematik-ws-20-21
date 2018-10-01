@@ -52,17 +52,34 @@
             android:layout_width="match_parent"
             android:layout_height="fill_parent"
             android:layout_below="@id/tabLayout"
-            android:layout_above="@id/saveConfigButton"/>
+            android:layout_above="@id/buttonPanel"/>
 
-        <Button
-            style="@style/Widget.AppCompat.Button.Colored"
-            android:id="@+id/saveConfigButton"
-            android:textColor="?android:textColorPrimary"
+        <LinearLayout
+            android:id="@+id/buttonPanel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentBottom="true"
-            android:text="Save"/>
+            android:padding="10dp"
+            android:orientation="horizontal">
+
+            <Button
+                style="@style/Widget.AppCompat.Button"
+                android:id="@+id/cancelButton"
+                android:textColor="?android:textColorPrimary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cancel"/>
+
+            <Button
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:id="@+id/saveButton"
+                android:textColor="?android:textColorPrimary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Save"/>
+
+        </LinearLayout>
 
     </RelativeLayout>
 
