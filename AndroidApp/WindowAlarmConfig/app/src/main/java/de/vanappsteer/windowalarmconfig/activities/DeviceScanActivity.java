@@ -242,7 +242,7 @@ public class DeviceScanActivity extends AppCompatActivity {
         mAdapter = new DeviceListAdapter();
         mAdapter.setOnDeviceSelectionListener(new DeviceListAdapter.OnDeviceSelectionListener() {
             @Override
-            void onDeviceSelected(BluetoothDevice device) {
+            public void onDeviceSelected(BluetoothDevice device) {
                 //mConnectedBluetoothGatt = device.connectGatt(DeviceScanActivity.this, false, mGattCallback);
                 Intent intent = new Intent(DeviceScanActivity.this, DeviceConfigActivity.class);
                 startActivity(intent);

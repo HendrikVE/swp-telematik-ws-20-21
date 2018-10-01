@@ -34,9 +34,9 @@ public class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.My
         }
     }
 
-    static abstract class OnDeviceSelectionListener {
+    public static abstract class OnDeviceSelectionListener {
 
-        abstract void onDeviceSelected(BluetoothDevice device);
+        public abstract void onDeviceSelected(BluetoothDevice device);
     }
 
     public DeviceListAdapter() {
