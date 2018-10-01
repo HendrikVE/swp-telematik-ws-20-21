@@ -73,7 +73,7 @@
 
             <Button
                 style="@style/Widget.AppCompat.Button"
-                android:id="@+id/cancelButton"
+                android:id="@+id/buttonCancel"
                 android:textColor="?android:textColorPrimary"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -81,7 +81,7 @@
 
             <Button
                 style="@style/Widget.AppCompat.Button.Colored"
-                android:id="@+id/saveButton"
+                android:id="@+id/buttonSave"
                 android:textColor="?android:textColorPrimary"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

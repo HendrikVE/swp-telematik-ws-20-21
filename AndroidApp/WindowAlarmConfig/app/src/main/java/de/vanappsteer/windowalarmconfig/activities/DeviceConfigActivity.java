@@ -5,9 +5,15 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
+import android.widget.Button;
+
+import java.util.Map;
 
 import de.vanappsteer.windowalarmconfig.adapter.PagerAdapter;
 import de.vanappsteer.windowalarmconfig.R;
+import de.vanappsteer.windowalarmconfig.fragments.ConfigFragment;
+import de.vanappsteer.windowalarmconfig.util.LoggingUtil;
 
 public class DeviceConfigActivity extends AppCompatActivity {
 
@@ -41,6 +47,34 @@ public class DeviceConfigActivity extends AppCompatActivity {
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
 
+            }
+        });
+
+        Button buttonSave = findViewById(R.id.buttonSave);
+        buttonSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                for (int i = 0; i < adapter.getCount(); i++) {
+                    ConfigFragment configFragment = (ConfigFragment) adapter.getItem(i);
+
+                    Map<String, ConfigFragment.ConfigDescription> map = configFragment.getInputData();
+                    for (Map.Entry<String, ConfigFragment.ConfigDescription> entry : map.entrySet()) {
+                        LoggingUtil.debug("key: " + entry.getKey());
+                        LoggingUtil.debug("UUID: " + entry.getValue().getUuid().toString());
+                        LoggingUtil.debug("value: " + entry.getValue().getValue());
+                        LoggingUtil.debug("");
+                    }
+                }
+
+                DeviceConfigActivity.this.finish();
+            }
+        });
+        Button buttonCancel = findViewById(R.id.buttonCancel);
+        buttonCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                DeviceConfigActivity.this.finish();
             }
         });
     }

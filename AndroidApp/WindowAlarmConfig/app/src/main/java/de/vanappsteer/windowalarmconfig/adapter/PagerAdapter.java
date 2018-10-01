@@ -13,11 +13,22 @@ import de.vanappsteer.windowalarmconfig.util.LoggingUtil;
 
 public class PagerAdapter extends FragmentStatePagerAdapter {
 
-    int mNumerOfTabs;
+    private int mNumerOfTabs;
+
+    private DeviceConfigFragment mDeviceConfigFragment;
+    private OtaConfigFragment mOtaConfigFragment;
+    private WifiConfigFragment mWifiConfigFragment;
+    private MqttConfigFragment mMqttConfigFragment;
+    private SensorConfigFragment mSensorConfigFragment;
 
     public PagerAdapter(FragmentManager fm, int numberOfTabs) {
         super(fm);
         this.mNumerOfTabs = numberOfTabs;
+        mDeviceConfigFragment = new DeviceConfigFragment();
+        mOtaConfigFragment = new OtaConfigFragment();
+        mWifiConfigFragment = new WifiConfigFragment();
+        mMqttConfigFragment = new MqttConfigFragment();
+        mSensorConfigFragment = new SensorConfigFragment();
     }
 
     @Override
@@ -28,23 +39,23 @@ public class PagerAdapter extends FragmentStatePagerAdapter {
         switch (position) {
 
             case 0:
-                fragment = new DeviceConfigFragment();
+                fragment = mDeviceConfigFragment;
                 break;
 
             case 1:
-                fragment = new OtaConfigFragment();
+                fragment = mOtaConfigFragment;
                 break;
 
             case 2:
-                fragment = new WifiConfigFragment();
+                fragment = mWifiConfigFragment;
                 break;
 
             case 3:
-                fragment = new MqttConfigFragment();
+                fragment = mMqttConfigFragment;
                 break;
 
             case 4:
-                fragment = new SensorConfigFragment();
+                fragment = mSensorConfigFragment;
                 break;
 
             default:
