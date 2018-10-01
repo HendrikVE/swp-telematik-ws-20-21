@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">WindowAlarmConfig</string>
+    <string name="app_name">Window Alarm Config</string>
     <string name="title_activity_device_scan">Device scan</string>
 
     <string name="button_ok">OK</string>
