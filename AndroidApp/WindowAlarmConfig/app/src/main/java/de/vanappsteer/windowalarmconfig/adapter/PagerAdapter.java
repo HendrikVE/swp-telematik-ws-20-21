@@ -1,4 +1,4 @@
-package de.vanappsteer.windowalarmconfig;
+package de.vanappsteer.windowalarmconfig.adapter;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;

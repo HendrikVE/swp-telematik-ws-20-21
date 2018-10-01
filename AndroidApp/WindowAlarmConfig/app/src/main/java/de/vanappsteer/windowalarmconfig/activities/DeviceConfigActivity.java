@@ -6,7 +6,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
-import de.vanappsteer.windowalarmconfig.PagerAdapter;
+import de.vanappsteer.windowalarmconfig.adapter.PagerAdapter;
 import de.vanappsteer.windowalarmconfig.R;
 
 public class DeviceConfigActivity extends AppCompatActivity {

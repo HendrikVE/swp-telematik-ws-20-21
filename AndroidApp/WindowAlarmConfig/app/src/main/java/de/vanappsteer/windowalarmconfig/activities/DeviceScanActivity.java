@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import de.vanappsteer.windowalarmconfig.adapter.DeviceListAdapter;
 import de.vanappsteer.windowalarmconfig.R;
 import de.vanappsteer.windowalarmconfig.util.LoggingUtil;
 
@@ -72,7 +73,7 @@ public class DeviceScanActivity extends AppCompatActivity {
 
     private Set<BluetoothDevice> bleDeviceSet = new HashSet<>();
 
-    private MyAdapter mAdapter;
+    private DeviceListAdapter mAdapter;
     private boolean mScanSwitchEnabled = true;
     private boolean mIsScanning = false;
 
@@ -238,8 +239,8 @@ public class DeviceScanActivity extends AppCompatActivity {
         mLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(mLayoutManager);
 
-        mAdapter = new MyAdapter();
-        mAdapter.setOnDeviceSelectionListener(new MyAdapter.OnDeviceSelectionListener() {
+        mAdapter = new DeviceListAdapter();
+        mAdapter.setOnDeviceSelectionListener(new DeviceListAdapter.OnDeviceSelectionListener() {
             @Override
             void onDeviceSelected(BluetoothDevice device) {
                 //mConnectedBluetoothGatt = device.connectGatt(DeviceScanActivity.this, false, mGattCallback);

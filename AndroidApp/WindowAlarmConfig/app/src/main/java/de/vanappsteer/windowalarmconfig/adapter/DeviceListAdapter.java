@@ -1,4 +1,4 @@
-package de.vanappsteer.windowalarmconfig.activities;
+package de.vanappsteer.windowalarmconfig.adapter;
 
 import android.bluetooth.BluetoothDevice;
 import android.support.v7.widget.RecyclerView;
@@ -15,7 +15,7 @@ import java.util.Set;
 
 import de.vanappsteer.windowalarmconfig.R;
 
-public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
+public class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.MyViewHolder> {
 
     private List<BluetoothDevice> mDevices;
     private OnDeviceSelectionListener mOnDeviceSelectionListener;
@@ -39,16 +39,16 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         abstract void onDeviceSelected(BluetoothDevice device);
     }
 
-    public MyAdapter() {
+    public DeviceListAdapter() {
         mDevices = new ArrayList<>();
     }
 
-    public MyAdapter(List<BluetoothDevice> myDataset) {
+    public DeviceListAdapter(List<BluetoothDevice> myDataset) {
         mDevices = myDataset;
     }
 
     @Override
-    public MyAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public DeviceListAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         View rootView = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item, parent, false);
 
