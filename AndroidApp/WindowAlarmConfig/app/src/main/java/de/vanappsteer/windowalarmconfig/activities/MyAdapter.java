@@ -60,7 +60,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     @Override
     public void onBindViewHolder(MyViewHolder holder, final int position) {
 
-        holder.getRootView().setOnClickListener(new View.OnClickListener() {
+        holder.getRootView().findViewById(R.id.connectButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mOnDeviceSelectionListener.onDeviceSelected(mDevices.get(position));
