@@ -4,7 +4,6 @@ package de.vanappsteer.windowalarmconfig.fragments;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +13,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import de.vanappsteer.windowalarmconfig.R;
-import de.vanappsteer.windowalarmconfig.util.LoggingUtil;
+import de.vanappsteer.windowalarmconfig.util.TextChangeWatcher;
 
 public class MqttConfigFragment extends ConfigFragment {
 
@@ -96,16 +95,7 @@ public class MqttConfigFragment extends ConfigFragment {
     private void initViews() {
 
         mEditTextMqttUsername = getView().findViewById(R.id.editTextMqttUsername);
-        mEditTextMqttUsername.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
+        mEditTextMqttUsername.addTextChangedListener(new TextChangeWatcher() {
 
             @Override
             public void afterTextChanged(Editable editable) {
@@ -114,16 +104,7 @@ public class MqttConfigFragment extends ConfigFragment {
         });
 
         mEditTextMqttPassword = getView().findViewById(R.id.editTextMqttPassword);
-        mEditTextMqttPassword.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
+        mEditTextMqttPassword.addTextChangedListener(new TextChangeWatcher() {
 
             @Override
             public void afterTextChanged(Editable editable) {
@@ -132,16 +113,7 @@ public class MqttConfigFragment extends ConfigFragment {
         });
 
         mEditTextMqttBrokerAddress = getView().findViewById(R.id.editTextMqttBrokerAddress);
-        mEditTextMqttBrokerAddress.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
+        mEditTextMqttBrokerAddress.addTextChangedListener(new TextChangeWatcher() {
 
             @Override
             public void afterTextChanged(Editable editable) {
@@ -150,16 +122,7 @@ public class MqttConfigFragment extends ConfigFragment {
         });
 
         mEditTextMqttBrokerPort = getView().findViewById(R.id.editTextMqttBrokerPort);
-        mEditTextMqttBrokerPort.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
+        mEditTextMqttBrokerPort.addTextChangedListener(new TextChangeWatcher() {
 
             @Override
             public void afterTextChanged(Editable editable) {

@@ -4,7 +4,6 @@ package de.vanappsteer.windowalarmconfig.fragments;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +13,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import de.vanappsteer.windowalarmconfig.R;
-import de.vanappsteer.windowalarmconfig.util.LoggingUtil;
+import de.vanappsteer.windowalarmconfig.util.TextChangeWatcher;
 
 public class OtaConfigFragment extends ConfigFragment {
 
@@ -95,16 +94,7 @@ public class OtaConfigFragment extends ConfigFragment {
 
     private void initViews() {
         mEditTextOtaServerAddress = getView().findViewById(R.id.editTextOtaServerAddress);
-        mEditTextOtaServerAddress.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
+        mEditTextOtaServerAddress.addTextChangedListener(new TextChangeWatcher() {
 
             @Override
             public void afterTextChanged(Editable editable) {
@@ -113,16 +103,7 @@ public class OtaConfigFragment extends ConfigFragment {
         });
 
         mEditTextOtaFilename = getView().findViewById(R.id.editTextOtaFilename);
-        mEditTextOtaFilename.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
+        mEditTextOtaFilename.addTextChangedListener(new TextChangeWatcher() {
 
             @Override
             public void afterTextChanged(Editable editable) {
@@ -131,16 +112,7 @@ public class OtaConfigFragment extends ConfigFragment {
         });
 
         mEditTextOtaUsername = getView().findViewById(R.id.editTextOtaUsername);
-        mEditTextOtaUsername.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
+        mEditTextOtaUsername.addTextChangedListener(new TextChangeWatcher() {
 
             @Override
             public void afterTextChanged(Editable editable) {
@@ -149,16 +121,7 @@ public class OtaConfigFragment extends ConfigFragment {
         });
 
         mEditTextOtaPassword = getView().findViewById(R.id.editTextOtaPassword);
-        mEditTextOtaPassword.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
+        mEditTextOtaPassword.addTextChangedListener(new TextChangeWatcher() {
 
             @Override
             public void afterTextChanged(Editable editable) {

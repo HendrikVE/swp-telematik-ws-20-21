@@ -4,7 +4,6 @@ package de.vanappsteer.windowalarmconfig.fragments;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +13,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import de.vanappsteer.windowalarmconfig.R;
-import de.vanappsteer.windowalarmconfig.util.LoggingUtil;
+import de.vanappsteer.windowalarmconfig.util.TextChangeWatcher;
 
 public class SensorConfigFragment extends ConfigFragment {
 
@@ -71,16 +70,7 @@ public class SensorConfigFragment extends ConfigFragment {
 
     private void initViews() {
         mEditTextSensorPollInterval = getView().findViewById(R.id.editTextSensorPollInterval);
-        mEditTextSensorPollInterval.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
+        mEditTextSensorPollInterval.addTextChangedListener(new TextChangeWatcher() {
 
             @Override
             public void afterTextChanged(Editable editable) {
