@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Set;
 
 import de.vanappsteer.windowalarmconfig.R;
-import de.vanappsteer.windowalarmconfig.util.LoggingUtil;
 
 public class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.MyViewHolder> {
 
@@ -51,7 +50,7 @@ public class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.My
     @Override
     public DeviceListAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-        View rootView = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item, parent, false);
+        View rootView = LayoutInflater.from(parent.getContext()).inflate(R.layout.device_list_item, parent, false);
 
         MyViewHolder vh = new MyViewHolder(rootView);
 

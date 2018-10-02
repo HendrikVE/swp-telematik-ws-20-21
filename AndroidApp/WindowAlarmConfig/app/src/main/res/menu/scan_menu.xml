@@ -6,7 +6,7 @@
     <item
         android:id="@+id/menuItemBluetoothSwitch"
         android:title="Scan"
-        app:actionLayout="@layout/menu_bluetooth_switch"
+        app:actionLayout="@layout/action_layout_bluetooth_switch"
         app:showAsAction="always" />
 
 </menu>
