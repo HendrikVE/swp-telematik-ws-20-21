@@ -15,6 +15,5 @@ public abstract class TextChangeWatcher implements TextWatcher {
         // not implemented
     }
 
-    @Override
     public abstract void afterTextChanged(Editable editable);
 }
