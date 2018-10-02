@@ -337,7 +337,18 @@ public class DeviceScanActivity extends AppCompatActivity {
                         return;
                     }
 
-                    boolean added = bleDeviceSet.add(device);
+                    boolean added = false;
+
+                    // update device in set if a name was found after address was already discovered
+                    BluetoothDevice deviceFound = getDeviceByBleAddress(bleDeviceSet, device.getAddress());
+                    if (deviceFound != null && deviceFound.getName() == null && device.getName() != null) {
+                        bleDeviceSet.remove(deviceFound);
+                        added = bleDeviceSet.add(device);
+                    }
+                    else if(deviceFound == null) {
+                        added = bleDeviceSet.add(device);
+                    }
+
                     if (added) {
                         mAdapter.setDevices(bleDeviceSet);
                         mAdapter.notifyDataSetChanged();
@@ -346,6 +357,17 @@ public class DeviceScanActivity extends AppCompatActivity {
             });
         }
     };
+
+    private BluetoothDevice getDeviceByBleAddress(Set<BluetoothDevice> deviceSet, String address) {
+
+        for (BluetoothDevice device : deviceSet) {
+            if (device.getAddress().equals(address)) {
+                return device;
+            }
+        }
+
+        return null;
+    }
 
     private BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
 
