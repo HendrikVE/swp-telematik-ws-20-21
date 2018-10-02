@@ -43,24 +43,6 @@ public class DeviceScanActivity extends AppCompatActivity {
 
     private final UUID BLE_SERVICE_UUID = UUID.fromString("2fa1dab8-3eef-40fc-8540-7fc496a10d75");
 
-    private final UUID BLE_CHARACTERISTIC_CONFIG_DEVICE_ROOM_UUID = UUID.fromString("d3491796-683b-4b9c-aafb-f51a35459d43");
-    private final UUID BLE_CHARACTERISTIC_CONFIG_DEVICE_ID_UUID = UUID.fromString("4745e11f-b403-4cfb-83bb-710d46897875");
-
-    private final UUID BLE_CHARACTERISTIC_CONFIG_OTA_HOST_UUID = UUID.fromString("2f44b103-444c-48f5-bf60-91b81dfa0a25");
-    private final UUID BLE_CHARACTERISTIC_CONFIG_OTA_FILENAME_UUID = UUID.fromString("4b95d245-db08-4c56-98f9-738faa8cfbb6");
-    private final UUID BLE_CHARACTERISTIC_CONFIG_OTA_SERVER_USERNAME_UUID = UUID.fromString("1c93dce2-3796-4027-9f55-6d251c41dd34");
-    private final UUID BLE_CHARACTERISTIC_CONFIG_OTA_SERVER_PASSWORD_UUID = UUID.fromString("0e837309-5336-45a3-9b69-d0f7134f30ff");
-
-    private final UUID BLE_CHARACTERISTIC_CONFIG_WIFI_SSID_UUID = UUID.fromString("8ca0bf1d-bb5d-4a66-9191-341fd805e288");
-    private final UUID BLE_CHARACTERISTIC_CONFIG_WIFI_PASSWORD_UUID = UUID.fromString("fa41c195-ae99-422e-8f1f-0730702b3fc5");
-
-    private final UUID BLE_CHARACTERISTIC_CONFIG_MQTT_USER_UUID = UUID.fromString("69150609-18f8-4523-a41f-6d9a01d2e08d");
-    private final UUID BLE_CHARACTERISTIC_CONFIG_MQTT_PASSWORD_UUID = UUID.fromString("8bebec77-ea21-4c14-9d64-dbec1fd5267c");
-    private final UUID BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_IP_UUID = UUID.fromString("e3b150fb-90a2-4cd3-80c5-b1189e110ef1");
-    private final UUID BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_PORT_UUID = UUID.fromString("4eeff953-0f5e-43ee-b1be-1783a8190b0d");
-
-    private final UUID BLE_CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID = UUID.fromString("68011c92-854a-4f2c-a94c-5ee37dc607c3");
-
     private final int ACTIVITY_RESULT_ENABLE_BLUETOOTH = 1;
     private final int ACTIVITY_RESULT_ENABLE_LOCATION_PERMISSION = 2;
 
@@ -393,12 +375,12 @@ public class DeviceScanActivity extends AppCompatActivity {
                 return;
             }
 
-            BluetoothGattCharacteristic characteristic = gatt
+            /*BluetoothGattCharacteristic characteristic = gatt
                     .getService(BLE_SERVICE_UUID)
                     .getCharacteristic(BLE_CHARACTERISTIC_CONFIG_DEVICE_ROOM_UUID);
 
             characteristic.setValue("hallo");
-            gatt.writeCharacteristic(characteristic);
+            gatt.writeCharacteristic(characteristic);*/
         }
     };
 
