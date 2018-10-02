@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Set;
 
 import de.vanappsteer.windowalarmconfig.R;
+import de.vanappsteer.windowalarmconfig.util.LoggingUtil;
 
 public class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.MyViewHolder> {
 
@@ -101,19 +102,22 @@ public class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.My
 
         public int compare(BluetoothDevice first, BluetoothDevice second) {
 
-            if (first.getName() == null) {
+            if (first.getName() == null && second.getName() == null) {
+                return first.getAddress().compareTo(second.getAddress());
+            }
+            else if (first.getName() == null) {
                 return 1;
             }
-
-            if (second.getName() == null) {
+            else if (second.getName() == null) {
                 return -1;
             }
 
-            if (first.getName() == null && second.getName() == null) {
-                return 0;
+            if (first.getName().compareTo(second.getName()) == 0) {
+                return first.getAddress().compareTo(second.getAddress());
             }
-
-            return first.getName().compareTo(second.getName());
+            else {
+                return first.getName().compareTo(second.getName());
+            }
         }
     }
 }
