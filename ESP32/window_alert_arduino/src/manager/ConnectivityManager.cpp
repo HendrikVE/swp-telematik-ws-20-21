@@ -115,7 +115,6 @@ void createCharacteristics(BLEService* bleService, BLECharacteristicCallbacks* c
     BLECharacteristic* characteristic;
 
     for (int i = 0; i < sizeof(CHARACTERISTICS)/sizeof(CHARACTERISTICS[0]) - 1; i++) {
-
         Serial.println(CHARACTERISTICS[i]);
 
         characteristic = bleService->createCharacteristic(
@@ -134,7 +133,7 @@ bool ConnectivityManager::initBluetoothConfig(BLECharacteristicCallbacks* callba
     BLEDevice::init("WindowAlertNode");
     BLEServer* bleServer = BLEDevice::createServer();
 
-    BLEService* bleService = bleServer->createService(SERVICE_UUID);
+    BLEService* bleService = bleServer->createService(BLEUUID(SERVICE_UUID), 30, 0);
 
     createCharacteristics(bleService, callbacks);
 
