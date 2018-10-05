@@ -12,6 +12,9 @@
     <string name="dialog_coarse_location_permitted_message">Please allow access to location, otherwise your device is not able to scan for BLE devices. You need to enable it manually in the app\'s settings page.</string>
     <string name="title_activity_about_app">About this app</string>
 
+    <string name="github_project_link_text">\u0040github</string>
+    <string name="github_project_link">https://github.com/HendrikVE/smarthome2/</string>
+
     <string name="license_title">License</string>
     <string name="license_text" tools:ignore="TypographyOther">
         <![CDATA[

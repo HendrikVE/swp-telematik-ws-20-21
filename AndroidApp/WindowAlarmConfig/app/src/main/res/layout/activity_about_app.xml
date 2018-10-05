@@ -80,11 +80,12 @@
                                 android:text="@string/app_name"
                                 android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 
-                            <!--<TextView
+                            <TextView
+                                android:id="@+id/textViewProjectPage"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="\u0040dream_space"
-                                android:textAppearance="@style/TextAppearance.AppCompat.Caption" />-->
+                                android:text="@string/github_project_link_text"
+                                android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
 
                         </LinearLayout>
 

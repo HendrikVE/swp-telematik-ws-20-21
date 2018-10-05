@@ -1,12 +1,15 @@
 package de.vanappsteer.windowalarmconfig.activities;
 
-import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
+import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -44,10 +47,27 @@ public class AboutApp extends AppCompatActivity {
                 AlertDialog.Builder builder = new AlertDialog.Builder(AboutApp.this);
                 builder.setPositiveButton(R.string.button_ok, null);
                 builder.setTitle(R.string.license_title);
-                builder.setMessage(Html.fromHtml(getString(R.string.license_text)));
+
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                    builder.setMessage(Html.fromHtml(getString(R.string.license_text), Html.FROM_HTML_MODE_LEGACY));
+                }
+                else {
+                    builder.setMessage(Html.fromHtml(getString(R.string.license_text)));
+                }
 
                 AlertDialog dialog = builder.create();
                 dialog.show();
+            }
+        });
+
+        TextView textViewProjectPage = findViewById(R.id.textViewProjectPage);
+        textViewProjectPage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String url = getString(R.string.github_project_link);
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(url));
+                startActivity(intent);
             }
         });
     }
