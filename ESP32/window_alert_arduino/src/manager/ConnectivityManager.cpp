@@ -114,7 +114,7 @@ void createCharacteristics(BLEService* bleService, BLECharacteristicCallbacks* c
 
     BLECharacteristic* characteristic;
 
-    for (int i = 0; i < sizeof(CHARACTERISTICS)/sizeof(CHARACTERISTICS[0]) - 1; i++) {
+    for (int i = 0; i < sizeof(CHARACTERISTICS)/sizeof(CHARACTERISTICS[0]); i++) {
         Serial.println(CHARACTERISTICS[i]);
 
         characteristic = bleService->createCharacteristic(
