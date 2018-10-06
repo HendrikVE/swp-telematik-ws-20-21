@@ -77,11 +77,11 @@ public class WifiConfigFragment extends ConfigFragment {
     }
 
     @Override
-    public Map<String, ConfigDescription> getInputData() {
+    public Map<UUID, String> getInputData() {
 
-        Map<String, ConfigDescription> map = new HashMap<>();
-        map.put(KEY_BLE_CHARACTERISTIC_CONFIG_WIFI_SSID_UUID, new ConfigDescription(BLE_CHARACTERISTIC_CONFIG_WIFI_SSID_UUID, mWifiSsid));
-        map.put(KEY_BLE_CHARACTERISTIC_CONFIG_WIFI_PASSWORD_UUID, new ConfigDescription(BLE_CHARACTERISTIC_CONFIG_WIFI_PASSWORD_UUID, mWifiPassword));
+        Map<UUID, String> map = new HashMap<>();
+        map.put(BLE_CHARACTERISTIC_CONFIG_WIFI_SSID_UUID, mWifiSsid);
+        map.put(BLE_CHARACTERISTIC_CONFIG_WIFI_PASSWORD_UUID, mWifiPassword);
 
         return map;
     }

@@ -78,11 +78,11 @@ public class DeviceConfigFragment extends ConfigFragment {
     }
 
     @Override
-    public Map<String, ConfigDescription> getInputData() {
+    public Map<UUID, String> getInputData() {
 
-        Map<String, ConfigDescription> map = new HashMap<>();
-        map.put(KEY_BLE_CHARACTERISTIC_CONFIG_DEVICE_ROOM_UUID, new ConfigDescription(BLE_CHARACTERISTIC_CONFIG_DEVICE_ROOM_UUID, mDeviceRoom));
-        map.put(KEY_BLE_CHARACTERISTIC_CONFIG_DEVICE_ID_UUID, new ConfigDescription(BLE_CHARACTERISTIC_CONFIG_DEVICE_ID_UUID, mDeviceID));
+        Map<UUID, String> map = new HashMap<>();
+        map.put(BLE_CHARACTERISTIC_CONFIG_DEVICE_ROOM_UUID, mDeviceRoom);
+        map.put(BLE_CHARACTERISTIC_CONFIG_DEVICE_ID_UUID, mDeviceID);
 
         return map;
     }

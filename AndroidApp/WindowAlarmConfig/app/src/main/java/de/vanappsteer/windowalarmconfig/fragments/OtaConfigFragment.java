@@ -93,13 +93,13 @@ public class OtaConfigFragment extends ConfigFragment {
     }
 
     @Override
-    public Map<String, ConfigDescription> getInputData() {
+    public Map<UUID, String> getInputData() {
 
-        Map<String, ConfigDescription> map = new HashMap<>();
-        map.put(KEY_BLE_CHARACTERISTIC_CONFIG_OTA_HOST_UUID, new ConfigDescription(BLE_CHARACTERISTIC_CONFIG_OTA_HOST_UUID, mOtaServerAddress));
-        map.put(KEY_BLE_CHARACTERISTIC_CONFIG_OTA_FILENAME_UUID, new ConfigDescription(BLE_CHARACTERISTIC_CONFIG_OTA_FILENAME_UUID, mOtaFilename));
-        map.put(KEY_BLE_CHARACTERISTIC_CONFIG_OTA_SERVER_USERNAME_UUID, new ConfigDescription(BLE_CHARACTERISTIC_CONFIG_OTA_SERVER_USERNAME_UUID, mOtaUsername));
-        map.put(KEY_BLE_CHARACTERISTIC_CONFIG_OTA_SERVER_PASSWORD_UUID, new ConfigDescription(BLE_CHARACTERISTIC_CONFIG_OTA_SERVER_PASSWORD_UUID, mOtaPassword));
+        Map<UUID, String> map = new HashMap<>();
+        map.put(BLE_CHARACTERISTIC_CONFIG_OTA_HOST_UUID, mOtaServerAddress);
+        map.put(BLE_CHARACTERISTIC_CONFIG_OTA_FILENAME_UUID, mOtaFilename);
+        map.put(BLE_CHARACTERISTIC_CONFIG_OTA_SERVER_USERNAME_UUID, mOtaUsername);
+        map.put(BLE_CHARACTERISTIC_CONFIG_OTA_SERVER_PASSWORD_UUID, mOtaPassword);
 
         return map;
     }

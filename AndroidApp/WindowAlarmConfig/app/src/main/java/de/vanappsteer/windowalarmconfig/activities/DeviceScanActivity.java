@@ -461,6 +461,8 @@ public class DeviceScanActivity extends AppCompatActivity {
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
 
             LoggingUtil.debug("onConnectionStateChange");
+            LoggingUtil.debug("status: " + status);
+            LoggingUtil.debug("newState: " + newState);
 
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 LoggingUtil.debug("discoverServices");

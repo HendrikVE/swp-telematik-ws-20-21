@@ -23,7 +23,7 @@ public class DeviceConfigActivity extends AppCompatActivity {
 
     public static final String KEY_CHARACTERISTIC_HASH_MAP = "KEY_CHARACTERISTIC_HASH_MAP";
 
-    private HashMap<UUID, ConfigFragment.ConfigDescription> mConfigDescriptionHashMap = new HashMap<>();
+    private HashMap<UUID, String> mConfigDescriptionHashMap = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +42,7 @@ public class DeviceConfigActivity extends AppCompatActivity {
         }
 
         for (Map.Entry<UUID, String> entry : characteristicHashMap.entrySet()) {
-            mConfigDescriptionHashMap.put(entry.getKey(), new ConfigFragment.ConfigDescription(entry.getKey(), entry.getValue()));
+            mConfigDescriptionHashMap.put(entry.getKey(), entry.getValue());
         }
 
         initViews();
@@ -81,11 +81,11 @@ public class DeviceConfigActivity extends AppCompatActivity {
                 for (int i = 0; i < adapter.getCount(); i++) {
                     ConfigFragment configFragment = (ConfigFragment) adapter.getItem(i);
 
-                    Map<String, ConfigFragment.ConfigDescription> map = configFragment.getInputData();
-                    for (Map.Entry<String, ConfigFragment.ConfigDescription> entry : map.entrySet()) {
+                    Map<UUID, String> map = configFragment.getInputData();
+                    for (Map.Entry<UUID, String> entry : map.entrySet()) {
                         LoggingUtil.debug("key: " + entry.getKey());
-                        LoggingUtil.debug("UUID: " + entry.getValue().getUuid().toString());
-                        LoggingUtil.debug("value: " + entry.getValue().getValue());
+                        LoggingUtil.debug("UUID: " + entry.getValue());
+                        LoggingUtil.debug("value: " + entry.getValue());
                         LoggingUtil.debug("");
                     }
                 }

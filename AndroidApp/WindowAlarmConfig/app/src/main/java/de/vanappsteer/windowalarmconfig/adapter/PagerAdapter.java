@@ -25,37 +25,37 @@ public class PagerAdapter extends FragmentStatePagerAdapter {
     private MqttConfigFragment mMqttConfigFragment;
     private SensorConfigFragment mSensorConfigFragment;
 
-    public PagerAdapter(FragmentManager fm, int numberOfTabs, HashMap<UUID, ConfigFragment.ConfigDescription> characteristicHashMap) {
+    public PagerAdapter(FragmentManager fm, int numberOfTabs, HashMap<UUID, String> characteristicHashMap) {
 
         super(fm);
         this.mNumerOfTabs = numberOfTabs;
 
         mDeviceConfigFragment = DeviceConfigFragment.newInstance(
-                characteristicHashMap.get(DeviceConfigFragment.BLE_CHARACTERISTIC_CONFIG_DEVICE_ROOM_UUID).getValue(),
-                characteristicHashMap.get(DeviceConfigFragment.BLE_CHARACTERISTIC_CONFIG_DEVICE_ID_UUID).getValue()
+                characteristicHashMap.get(DeviceConfigFragment.BLE_CHARACTERISTIC_CONFIG_DEVICE_ROOM_UUID),
+                characteristicHashMap.get(DeviceConfigFragment.BLE_CHARACTERISTIC_CONFIG_DEVICE_ID_UUID)
         );
 
         mOtaConfigFragment = OtaConfigFragment.newInstance(
-                characteristicHashMap.get(OtaConfigFragment.BLE_CHARACTERISTIC_CONFIG_OTA_HOST_UUID).getValue(),
-                characteristicHashMap.get(OtaConfigFragment.BLE_CHARACTERISTIC_CONFIG_OTA_FILENAME_UUID).getValue(),
-                characteristicHashMap.get(OtaConfigFragment.BLE_CHARACTERISTIC_CONFIG_OTA_SERVER_USERNAME_UUID).getValue(),
-                characteristicHashMap.get(OtaConfigFragment.BLE_CHARACTERISTIC_CONFIG_OTA_SERVER_PASSWORD_UUID).getValue()
+                characteristicHashMap.get(OtaConfigFragment.BLE_CHARACTERISTIC_CONFIG_OTA_HOST_UUID),
+                characteristicHashMap.get(OtaConfigFragment.BLE_CHARACTERISTIC_CONFIG_OTA_FILENAME_UUID),
+                characteristicHashMap.get(OtaConfigFragment.BLE_CHARACTERISTIC_CONFIG_OTA_SERVER_USERNAME_UUID),
+                characteristicHashMap.get(OtaConfigFragment.BLE_CHARACTERISTIC_CONFIG_OTA_SERVER_PASSWORD_UUID)
         );
 
         mWifiConfigFragment = WifiConfigFragment.newInstance(
-                characteristicHashMap.get(WifiConfigFragment.BLE_CHARACTERISTIC_CONFIG_WIFI_SSID_UUID).getValue(),
-                characteristicHashMap.get(WifiConfigFragment.BLE_CHARACTERISTIC_CONFIG_WIFI_PASSWORD_UUID).getValue()
+                characteristicHashMap.get(WifiConfigFragment.BLE_CHARACTERISTIC_CONFIG_WIFI_SSID_UUID),
+                characteristicHashMap.get(WifiConfigFragment.BLE_CHARACTERISTIC_CONFIG_WIFI_PASSWORD_UUID)
         );
 
         mMqttConfigFragment = MqttConfigFragment.newInstance(
-                characteristicHashMap.get(MqttConfigFragment.BLE_CHARACTERISTIC_CONFIG_MQTT_USER_UUID).getValue(),
-                characteristicHashMap.get(MqttConfigFragment.BLE_CHARACTERISTIC_CONFIG_MQTT_PASSWORD_UUID).getValue(),
-                characteristicHashMap.get(MqttConfigFragment.BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_IP_UUID).getValue(),
-                characteristicHashMap.get(MqttConfigFragment.BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_PORT_UUID).getValue()
+                characteristicHashMap.get(MqttConfigFragment.BLE_CHARACTERISTIC_CONFIG_MQTT_USER_UUID),
+                characteristicHashMap.get(MqttConfigFragment.BLE_CHARACTERISTIC_CONFIG_MQTT_PASSWORD_UUID),
+                characteristicHashMap.get(MqttConfigFragment.BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_IP_UUID),
+                characteristicHashMap.get(MqttConfigFragment.BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_PORT_UUID)
         );
 
         mSensorConfigFragment = SensorConfigFragment.newInstance(
-                characteristicHashMap.get(SensorConfigFragment.BLE_CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID).getValue()
+                characteristicHashMap.get(SensorConfigFragment.BLE_CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID)
         );
     }
 

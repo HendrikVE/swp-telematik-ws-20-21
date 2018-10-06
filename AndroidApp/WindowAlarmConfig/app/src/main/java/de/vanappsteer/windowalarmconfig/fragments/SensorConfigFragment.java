@@ -69,10 +69,10 @@ public class SensorConfigFragment extends ConfigFragment {
     }
 
     @Override
-    public Map<String, ConfigDescription> getInputData() {
+    public Map<UUID, String> getInputData() {
 
-        Map<String, ConfigDescription> map = new HashMap<>();
-        map.put(KEY_BLE_CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID, new ConfigDescription(BLE_CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID, mSensorPollInterval));
+        Map<UUID, String> map = new HashMap<>();
+        map.put(BLE_CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID, mSensorPollInterval);
 
         return map;
     }

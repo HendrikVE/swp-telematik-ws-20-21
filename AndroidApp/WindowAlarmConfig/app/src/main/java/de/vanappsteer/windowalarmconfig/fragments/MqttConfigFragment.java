@@ -93,13 +93,13 @@ public class MqttConfigFragment extends ConfigFragment {
     }
 
     @Override
-    public Map<String, ConfigDescription> getInputData() {
+    public Map<UUID, String> getInputData() {
 
-        Map<String, ConfigDescription> map = new HashMap<>();
-        map.put(KEY_BLE_CHARACTERISTIC_CONFIG_MQTT_USER_UUID, new ConfigDescription(BLE_CHARACTERISTIC_CONFIG_MQTT_USER_UUID, mMqttUsername));
-        map.put(KEY_BLE_CHARACTERISTIC_CONFIG_MQTT_PASSWORD_UUID, new ConfigDescription(BLE_CHARACTERISTIC_CONFIG_MQTT_PASSWORD_UUID, mMqttPassword));
-        map.put(KEY_BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_IP_UUID, new ConfigDescription(BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_IP_UUID, mMqttBrokerAddress));
-        map.put(KEY_BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_PORT_UUID, new ConfigDescription(BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_PORT_UUID, mMqttBrokerPort));
+        Map<UUID, String> map = new HashMap<>();
+        map.put(BLE_CHARACTERISTIC_CONFIG_MQTT_USER_UUID, mMqttUsername);
+        map.put(BLE_CHARACTERISTIC_CONFIG_MQTT_PASSWORD_UUID, mMqttPassword);
+        map.put(BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_IP_UUID, mMqttBrokerAddress);
+        map.put(BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_PORT_UUID, mMqttBrokerPort);
 
         return map;
     }
