@@ -15,6 +15,9 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
@@ -32,17 +35,12 @@ import android.widget.CompoundButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
-
-import javax.security.auth.login.LoginException;
 
 import de.vanappsteer.windowalarmconfig.adapter.DeviceListAdapter;
 import de.vanappsteer.windowalarmconfig.R;
@@ -57,6 +55,8 @@ public class DeviceScanActivity extends AppCompatActivity {
 
     private final int REQUEST_PERMISSION_COARSE_LOCATION = 1;
 
+    private final int COMMAND_SHOW_CONNECTION_ERROR_DIALOG = 1;
+
     private final String SHARED_PREFERENCES_ASKED_FOR_LOCATION = "SHARED_PREFERENCES_ASKED_FOR_LOCATION";
 
     private BluetoothManager mBluetoothManager;
@@ -68,14 +68,36 @@ public class DeviceScanActivity extends AppCompatActivity {
     private boolean mScanSwitchEnabled = true;
     private boolean mIsScanning = false;
 
-    private RecyclerView.LayoutManager mLayoutManager;
     private SwitchCompat mScanSwitch;
     private ProgressBar mScanProgressbar;
     private TextView mTextViewEnableBluetooth;
 
     private BluetoothGatt mConnectedBluetoothGatt = null;
 
+    private AlertDialog mDialogConnectDevice;
+
     private SharedPreferences mSP;
+
+    Handler mUiHandler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(Message message) {
+            switch (message.what) {
+
+                case COMMAND_SHOW_CONNECTION_ERROR_DIALOG:
+                    AlertDialog.Builder builder = new AlertDialog.Builder(DeviceScanActivity.this);
+                    builder.setTitle(R.string.dialog_bluetooth_device_connection_error_title);
+                    builder.setMessage(R.string.dialog_bluetooth_device_connection_error_message);
+                    builder.setPositiveButton(R.string.button_ok, null);
+
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                    break;
+
+                default:
+                    LoggingUtil.warning("unknown command: " + message.what);
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -151,7 +173,6 @@ public class DeviceScanActivity extends AppCompatActivity {
 
             default:
                 LoggingUtil.warning("unknown request code: " + requestCode);
-                break;
         }
     }
 
@@ -246,14 +267,28 @@ public class DeviceScanActivity extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
 
-        mLayoutManager = new LinearLayoutManager(this);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(mLayoutManager);
 
         mAdapter = new DeviceListAdapter();
         mAdapter.setOnDeviceSelectionListener(new DeviceListAdapter.OnDeviceSelectionListener() {
             @Override
             public void onDeviceSelected(BluetoothDevice device) {
+
                 mConnectedBluetoothGatt = device.connectGatt(DeviceScanActivity.this, false, mGattCallback);
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(DeviceScanActivity.this);
+                builder.setTitle(R.string.dialog_bluetooth_device_connecting_title);
+                builder.setView(R.layout.progress_infinite);
+                builder.setNegativeButton(R.string.button_cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        mConnectedBluetoothGatt.disconnect();
+                        mConnectedBluetoothGatt.close();
+                    }
+                });
+                mDialogConnectDevice = builder.create();
+                mDialogConnectDevice.show();
             }
         });
         recyclerView.setAdapter(mAdapter);
@@ -389,7 +424,10 @@ public class DeviceScanActivity extends AppCompatActivity {
                 gatt.discoverServices();
             }
             else {
-                LoggingUtil.debug("newState != BluetoothProfile.STATE_CONNECTED");
+                mDialogConnectDevice.dismiss();
+
+                Message message = mUiHandler.obtainMessage(COMMAND_SHOW_CONNECTION_ERROR_DIALOG, null);
+                message.sendToTarget();
             }
         }
 
@@ -397,6 +435,7 @@ public class DeviceScanActivity extends AppCompatActivity {
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
 
             LoggingUtil.debug("onServicesDiscovered");
+            mDialogConnectDevice.dismiss();
 
             if (status != BluetoothGatt.GATT_SUCCESS) {
                 // TODO: Handle the error
