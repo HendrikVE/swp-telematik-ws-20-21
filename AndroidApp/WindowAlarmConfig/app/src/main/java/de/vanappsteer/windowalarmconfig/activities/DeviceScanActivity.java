@@ -330,6 +330,8 @@ public class DeviceScanActivity extends AppCompatActivity {
                         mConnectedBluetoothGatt.close();
                     }
                 });
+                builder.setCancelable(false);
+                
                 mDialogConnectDevice = builder.create();
                 mDialogConnectDevice.show();
             }
