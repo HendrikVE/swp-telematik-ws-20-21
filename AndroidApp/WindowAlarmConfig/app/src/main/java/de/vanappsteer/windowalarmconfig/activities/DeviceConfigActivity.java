@@ -1,5 +1,7 @@
 package de.vanappsteer.windowalarmconfig.activities;
 
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
@@ -8,7 +10,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import de.vanappsteer.windowalarmconfig.adapter.PagerAdapter;
 import de.vanappsteer.windowalarmconfig.R;
@@ -16,6 +20,10 @@ import de.vanappsteer.windowalarmconfig.fragments.ConfigFragment;
 import de.vanappsteer.windowalarmconfig.util.LoggingUtil;
 
 public class DeviceConfigActivity extends AppCompatActivity {
+
+    public static final String KEY_CHARACTERISTIC_HASH_MAP = "KEY_CHARACTERISTIC_HASH_MAP";
+
+    private HashMap<UUID, ConfigFragment.ConfigDescription> mConfigDescriptionHashMap = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,11 +34,26 @@ public class DeviceConfigActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        Intent intent = getIntent();
+
+        HashMap<UUID, String> characteristicHashMap = (HashMap<UUID, String>) intent.getSerializableExtra(KEY_CHARACTERISTIC_HASH_MAP);
+        if (characteristicHashMap == null) {
+            characteristicHashMap = new HashMap<>();
+        }
+
+        for (Map.Entry<UUID, String> entry : characteristicHashMap.entrySet()) {
+            mConfigDescriptionHashMap.put(entry.getKey(), new ConfigFragment.ConfigDescription(entry.getKey(), entry.getValue()));
+        }
+
+        initViews();
+    }
+
+    private void initViews() {
         TabLayout tabLayout = findViewById(R.id.tabLayout);
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
         final ViewPager viewPager = findViewById(R.id.pager);
-        final PagerAdapter adapter = new PagerAdapter(getSupportFragmentManager(), tabLayout.getTabCount());
+        final PagerAdapter adapter = new PagerAdapter(getSupportFragmentManager(), tabLayout.getTabCount(), mConfigDescriptionHashMap);
         viewPager.setAdapter(adapter);
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {

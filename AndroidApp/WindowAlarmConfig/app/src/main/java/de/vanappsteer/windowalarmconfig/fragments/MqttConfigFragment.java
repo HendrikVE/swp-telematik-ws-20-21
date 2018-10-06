@@ -1,6 +1,5 @@
 package de.vanappsteer.windowalarmconfig.fragments;
 
-
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.text.Editable;
@@ -17,15 +16,15 @@ import de.vanappsteer.windowalarmconfig.util.TextChangeWatcher;
 
 public class MqttConfigFragment extends ConfigFragment {
 
-    public final String KEY_BLE_CHARACTERISTIC_CONFIG_MQTT_USER_UUID = "BLE_CHARACTERISTIC_CONFIG_MQTT_USER_UUID";
-    public final String KEY_BLE_CHARACTERISTIC_CONFIG_MQTT_PASSWORD_UUID = "BLE_CHARACTERISTIC_CONFIG_MQTT_PASSWORD_UUID";
-    public final String KEY_BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_IP_UUID = "BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_IP_UUID";
-    public final String KEY_BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_PORT_UUID = "BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_PORT_UUID";
+    public static final String KEY_BLE_CHARACTERISTIC_CONFIG_MQTT_USER_UUID = "BLE_CHARACTERISTIC_CONFIG_MQTT_USER_UUID";
+    public static final String KEY_BLE_CHARACTERISTIC_CONFIG_MQTT_PASSWORD_UUID = "BLE_CHARACTERISTIC_CONFIG_MQTT_PASSWORD_UUID";
+    public static final String KEY_BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_IP_UUID = "BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_IP_UUID";
+    public static final String KEY_BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_PORT_UUID = "BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_PORT_UUID";
 
-    private final UUID BLE_CHARACTERISTIC_CONFIG_MQTT_USER_UUID = UUID.fromString("69150609-18f8-4523-a41f-6d9a01d2e08d");
-    private final UUID BLE_CHARACTERISTIC_CONFIG_MQTT_PASSWORD_UUID = UUID.fromString("8bebec77-ea21-4c14-9d64-dbec1fd5267c");
-    private final UUID BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_IP_UUID = UUID.fromString("e3b150fb-90a2-4cd3-80c5-b1189e110ef1");
-    private final UUID BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_PORT_UUID = UUID.fromString("4eeff953-0f5e-43ee-b1be-1783a8190b0d");
+    public static final UUID BLE_CHARACTERISTIC_CONFIG_MQTT_USER_UUID = UUID.fromString("69150609-18f8-4523-a41f-6d9a01d2e08d");
+    public static final UUID BLE_CHARACTERISTIC_CONFIG_MQTT_PASSWORD_UUID = UUID.fromString("8bebec77-ea21-4c14-9d64-dbec1fd5267c");
+    public static final UUID BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_IP_UUID = UUID.fromString("e3b150fb-90a2-4cd3-80c5-b1189e110ef1");
+    public static final UUID BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_PORT_UUID = UUID.fromString("4eeff953-0f5e-43ee-b1be-1783a8190b0d");
 
     private TextInputEditText mEditTextMqttUsername;
     private TextInputEditText mEditTextMqttPassword;
@@ -41,6 +40,19 @@ public class MqttConfigFragment extends ConfigFragment {
         // Required empty public constructor
     }
 
+    public static MqttConfigFragment newInstance(String username, String password, String brokerAddress, String brokerPort) {
+
+        Bundle bundle = new Bundle();
+        bundle.putString(KEY_BLE_CHARACTERISTIC_CONFIG_MQTT_USER_UUID, username);
+        bundle.putString(KEY_BLE_CHARACTERISTIC_CONFIG_MQTT_PASSWORD_UUID, password);
+        bundle.putString(KEY_BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_IP_UUID, brokerAddress);
+        bundle.putString(KEY_BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_PORT_UUID, brokerPort);
+
+        MqttConfigFragment fragment = new MqttConfigFragment();
+        fragment.setArguments(bundle);
+
+        return fragment;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -61,12 +73,12 @@ public class MqttConfigFragment extends ConfigFragment {
             mMqttPassword = getArguments().getString(KEY_BLE_CHARACTERISTIC_CONFIG_MQTT_PASSWORD_UUID);
             mMqttBrokerAddress = getArguments().getString(KEY_BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_IP_UUID);
             mMqttBrokerPort = getArguments().getString(KEY_BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_PORT_UUID);
-
-            mEditTextMqttUsername.setText(mMqttUsername);
-            mEditTextMqttPassword.setText(mMqttPassword);
-            mEditTextMqttBrokerAddress.setText(mMqttBrokerAddress);
-            mEditTextMqttBrokerPort.setText(mMqttBrokerPort);
         }
+
+        mEditTextMqttUsername.setText(mMqttUsername);
+        mEditTextMqttPassword.setText(mMqttPassword);
+        mEditTextMqttBrokerAddress.setText(mMqttBrokerAddress);
+        mEditTextMqttBrokerPort.setText(mMqttBrokerPort);
     }
 
     @Override

@@ -32,9 +32,17 @@ import android.widget.CompoundButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+
+import javax.security.auth.login.LoginException;
 
 import de.vanappsteer.windowalarmconfig.adapter.DeviceListAdapter;
 import de.vanappsteer.windowalarmconfig.R;
@@ -104,6 +112,7 @@ public class DeviceScanActivity extends AppCompatActivity {
 
         if (mConnectedBluetoothGatt != null) {
             mConnectedBluetoothGatt.disconnect();
+            mConnectedBluetoothGatt.close();
         }
     }
 
@@ -244,9 +253,7 @@ public class DeviceScanActivity extends AppCompatActivity {
         mAdapter.setOnDeviceSelectionListener(new DeviceListAdapter.OnDeviceSelectionListener() {
             @Override
             public void onDeviceSelected(BluetoothDevice device) {
-                //mConnectedBluetoothGatt = device.connectGatt(DeviceScanActivity.this, false, mGattCallback);
-                Intent intent = new Intent(DeviceScanActivity.this, DeviceConfigActivity.class);
-                startActivity(intent);
+                mConnectedBluetoothGatt = device.connectGatt(DeviceScanActivity.this, false, mGattCallback);
             }
         });
         recyclerView.setAdapter(mAdapter);
@@ -381,6 +388,9 @@ public class DeviceScanActivity extends AppCompatActivity {
                 LoggingUtil.debug("discoverServices");
                 gatt.discoverServices();
             }
+            else {
+                LoggingUtil.debug("newState != BluetoothProfile.STATE_CONNECTED");
+            }
         }
 
         @Override
@@ -394,12 +404,20 @@ public class DeviceScanActivity extends AppCompatActivity {
                 return;
             }
 
-            /*BluetoothGattCharacteristic characteristic = gatt
-                    .getService(BLE_SERVICE_UUID)
-                    .getCharacteristic(BLE_CHARACTERISTIC_CONFIG_DEVICE_ROOM_UUID);
+            List<BluetoothGattCharacteristic> characteristicList = gatt.getService(BLE_SERVICE_UUID).getCharacteristics();
+            HashMap<UUID, String> characteristicHashMap = new HashMap<>();
 
-            characteristic.setValue("hallo");
-            gatt.writeCharacteristic(characteristic);*/
+            for (BluetoothGattCharacteristic characteristic : characteristicList) {
+
+                if (characteristic.getValue() == null) {
+                    characteristic.setValue("" + new Random().nextInt(100 + 1));
+                }
+                characteristicHashMap.put(characteristic.getUuid(), characteristic.getStringValue(0));
+            }
+
+            Intent intent = new Intent(DeviceScanActivity.this, DeviceConfigActivity.class);
+            intent.putExtra(DeviceConfigActivity.KEY_CHARACTERISTIC_HASH_MAP, characteristicHashMap);
+            startActivity(intent);
         }
     };
 

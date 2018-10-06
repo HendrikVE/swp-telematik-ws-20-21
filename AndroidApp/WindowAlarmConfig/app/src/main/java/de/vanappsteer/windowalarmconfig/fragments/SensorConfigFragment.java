@@ -1,6 +1,5 @@
 package de.vanappsteer.windowalarmconfig.fragments;
 
-
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.text.Editable;
@@ -17,9 +16,9 @@ import de.vanappsteer.windowalarmconfig.util.TextChangeWatcher;
 
 public class SensorConfigFragment extends ConfigFragment {
 
-    public final String KEY_BLE_CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID = "BLE_CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID";
+    public static final String KEY_BLE_CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID = "BLE_CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID";
 
-    private final UUID BLE_CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID = UUID.fromString("68011c92-854a-4f2c-a94c-5ee37dc607c3");
+    public static final UUID BLE_CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID = UUID.fromString("68011c92-854a-4f2c-a94c-5ee37dc607c3");
 
     private TextInputEditText mEditTextSensorPollInterval;
 
@@ -29,6 +28,16 @@ public class SensorConfigFragment extends ConfigFragment {
         // Required empty public constructor
     }
 
+    public static SensorConfigFragment newInstance(String pollInterval) {
+
+        Bundle bundle = new Bundle();
+        bundle.putString(KEY_BLE_CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID, pollInterval);
+
+        SensorConfigFragment fragment = new SensorConfigFragment();
+        fragment.setArguments(bundle);
+
+        return fragment;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -46,9 +55,9 @@ public class SensorConfigFragment extends ConfigFragment {
         Bundle bundle = getArguments();
         if (bundle != null) {
             mSensorPollInterval = getArguments().getString(KEY_BLE_CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID);
-
-            mEditTextSensorPollInterval.setText(mSensorPollInterval);
         }
+
+        mEditTextSensorPollInterval.setText(mSensorPollInterval);
     }
 
     @Override
