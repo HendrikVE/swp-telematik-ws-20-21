@@ -8,9 +8,11 @@ import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -94,7 +96,39 @@ public class DeviceScanActivity extends AppCompatActivity {
                     break;
 
                 default:
-                    LoggingUtil.warning("unknown command: " + message.what);
+                    LoggingUtil.warning("unhandled command: " + message.what);
+            }
+        }
+    };
+
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+
+            if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
+                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
+                switch (state) {
+
+                    case BluetoothAdapter.STATE_OFF:
+                        stopScan();
+                        break;
+
+                    case BluetoothAdapter.STATE_TURNING_OFF:
+                        // do nothing
+                        break;
+
+                    case BluetoothAdapter.STATE_ON:
+                        // do nothing
+                        break;
+
+                    case BluetoothAdapter.STATE_TURNING_ON:
+                        // do nothing
+                        break;
+
+                    default:
+                        LoggingUtil.warning("unhandled state: " + state);
+                }
             }
         }
     };
@@ -112,6 +146,9 @@ public class DeviceScanActivity extends AppCompatActivity {
 
         mBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         mSP = PreferenceManager.getDefaultSharedPreferences(this);
+
+        IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+        registerReceiver(mBroadcastReceiver, filter);
     }
 
     @Override
@@ -136,6 +173,8 @@ public class DeviceScanActivity extends AppCompatActivity {
             mConnectedBluetoothGatt.disconnect();
             mConnectedBluetoothGatt.close();
         }
+
+        unregisterReceiver(mBroadcastReceiver);
     }
 
     @Override
@@ -172,7 +211,7 @@ public class DeviceScanActivity extends AppCompatActivity {
             }
 
             default:
-                LoggingUtil.warning("unknown request code: " + requestCode);
+                LoggingUtil.warning("unhandled request code: " + requestCode);
         }
     }
 
@@ -242,6 +281,10 @@ public class DeviceScanActivity extends AppCompatActivity {
     private void stopScan() {
 
         mScanProgressbar.setVisibility(View.INVISIBLE);
+
+        mScanSwitchEnabled = false;
+        mScanSwitch.setChecked(false);
+        mScanSwitchEnabled = true;
 
         // mBluetoothAdapter is null if only checkPermissions() was called, but not checkBluetooth()
         if (mBluetoothAdapter != null) {
