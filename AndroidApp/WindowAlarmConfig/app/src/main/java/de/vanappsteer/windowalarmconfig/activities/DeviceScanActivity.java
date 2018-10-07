@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
@@ -61,7 +62,7 @@ public class DeviceScanActivity extends AppCompatActivity {
     private final int COMMAND_SHOW_CONNECTION_ERROR_DIALOG = 1;
     private final int COMMAND_SHOW_DEVICE_UNSUPPORTED_DIALOG = 2;
 
-    private final String SHARED_PREFERENCES_ASKED_FOR_LOCATION = "SHARED_PREFERENCES_ASKED_FOR_LOCATION";
+    private final String KEY_SP_ASKED_FOR_LOCATION = "KEY_SP_ASKED_FOR_LOCATION";
 
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
@@ -71,6 +72,7 @@ public class DeviceScanActivity extends AppCompatActivity {
     private DeviceListAdapter mAdapter;
     private boolean mScanSwitchEnabled = true;
     private boolean mIsScanning = false;
+    private boolean mScanPaused = false;
 
     private SwitchCompat mScanSwitch;
     private ProgressBar mScanProgressbar;
@@ -169,14 +171,21 @@ public class DeviceScanActivity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
+
         super.onPause();
+
+        if (mIsScanning) {
+            mScanPaused = true;
+        }
         stopScan();
     }
 
     @Override
     protected void onResume() {
+
         super.onResume();
-        if (mScanSwitch != null && mScanSwitch.isChecked()) {
+
+        if (mScanSwitch != null && (mScanSwitch.isChecked()) || mScanPaused) {
             checkPermissions();
         }
     }
@@ -282,6 +291,8 @@ public class DeviceScanActivity extends AppCompatActivity {
 
     private void startScan() {
 
+        mScanPaused = false;
+
         mScanProgressbar.setVisibility(View.VISIBLE);
 
         mScanSwitchEnabled = false;
@@ -376,7 +387,7 @@ public class DeviceScanActivity extends AppCompatActivity {
         if (! coarseLocationGranted) {
 
             boolean showRationale = ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_COARSE_LOCATION);
-            boolean alreadyAskedBefore = mSP.getBoolean(SHARED_PREFERENCES_ASKED_FOR_LOCATION, false);
+            boolean alreadyAskedBefore = mSP.getBoolean(KEY_SP_ASKED_FOR_LOCATION, false);
 
             if ( !showRationale && alreadyAskedBefore) {// user CHECKED "never ask again"
 
@@ -386,7 +397,7 @@ public class DeviceScanActivity extends AppCompatActivity {
                 showLocationRequestDialog(false);
 
                 SharedPreferences.Editor editor = mSP.edit();
-                editor.putBoolean(SHARED_PREFERENCES_ASKED_FOR_LOCATION, true);
+                editor.putBoolean(KEY_SP_ASKED_FOR_LOCATION, true);
                 editor.apply();
             }
         }
