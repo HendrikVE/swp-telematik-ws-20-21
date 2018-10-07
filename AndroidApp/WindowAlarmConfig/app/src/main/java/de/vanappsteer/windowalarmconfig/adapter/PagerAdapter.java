@@ -7,7 +7,6 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import java.util.HashMap;
 import java.util.UUID;
 
-import de.vanappsteer.windowalarmconfig.fragments.ConfigFragment;
 import de.vanappsteer.windowalarmconfig.fragments.DeviceConfigFragment;
 import de.vanappsteer.windowalarmconfig.fragments.MqttConfigFragment;
 import de.vanappsteer.windowalarmconfig.fragments.OtaConfigFragment;

@@ -21,7 +21,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
@@ -41,7 +40,9 @@ import android.widget.TextView;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -69,6 +70,7 @@ public class DeviceScanActivity extends AppCompatActivity {
     private BluetoothAdapter mBluetoothAdapter;
 
     private Set<BluetoothDevice> bleDeviceSet = new HashSet<>();
+    private HashMap<UUID, String> mCharacteristicHashMap;
 
     private DeviceListAdapter mAdapter;
     private boolean mScanSwitchEnabled = true;
@@ -82,6 +84,8 @@ public class DeviceScanActivity extends AppCompatActivity {
     private BluetoothGatt mConnectedBluetoothGatt = null;
 
     private AlertDialog mDialogConnectDevice;
+
+    private Queue<BluetoothGattCharacteristic> mReadCharacteristicsOperationsQueue = new LinkedList<>();
 
     private SharedPreferences mSP;
 
@@ -314,9 +318,11 @@ public class DeviceScanActivity extends AppCompatActivity {
 
         mScanProgressbar.setVisibility(View.INVISIBLE);
 
-        mScanSwitchEnabled = false;
-        mScanSwitch.setChecked(false);
-        mScanSwitchEnabled = true;
+        if (mScanSwitch != null) {
+            mScanSwitchEnabled = false;
+            mScanSwitch.setChecked(false);
+            mScanSwitchEnabled = true;
+        }
 
         // mBluetoothAdapter is null if only checkPermissions() was called, but not checkBluetooth()
         if (mBluetoothAdapter != null) {
@@ -489,6 +495,13 @@ public class DeviceScanActivity extends AppCompatActivity {
         return null;
     }
 
+    private void openDeviceConfigActivity() {
+
+        Intent intent = new Intent(DeviceScanActivity.this, DeviceConfigActivity.class);
+        intent.putExtra(DeviceConfigActivity.KEY_CHARACTERISTIC_HASH_MAP, mCharacteristicHashMap);
+        startActivityForResult(intent, ACTIVITY_RESULT_CONFIGURE_DEVICE);
+    }
+
     private BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
 
         @Override
@@ -505,8 +518,8 @@ public class DeviceScanActivity extends AppCompatActivity {
             else {
                 mDialogConnectDevice.dismiss();
 
-                mConnectedBluetoothGatt.disconnect();
-                mConnectedBluetoothGatt.close();
+                gatt.disconnect();
+                gatt.close();
 
                 Message message = mUiHandler.obtainMessage(COMMAND_SHOW_CONNECTION_ERROR_DIALOG, null);
                 message.sendToTarget();
@@ -527,8 +540,8 @@ public class DeviceScanActivity extends AppCompatActivity {
 
             BluetoothGattService gattService = gatt.getService(BLE_SERVICE_UUID);
             if (gattService == null) {
-                mConnectedBluetoothGatt.disconnect();
-                mConnectedBluetoothGatt.close();
+                gatt.disconnect();
+                gatt.close();
 
                 Message message = mUiHandler.obtainMessage(COMMAND_SHOW_DEVICE_UNSUPPORTED_DIALOG, null);
                 message.sendToTarget();
@@ -537,19 +550,27 @@ public class DeviceScanActivity extends AppCompatActivity {
             }
 
             List<BluetoothGattCharacteristic> characteristicList = gattService.getCharacteristics();
-            HashMap<UUID, String> characteristicHashMap = new HashMap<>();
+            mCharacteristicHashMap = new HashMap<>();
 
-            for (BluetoothGattCharacteristic characteristic : characteristicList) {
+            mReadCharacteristicsOperationsQueue.addAll(characteristicList);
 
-                if (characteristic.getValue() == null) {
-                    characteristic.setValue("" + new Random().nextInt(100 + 1));
-                }
-                characteristicHashMap.put(characteristic.getUuid(), characteristic.getStringValue(0));
+            // initial call of readCharacteristic, further calls are done within readCharacteristic afterwards
+            gatt.readCharacteristic(mReadCharacteristicsOperationsQueue.poll());
+        }
+
+        @Override
+        public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+
+            LoggingUtil.debug("uuid: " + characteristic.getUuid());
+            LoggingUtil.debug("value: " + characteristic.getStringValue(0));
+
+            mCharacteristicHashMap.put(characteristic.getUuid(), characteristic.getStringValue(0));
+
+            gatt.readCharacteristic(mReadCharacteristicsOperationsQueue.poll());
+
+            if (mReadCharacteristicsOperationsQueue.size() == 0) {
+                openDeviceConfigActivity();
             }
-
-            Intent intent = new Intent(DeviceScanActivity.this, DeviceConfigActivity.class);
-            intent.putExtra(DeviceConfigActivity.KEY_CHARACTERISTIC_HASH_MAP, characteristicHashMap);
-            startActivityForResult(intent, ACTIVITY_RESULT_CONFIGURE_DEVICE);
         }
     };
 
