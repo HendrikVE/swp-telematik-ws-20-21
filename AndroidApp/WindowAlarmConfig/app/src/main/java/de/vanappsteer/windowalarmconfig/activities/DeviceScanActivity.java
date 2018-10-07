@@ -530,16 +530,19 @@ public class DeviceScanActivity extends AppCompatActivity {
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
 
             LoggingUtil.debug("onServicesDiscovered");
-            mDialogConnectDevice.dismiss();
 
             if (status != BluetoothGatt.GATT_SUCCESS) {
                 // TODO: Handle the error
                 LoggingUtil.error("status != BluetoothGatt.GATT_SUCCESS");
+                mDialogConnectDevice.dismiss();
                 return;
             }
 
             BluetoothGattService gattService = gatt.getService(BLE_SERVICE_UUID);
             if (gattService == null) {
+
+                mDialogConnectDevice.dismiss();
+
                 gatt.disconnect();
                 gatt.close();
 
@@ -569,6 +572,7 @@ public class DeviceScanActivity extends AppCompatActivity {
             gatt.readCharacteristic(mReadCharacteristicsOperationsQueue.poll());
 
             if (mReadCharacteristicsOperationsQueue.size() == 0) {
+                mDialogConnectDevice.dismiss();
                 openDeviceConfigActivity();
             }
         }
