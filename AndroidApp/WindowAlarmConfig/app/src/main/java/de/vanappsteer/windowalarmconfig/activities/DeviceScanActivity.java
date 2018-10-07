@@ -56,6 +56,7 @@ public class DeviceScanActivity extends AppCompatActivity {
 
     private final int ACTIVITY_RESULT_ENABLE_BLUETOOTH = 1;
     private final int ACTIVITY_RESULT_ENABLE_LOCATION_PERMISSION = 2;
+    private final int ACTIVITY_RESULT_CONFIGURE_DEVICE = 3;
 
     private final int REQUEST_PERMISSION_COARSE_LOCATION = 1;
 
@@ -215,6 +216,10 @@ public class DeviceScanActivity extends AppCompatActivity {
         }
         else if (requestCode == ACTIVITY_RESULT_ENABLE_LOCATION_PERMISSION) {
             checkPermissions();
+        }
+        else if (requestCode == ACTIVITY_RESULT_CONFIGURE_DEVICE) {
+            mConnectedBluetoothGatt.disconnect();
+            mConnectedBluetoothGatt.close();
         }
     }
 
@@ -544,7 +549,7 @@ public class DeviceScanActivity extends AppCompatActivity {
 
             Intent intent = new Intent(DeviceScanActivity.this, DeviceConfigActivity.class);
             intent.putExtra(DeviceConfigActivity.KEY_CHARACTERISTIC_HASH_MAP, characteristicHashMap);
-            startActivity(intent);
+            startActivityForResult(intent, ACTIVITY_RESULT_CONFIGURE_DEVICE);
         }
     };
 

@@ -31,6 +31,8 @@ public class DeviceConfigActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_config);
 
+        setResult(RESULT_CANCELED);
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -90,6 +92,7 @@ public class DeviceConfigActivity extends AppCompatActivity {
                     }
                 }
 
+                setResult(RESULT_OK);
                 DeviceConfigActivity.this.finish();
             }
         });
