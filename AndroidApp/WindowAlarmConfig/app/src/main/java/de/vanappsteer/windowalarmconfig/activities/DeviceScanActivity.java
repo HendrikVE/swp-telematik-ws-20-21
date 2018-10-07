@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
@@ -58,6 +59,7 @@ public class DeviceScanActivity extends AppCompatActivity {
     private final int REQUEST_PERMISSION_COARSE_LOCATION = 1;
 
     private final int COMMAND_SHOW_CONNECTION_ERROR_DIALOG = 1;
+    private final int COMMAND_SHOW_DEVICE_UNSUPPORTED_DIALOG = 2;
 
     private final String SHARED_PREFERENCES_ASKED_FOR_LOCATION = "SHARED_PREFERENCES_ASKED_FOR_LOCATION";
 
@@ -83,15 +85,29 @@ public class DeviceScanActivity extends AppCompatActivity {
     Handler mUiHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message message) {
+
+            AlertDialog.Builder builder;
+            AlertDialog dialog;
+
             switch (message.what) {
 
                 case COMMAND_SHOW_CONNECTION_ERROR_DIALOG:
-                    AlertDialog.Builder builder = new AlertDialog.Builder(DeviceScanActivity.this);
+                    builder = new AlertDialog.Builder(DeviceScanActivity.this);
                     builder.setTitle(R.string.dialog_bluetooth_device_connection_error_title);
                     builder.setMessage(R.string.dialog_bluetooth_device_connection_error_message);
                     builder.setPositiveButton(R.string.button_ok, null);
 
-                    AlertDialog dialog = builder.create();
+                    dialog = builder.create();
+                    dialog.show();
+                    break;
+
+                case COMMAND_SHOW_DEVICE_UNSUPPORTED_DIALOG:
+                    builder = new AlertDialog.Builder(DeviceScanActivity.this);
+                    builder.setTitle(R.string.dialog_bluetooth_device_not_supported_title);
+                    builder.setMessage(R.string.dialog_bluetooth_device_not_supported_message);
+                    builder.setPositiveButton(R.string.button_ok, null);
+
+                    dialog = builder.create();
                     dialog.show();
                     break;
 
@@ -331,7 +347,7 @@ public class DeviceScanActivity extends AppCompatActivity {
                     }
                 });
                 builder.setCancelable(false);
-                
+
                 mDialogConnectDevice = builder.create();
                 mDialogConnectDevice.show();
             }
@@ -473,6 +489,9 @@ public class DeviceScanActivity extends AppCompatActivity {
             else {
                 mDialogConnectDevice.dismiss();
 
+                mConnectedBluetoothGatt.disconnect();
+                mConnectedBluetoothGatt.close();
+
                 Message message = mUiHandler.obtainMessage(COMMAND_SHOW_CONNECTION_ERROR_DIALOG, null);
                 message.sendToTarget();
             }
@@ -490,7 +509,18 @@ public class DeviceScanActivity extends AppCompatActivity {
                 return;
             }
 
-            List<BluetoothGattCharacteristic> characteristicList = gatt.getService(BLE_SERVICE_UUID).getCharacteristics();
+            BluetoothGattService gattService = gatt.getService(BLE_SERVICE_UUID);
+            if (gattService == null) {
+                mConnectedBluetoothGatt.disconnect();
+                mConnectedBluetoothGatt.close();
+
+                Message message = mUiHandler.obtainMessage(COMMAND_SHOW_DEVICE_UNSUPPORTED_DIALOG, null);
+                message.sendToTarget();
+
+                return;
+            }
+
+            List<BluetoothGattCharacteristic> characteristicList = gattService.getCharacteristics();
             HashMap<UUID, String> characteristicHashMap = new HashMap<>();
 
             for (BluetoothGattCharacteristic characteristic : characteristicList) {
