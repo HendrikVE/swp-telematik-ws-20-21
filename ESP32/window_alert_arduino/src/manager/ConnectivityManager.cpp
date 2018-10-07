@@ -124,7 +124,7 @@ void createCharacteristics(BLEService* bleService, BLECharacteristicCallbacks* c
         );
 
         characteristic->setCallbacks(callbacks);
-        characteristic->setValue("Hello World");
+        characteristic->setValue(CHARACTERISTIC_VALUES[i]);
     }
 }
 
