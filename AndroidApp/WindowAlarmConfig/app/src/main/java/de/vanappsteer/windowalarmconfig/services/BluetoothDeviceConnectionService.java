@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
 
@@ -29,7 +30,8 @@ public class BluetoothDeviceConnectionService extends Service {
     private BluetoothGatt mConnectedBluetoothGatt = null;
 
     private HashMap<UUID, String> mCharacteristicHashMap;
-    private Queue<BluetoothGattCharacteristic> mReadCharacteristicsOperationsQueue = new LinkedList<>();
+    private final Queue<BluetoothGattCharacteristic> mReadCharacteristicsOperationsQueue = new LinkedList<>();
+    private final Queue<BluetoothGattCharacteristic> mWriteCharacteristicsOperationsQueue = new LinkedList<>();
 
     private ArrayList<DeviceConnectionListener> mDeviceConnectionListenerList = new ArrayList<>();
 
@@ -49,7 +51,7 @@ public class BluetoothDeviceConnectionService extends Service {
         public static final int DEVICE_CONNECTION_ERROR_GENERIC = 1;
         public static final int DEVICE_CONNECTION_ERROR_UNSUPPORTED = 2;
 
-        public abstract void onCharacteristicsRead(HashMap<UUID, String> characteristicHashmap);
+        public abstract void onCharacteristicsRead(Map<UUID, String> characteristicMap);
         public abstract void onDeviceConnectionError(int errorCode);
     }
 
@@ -59,7 +61,7 @@ public class BluetoothDeviceConnectionService extends Service {
     }
 
     public void connectDevice(BluetoothDevice device) {
-        mConnectedBluetoothGatt = device.connectGatt(BluetoothDeviceConnectionService.this, false, mGattCharacteristicReadCallback);
+        mConnectedBluetoothGatt = device.connectGatt(BluetoothDeviceConnectionService.this, false, mGattCharacteristicCallback);
     }
 
     public void disconnectDevice() {
@@ -75,19 +77,38 @@ public class BluetoothDeviceConnectionService extends Service {
     }
     */
 
-    public void writeCharacteristics() {
+    public void writeCharacteristics(Map<UUID, String> characteristicMap) {
 
+        synchronized (mWriteCharacteristicsOperationsQueue) {
+
+            boolean needInitialCall = mWriteCharacteristicsOperationsQueue.size() == 0;
+
+            BluetoothGattService gattService = mConnectedBluetoothGatt.getService(BLE_SERVICE_UUID);
+
+            for (Map.Entry<UUID, String> entry : characteristicMap.entrySet()) {
+
+                BluetoothGattCharacteristic characteristic = gattService.getCharacteristic(entry.getKey());
+                characteristic.setValue(entry.getValue());
+
+                mWriteCharacteristicsOperationsQueue.add(characteristic);
+            }
+
+            if (needInitialCall) {
+                // initial call of writeCharacteristic, further calls are done within onCharacteristicWrite afterwards
+                mConnectedBluetoothGatt.writeCharacteristic(mWriteCharacteristicsOperationsQueue.poll());
+            }
+        }
     }
 
-    public void addDeviceConnectionErrorListener(DeviceConnectionListener listener) {
+    public void addDeviceConnectionListener(DeviceConnectionListener listener) {
         mDeviceConnectionListenerList.add(listener);
     }
 
-    public void removeDeviceConnectionErrorListener(DeviceConnectionListener listener) {
+    public void removeDeviceConnectionListener(DeviceConnectionListener listener) {
         mDeviceConnectionListenerList.remove(listener);
     }
 
-    private BluetoothGattCallback mGattCharacteristicReadCallback = new BluetoothGattCallback() {
+    private BluetoothGattCallback mGattCharacteristicCallback = new BluetoothGattCallback() {
 
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
@@ -143,13 +164,14 @@ public class BluetoothDeviceConnectionService extends Service {
 
             mReadCharacteristicsOperationsQueue.addAll(characteristicList);
 
-            // initial call of readCharacteristic, further calls are done within readCharacteristic afterwards
+            // initial call of readCharacteristic, further calls are done within onCharacteristicRead afterwards
             gatt.readCharacteristic(mReadCharacteristicsOperationsQueue.poll());
         }
 
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
 
+            LoggingUtil.debug("onCharacteristicRead");
             LoggingUtil.debug("uuid: " + characteristic.getUuid());
             LoggingUtil.debug("value: " + characteristic.getStringValue(0));
 
@@ -161,6 +183,17 @@ public class BluetoothDeviceConnectionService extends Service {
                 for (DeviceConnectionListener listener : mDeviceConnectionListenerList) {
                     listener.onCharacteristicsRead(mCharacteristicHashMap);
                 }
+            }
+        }
+
+        public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+
+            LoggingUtil.debug("onCharacteristicWrite");
+            LoggingUtil.debug("uuid: " + characteristic.getUuid());
+            LoggingUtil.debug("value: " + characteristic.getStringValue(0));
+
+            synchronized (mWriteCharacteristicsOperationsQueue) {
+                gatt.writeCharacteristic(mWriteCharacteristicsOperationsQueue.poll());
             }
         }
     };

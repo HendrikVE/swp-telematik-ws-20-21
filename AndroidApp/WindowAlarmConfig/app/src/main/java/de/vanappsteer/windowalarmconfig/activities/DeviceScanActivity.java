@@ -38,6 +38,7 @@ import android.widget.TextView;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -170,7 +171,7 @@ public class DeviceScanActivity extends AppCompatActivity {
         super.onDestroy();
 
         mDeviceService.disconnectDevice();
-        mDeviceService.removeDeviceConnectionErrorListener(mDeviceErrorListener);
+        mDeviceService.removeDeviceConnectionListener(mDeviceErrorListener);
         unbindService(mConnection);
         mDeviceServiceBound = false;
 
@@ -511,7 +512,7 @@ public class DeviceScanActivity extends AppCompatActivity {
         public void onServiceConnected(ComponentName className, IBinder service) {
             BluetoothDeviceConnectionService.LocalBinder binder = (BluetoothDeviceConnectionService.LocalBinder) service;
             mDeviceService = binder.getService();
-            mDeviceService.addDeviceConnectionErrorListener(mDeviceErrorListener);
+            mDeviceService.addDeviceConnectionListener(mDeviceErrorListener);
             mDeviceServiceBound = true;
         }
 
@@ -524,9 +525,9 @@ public class DeviceScanActivity extends AppCompatActivity {
     DeviceConnectionListener mDeviceErrorListener = new DeviceConnectionListener() {
 
         @Override
-        public void onCharacteristicsRead(HashMap<UUID, String> characteristicHashmap) {
+        public void onCharacteristicsRead(Map<UUID, String> characteristicMap) {
             mDialogConnectDevice.dismiss();
-            openDeviceConfigActivity(characteristicHashmap);
+            openDeviceConfigActivity((HashMap<UUID, String>) characteristicMap);
         }
 
         @Override
