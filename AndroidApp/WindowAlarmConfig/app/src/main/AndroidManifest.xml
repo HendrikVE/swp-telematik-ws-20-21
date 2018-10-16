@@ -34,7 +34,7 @@
             android:name=".activities.DeviceScanActivity"
             android:label="@string/title_activity_device_scan"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".activities.DeviceConfigActivity"
             android:label="@string/title_activity_device_config"
@@ -44,7 +44,11 @@
             android:name=".activities.AboutApp"
             android:label="@string/title_activity_about_app"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <service
+            android:name=".services.BluetoothDeviceConnectionService"
+            android:exported="false"/>
     </application>
 
 </manifest>

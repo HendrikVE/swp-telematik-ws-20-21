@@ -3,22 +3,20 @@ package de.vanappsteer.windowalarmconfig.activities;
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCallback;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
-import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.preference.PreferenceManager;
@@ -40,20 +38,19 @@ import android.widget.TextView;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
-import de.vanappsteer.windowalarmconfig.adapter.DeviceListAdapter;
 import de.vanappsteer.windowalarmconfig.R;
+import de.vanappsteer.windowalarmconfig.adapter.DeviceListAdapter;
+import de.vanappsteer.windowalarmconfig.services.BluetoothDeviceConnectionService;
+import de.vanappsteer.windowalarmconfig.services.BluetoothDeviceConnectionService.DeviceConnectionListener;
 import de.vanappsteer.windowalarmconfig.util.LoggingUtil;
 
 public class DeviceScanActivity extends AppCompatActivity {
 
-    private final UUID BLE_SERVICE_UUID = UUID.fromString("2fa1dab8-3eef-40fc-8540-7fc496a10d75");
+    private final int COMMAND_SHOW_CONNECTION_ERROR_DIALOG = 1;
+    private final int COMMAND_SHOW_DEVICE_UNSUPPORTED_DIALOG = 2;
 
     private final int ACTIVITY_RESULT_ENABLE_BLUETOOTH = 1;
     private final int ACTIVITY_RESULT_ENABLE_LOCATION_PERMISSION = 2;
@@ -61,16 +58,15 @@ public class DeviceScanActivity extends AppCompatActivity {
 
     private final int REQUEST_PERMISSION_COARSE_LOCATION = 1;
 
-    private final int COMMAND_SHOW_CONNECTION_ERROR_DIALOG = 1;
-    private final int COMMAND_SHOW_DEVICE_UNSUPPORTED_DIALOG = 2;
-
     private final String KEY_SP_ASKED_FOR_LOCATION = "KEY_SP_ASKED_FOR_LOCATION";
 
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
 
+    private BluetoothDeviceConnectionService mDeviceService;
+    private boolean mDeviceServiceBound = false;
+
     private Set<BluetoothDevice> bleDeviceSet = new HashSet<>();
-    private HashMap<UUID, String> mCharacteristicHashMap;
 
     private DeviceListAdapter mAdapter;
     private boolean mScanSwitchEnabled = true;
@@ -81,48 +77,9 @@ public class DeviceScanActivity extends AppCompatActivity {
     private ProgressBar mScanProgressbar;
     private TextView mTextViewEnableBluetooth;
 
-    private BluetoothGatt mConnectedBluetoothGatt = null;
-
     private AlertDialog mDialogConnectDevice;
 
-    private Queue<BluetoothGattCharacteristic> mReadCharacteristicsOperationsQueue = new LinkedList<>();
-
     private SharedPreferences mSP;
-
-    Handler mUiHandler = new Handler(Looper.getMainLooper()) {
-        @Override
-        public void handleMessage(Message message) {
-
-            AlertDialog.Builder builder;
-            AlertDialog dialog;
-
-            switch (message.what) {
-
-                case COMMAND_SHOW_CONNECTION_ERROR_DIALOG:
-                    builder = new AlertDialog.Builder(DeviceScanActivity.this);
-                    builder.setTitle(R.string.dialog_bluetooth_device_connection_error_title);
-                    builder.setMessage(R.string.dialog_bluetooth_device_connection_error_message);
-                    builder.setPositiveButton(R.string.button_ok, null);
-
-                    dialog = builder.create();
-                    dialog.show();
-                    break;
-
-                case COMMAND_SHOW_DEVICE_UNSUPPORTED_DIALOG:
-                    builder = new AlertDialog.Builder(DeviceScanActivity.this);
-                    builder.setTitle(R.string.dialog_bluetooth_device_not_supported_title);
-                    builder.setMessage(R.string.dialog_bluetooth_device_not_supported_message);
-                    builder.setPositiveButton(R.string.button_ok, null);
-
-                    dialog = builder.create();
-                    dialog.show();
-                    break;
-
-                default:
-                    LoggingUtil.warning("unhandled command: " + message.what);
-            }
-        }
-    };
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -175,14 +132,11 @@ public class DeviceScanActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause() {
+    protected void onStart() {
+        super.onStart();
 
-        super.onPause();
-
-        if (mIsScanning) {
-            mScanPaused = true;
-        }
-        stopScan();
+        Intent intent = new Intent(this, BluetoothDeviceConnectionService.class);
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -196,13 +150,29 @@ public class DeviceScanActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onPause() {
+
+        super.onPause();
+
+        if (mIsScanning) {
+            mScanPaused = true;
+        }
+        stopScan();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
 
-        if (mConnectedBluetoothGatt != null) {
-            mConnectedBluetoothGatt.disconnect();
-            mConnectedBluetoothGatt.close();
-        }
+        mDeviceService.disconnectDevice();
+        mDeviceService.removeDeviceConnectionErrorListener(mDeviceErrorListener);
+        unbindService(mConnection);
+        mDeviceServiceBound = false;
 
         unregisterReceiver(mBroadcastReceiver);
     }
@@ -222,8 +192,7 @@ public class DeviceScanActivity extends AppCompatActivity {
             checkPermissions();
         }
         else if (requestCode == ACTIVITY_RESULT_CONFIGURE_DEVICE) {
-            mConnectedBluetoothGatt.disconnect();
-            mConnectedBluetoothGatt.close();
+            mDeviceService.disconnectDevice();
         }
     }
 
@@ -356,7 +325,7 @@ public class DeviceScanActivity extends AppCompatActivity {
             @Override
             public void onDeviceSelected(BluetoothDevice device) {
 
-                mConnectedBluetoothGatt = device.connectGatt(DeviceScanActivity.this, false, mGattCallback);
+                mDeviceService.connectDevice(device);
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(DeviceScanActivity.this);
                 builder.setTitle(R.string.dialog_bluetooth_device_connecting_title);
@@ -364,8 +333,7 @@ public class DeviceScanActivity extends AppCompatActivity {
                 builder.setNegativeButton(R.string.button_cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        mConnectedBluetoothGatt.disconnect();
-                        mConnectedBluetoothGatt.close();
+                        mDeviceService.disconnectDevice();
                     }
                 });
                 builder.setCancelable(false);
@@ -495,87 +463,93 @@ public class DeviceScanActivity extends AppCompatActivity {
         return null;
     }
 
-    private void openDeviceConfigActivity() {
+    private void openDeviceConfigActivity(HashMap<UUID, String> characteristicHashMap) {
 
         Intent intent = new Intent(DeviceScanActivity.this, DeviceConfigActivity.class);
-        intent.putExtra(DeviceConfigActivity.KEY_CHARACTERISTIC_HASH_MAP, mCharacteristicHashMap);
+        intent.putExtra(DeviceConfigActivity.KEY_CHARACTERISTIC_HASH_MAP, characteristicHashMap);
         startActivityForResult(intent, ACTIVITY_RESULT_CONFIGURE_DEVICE);
     }
 
-    private BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
-
+    Handler mUiHandler = new Handler(Looper.getMainLooper()) {
         @Override
-        public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
+        public void handleMessage(Message message) {
 
-            LoggingUtil.debug("onConnectionStateChange");
-            LoggingUtil.debug("status: " + status);
-            LoggingUtil.debug("newState: " + newState);
+            AlertDialog.Builder builder;
+            AlertDialog dialog;
 
-            if (newState == BluetoothProfile.STATE_CONNECTED) {
-                LoggingUtil.debug("discoverServices");
-                gatt.discoverServices();
-            }
-            else {
-                mDialogConnectDevice.dismiss();
+            switch (message.what) {
 
-                gatt.disconnect();
-                gatt.close();
+                case COMMAND_SHOW_CONNECTION_ERROR_DIALOG:
+                    builder = new AlertDialog.Builder(DeviceScanActivity.this);
+                    builder.setTitle(R.string.dialog_bluetooth_device_connection_error_title);
+                    builder.setMessage(R.string.dialog_bluetooth_device_connection_error_message);
+                    builder.setPositiveButton(R.string.button_ok, null);
 
-                Message message = mUiHandler.obtainMessage(COMMAND_SHOW_CONNECTION_ERROR_DIALOG, null);
-                message.sendToTarget();
-            }
-        }
+                    dialog = builder.create();
+                    dialog.show();
+                    break;
 
-        @Override
-        public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+                case COMMAND_SHOW_DEVICE_UNSUPPORTED_DIALOG:
+                    builder = new AlertDialog.Builder(DeviceScanActivity.this);
+                    builder.setTitle(R.string.dialog_bluetooth_device_not_supported_title);
+                    builder.setMessage(R.string.dialog_bluetooth_device_not_supported_message);
+                    builder.setPositiveButton(R.string.button_ok, null);
 
-            LoggingUtil.debug("onServicesDiscovered");
+                    dialog = builder.create();
+                    dialog.show();
+                    break;
 
-            if (status != BluetoothGatt.GATT_SUCCESS) {
-                // TODO: Handle the error
-                LoggingUtil.error("status != BluetoothGatt.GATT_SUCCESS");
-                mDialogConnectDevice.dismiss();
-                return;
-            }
-
-            BluetoothGattService gattService = gatt.getService(BLE_SERVICE_UUID);
-            if (gattService == null) {
-
-                mDialogConnectDevice.dismiss();
-
-                gatt.disconnect();
-                gatt.close();
-
-                Message message = mUiHandler.obtainMessage(COMMAND_SHOW_DEVICE_UNSUPPORTED_DIALOG, null);
-                message.sendToTarget();
-
-                return;
-            }
-
-            List<BluetoothGattCharacteristic> characteristicList = gattService.getCharacteristics();
-            mCharacteristicHashMap = new HashMap<>();
-
-            mReadCharacteristicsOperationsQueue.addAll(characteristicList);
-
-            // initial call of readCharacteristic, further calls are done within readCharacteristic afterwards
-            gatt.readCharacteristic(mReadCharacteristicsOperationsQueue.poll());
-        }
-
-        @Override
-        public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-
-            LoggingUtil.debug("uuid: " + characteristic.getUuid());
-            LoggingUtil.debug("value: " + characteristic.getStringValue(0));
-
-            mCharacteristicHashMap.put(characteristic.getUuid(), characteristic.getStringValue(0));
-
-            gatt.readCharacteristic(mReadCharacteristicsOperationsQueue.poll());
-
-            if (mReadCharacteristicsOperationsQueue.size() == 0) {
-                mDialogConnectDevice.dismiss();
-                openDeviceConfigActivity();
+                default:
+                    LoggingUtil.warning("unhandled command: " + message.what);
             }
         }
     };
 
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            BluetoothDeviceConnectionService.LocalBinder binder = (BluetoothDeviceConnectionService.LocalBinder) service;
+            mDeviceService = binder.getService();
+            mDeviceService.addDeviceConnectionErrorListener(mDeviceErrorListener);
+            mDeviceServiceBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mDeviceServiceBound = false;
+        }
+    };
+
+    DeviceConnectionListener mDeviceErrorListener = new DeviceConnectionListener() {
+
+        @Override
+        public void onCharacteristicsRead(HashMap<UUID, String> characteristicHashmap) {
+            mDialogConnectDevice.dismiss();
+            openDeviceConfigActivity(characteristicHashmap);
+        }
+
+        @Override
+        public void onDeviceConnectionError(int errorCode) {
+
+            mDialogConnectDevice.dismiss();
+
+            Message message;
+            switch (errorCode) {
+
+                case DeviceConnectionListener.DEVICE_CONNECTION_ERROR_GENERIC:
+                    message = mUiHandler.obtainMessage(COMMAND_SHOW_CONNECTION_ERROR_DIALOG, null);
+                    message.sendToTarget();
+                    break;
+
+                case DeviceConnectionListener.DEVICE_CONNECTION_ERROR_UNSUPPORTED:
+                    message = mUiHandler.obtainMessage(COMMAND_SHOW_DEVICE_UNSUPPORTED_DIALOG, null);
+                    message.sendToTarget();
+                    break;
+
+                default:
+                    LoggingUtil.warning("unhandled error code: " + errorCode);
+            }
+        }
+    };
 }
