@@ -436,6 +436,12 @@ public class DeviceScanActivity extends AppCompatActivity {
 
                     // update device in set if a name was found after address was already discovered
                     BluetoothDevice deviceFound = getDeviceByBleAddress(bleDeviceSet, device.getAddress());
+
+                    if (device.getName() == null) {
+                        // ignore devices without a name
+                        return;
+                    }
+
                     if (deviceFound != null && deviceFound.getName() == null && device.getName() != null) {
                         bleDeviceSet.remove(deviceFound);
                         added = bleDeviceSet.add(device);

@@ -58,12 +58,12 @@ public class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.My
     }
 
     @Override
-    public void onBindViewHolder(MyViewHolder holder, final int position) {
+    public void onBindViewHolder(final MyViewHolder holder, int position) {
 
         holder.getRootView().findViewById(R.id.connectButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mOnDeviceSelectionListener.onDeviceSelected(mDevices.get(position));
+                mOnDeviceSelectionListener.onDeviceSelected(mDevices.get(holder.getAdapterPosition()));
             }
         });
 
