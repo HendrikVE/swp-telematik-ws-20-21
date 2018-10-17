@@ -186,6 +186,7 @@ public class BluetoothDeviceConnectionService extends Service {
             }
         }
 
+        @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
 
             LoggingUtil.debug("onCharacteristicWrite");
