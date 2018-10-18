@@ -28,6 +28,7 @@ public class BluetoothDeviceConnectionService extends Service {
     private final IBinder mBinder = new LocalBinder();
 
     private BluetoothGatt mConnectedBluetoothGatt = null;
+    private boolean mDisconnectPending = false;
 
     private HashMap<UUID, String> mCharacteristicHashMap;
     private final Queue<BluetoothGattCharacteristic> mReadCharacteristicsOperationsQueue = new LinkedList<>();
@@ -61,13 +62,29 @@ public class BluetoothDeviceConnectionService extends Service {
     }
 
     public void connectDevice(BluetoothDevice device) {
+
+        LoggingUtil.debug("connectDevice()");
+
         mConnectedBluetoothGatt = device.connectGatt(BluetoothDeviceConnectionService.this, false, mGattCharacteristicCallback);
     }
 
     public void disconnectDevice() {
+
         if (mConnectedBluetoothGatt != null) {
-            mConnectedBluetoothGatt.disconnect();
-            mConnectedBluetoothGatt.close();
+
+            synchronized (mReadCharacteristicsOperationsQueue) {
+                synchronized (mWriteCharacteristicsOperationsQueue) {
+                    int operationsPending = mReadCharacteristicsOperationsQueue.size() + mWriteCharacteristicsOperationsQueue.size();
+
+                    if (operationsPending == 0) {
+                        mConnectedBluetoothGatt.disconnect();
+                        mDisconnectPending = false;
+                    }
+                    else {
+                        mDisconnectPending = true;
+                    }
+                }
+            }
         }
     }
 
@@ -78,6 +95,8 @@ public class BluetoothDeviceConnectionService extends Service {
     */
 
     public void writeCharacteristics(Map<UUID, String> characteristicMap) {
+
+        LoggingUtil.debug("writeCharacteristics()");
 
         synchronized (mWriteCharacteristicsOperationsQueue) {
 
@@ -90,12 +109,17 @@ public class BluetoothDeviceConnectionService extends Service {
                 BluetoothGattCharacteristic characteristic = gattService.getCharacteristic(entry.getKey());
                 characteristic.setValue(entry.getValue());
 
+                LoggingUtil.debug("entry.getValue() = " + entry.getValue());
+                LoggingUtil.debug("characteristic.getStringValue(0) = " +  characteristic.getStringValue(0));
+
                 mWriteCharacteristicsOperationsQueue.add(characteristic);
             }
 
             if (needInitialCall) {
                 // initial call of writeCharacteristic, further calls are done within onCharacteristicWrite afterwards
-                mConnectedBluetoothGatt.writeCharacteristic(mWriteCharacteristicsOperationsQueue.poll());
+                boolean success = mConnectedBluetoothGatt.writeCharacteristic(mWriteCharacteristicsOperationsQueue.poll());
+
+                LoggingUtil.debug("initial write. success = " + success);
             }
         }
     }
@@ -117,14 +141,24 @@ public class BluetoothDeviceConnectionService extends Service {
             LoggingUtil.debug("status: " + status);
             LoggingUtil.debug("newState: " + newState);
 
-            if (newState == BluetoothProfile.STATE_CONNECTED) {
-                LoggingUtil.debug("discoverServices");
-                gatt.discoverServices();
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+
+                switch (newState) {
+
+                    case BluetoothProfile.STATE_CONNECTED:
+                        LoggingUtil.debug("discoverServices");
+                        gatt.discoverServices();
+                        break;
+
+                    case BluetoothProfile.STATE_DISCONNECTED:
+                        gatt.close();
+                        break;
+
+                    default:
+                        LoggingUtil.debug("unhandled state: " + newState);
+                }
             }
             else {
-                gatt.disconnect();
-                gatt.close();
-
                 for (DeviceConnectionListener listener : mDeviceConnectionListenerList) {
                     listener.onDeviceConnectionError(DeviceConnectionListener.DEVICE_CONNECTION_ERROR_GENERIC);
                 }
@@ -150,7 +184,6 @@ public class BluetoothDeviceConnectionService extends Service {
             if (gattService == null) {
 
                 gatt.disconnect();
-                gatt.close();
 
                 for (DeviceConnectionListener listener : mDeviceConnectionListenerList) {
                     listener.onDeviceConnectionError(DeviceConnectionListener.DEVICE_CONNECTION_ERROR_UNSUPPORTED);
@@ -177,11 +210,15 @@ public class BluetoothDeviceConnectionService extends Service {
 
             mCharacteristicHashMap.put(characteristic.getUuid(), characteristic.getStringValue(0));
 
-            gatt.readCharacteristic(mReadCharacteristicsOperationsQueue.poll());
+            synchronized (mReadCharacteristicsOperationsQueue) {
 
-            if (mReadCharacteristicsOperationsQueue.size() == 0) {
-                for (DeviceConnectionListener listener : mDeviceConnectionListenerList) {
-                    listener.onCharacteristicsRead(mCharacteristicHashMap);
+                if (mReadCharacteristicsOperationsQueue.size() > 0) {
+                    gatt.readCharacteristic(mReadCharacteristicsOperationsQueue.poll());
+                }
+                else {
+                    for (DeviceConnectionListener listener : mDeviceConnectionListenerList) {
+                        listener.onCharacteristicsRead(mCharacteristicHashMap);
+                    }
                 }
             }
         }
@@ -194,7 +231,13 @@ public class BluetoothDeviceConnectionService extends Service {
             LoggingUtil.debug("value: " + characteristic.getStringValue(0));
 
             synchronized (mWriteCharacteristicsOperationsQueue) {
-                gatt.writeCharacteristic(mWriteCharacteristicsOperationsQueue.poll());
+
+                if (mWriteCharacteristicsOperationsQueue.size() > 0) {
+                    gatt.writeCharacteristic(mWriteCharacteristicsOperationsQueue.poll());
+                }
+                else if (mDisconnectPending) {
+                    disconnectDevice();
+                }
             }
         }
     };

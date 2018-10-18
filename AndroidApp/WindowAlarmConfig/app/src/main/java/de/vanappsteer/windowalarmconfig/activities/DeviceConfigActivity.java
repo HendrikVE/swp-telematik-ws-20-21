@@ -70,7 +70,6 @@ public class DeviceConfigActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
 
-        mDeviceService.disconnectDevice();
         unbindService(mConnection);
         mDeviceServiceBound = false;
     }
@@ -109,11 +108,6 @@ public class DeviceConfigActivity extends AppCompatActivity {
                     ConfigFragment configFragment = (ConfigFragment) adapter.getItem(i);
 
                     Map<UUID, String> map = configFragment.getInputData();
-                    for (Map.Entry<UUID, String> entry : map.entrySet()) {
-                        LoggingUtil.debug("key: " + entry.getKey());
-                        LoggingUtil.debug("value: " + entry.getValue());
-                        LoggingUtil.debug("");
-                    }
                     mDeviceService.writeCharacteristics(map);
                 }
 
