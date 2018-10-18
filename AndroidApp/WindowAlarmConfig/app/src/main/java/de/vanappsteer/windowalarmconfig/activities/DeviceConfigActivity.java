@@ -109,7 +109,12 @@ public class DeviceConfigActivity extends AppCompatActivity {
                         ConfigFragment configFragment = (ConfigFragment) adapter.getItem(i);
 
                         Map<UUID, String> map = configFragment.getInputData();
-                        mDeviceService.writeCharacteristics(map);
+                        boolean success  = mDeviceService.writeCharacteristics(map);
+
+                        if (!success) {
+                            setResult(RESULT_CANCELED);
+                            DeviceConfigActivity.this.finish();
+                        }
                     }
 
                     setResult(RESULT_OK);
@@ -118,6 +123,7 @@ public class DeviceConfigActivity extends AppCompatActivity {
                 else {
                     // TODO: keep config activity instead and retry?
                     setResult(RESULT_CANCELED);
+                    DeviceConfigActivity.this.finish();
                 }
             }
         });

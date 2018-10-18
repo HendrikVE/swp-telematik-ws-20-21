@@ -51,6 +51,8 @@ public class BluetoothDeviceConnectionService extends Service {
 
         public static final int DEVICE_CONNECTION_ERROR_GENERIC = 1;
         public static final int DEVICE_CONNECTION_ERROR_UNSUPPORTED = 2;
+        public static final int DEVICE_CONNECTION_ERROR_READ = 3;
+        public static final int DEVICE_CONNECTION_ERROR_WRITE = 4;
 
         public abstract void onCharacteristicsRead(Map<UUID, String> characteristicMap);
         public abstract void onDeviceConnectionError(int errorCode);
@@ -94,7 +96,7 @@ public class BluetoothDeviceConnectionService extends Service {
     }
     */
 
-    public void writeCharacteristics(Map<UUID, String> characteristicMap) {
+    public boolean writeCharacteristics(Map<UUID, String> characteristicMap) {
 
         LoggingUtil.debug("writeCharacteristics()");
 
@@ -117,10 +119,10 @@ public class BluetoothDeviceConnectionService extends Service {
 
             if (needInitialCall) {
                 // initial call of writeCharacteristic, further calls are done within onCharacteristicWrite afterwards
-                boolean success = mConnectedBluetoothGatt.writeCharacteristic(mWriteCharacteristicsOperationsQueue.poll());
-
-                LoggingUtil.debug("initial write. success = " + success);
+                return mConnectedBluetoothGatt.writeCharacteristic(mWriteCharacteristicsOperationsQueue.poll());
             }
+
+            return true;
         }
     }
 
@@ -198,7 +200,12 @@ public class BluetoothDeviceConnectionService extends Service {
             mReadCharacteristicsOperationsQueue.addAll(characteristicList);
 
             // initial call of readCharacteristic, further calls are done within onCharacteristicRead afterwards
-            gatt.readCharacteristic(mReadCharacteristicsOperationsQueue.poll());
+            boolean success = gatt.readCharacteristic(mReadCharacteristicsOperationsQueue.poll());
+            if (! success) {
+                for (DeviceConnectionListener listener : mDeviceConnectionListenerList) {
+                    listener.onDeviceConnectionError(DeviceConnectionListener.DEVICE_CONNECTION_ERROR_READ);
+                }
+            }
         }
 
         @Override
@@ -213,7 +220,12 @@ public class BluetoothDeviceConnectionService extends Service {
             synchronized (mReadCharacteristicsOperationsQueue) {
 
                 if (mReadCharacteristicsOperationsQueue.size() > 0) {
-                    gatt.readCharacteristic(mReadCharacteristicsOperationsQueue.poll());
+                    boolean success = gatt.readCharacteristic(mReadCharacteristicsOperationsQueue.poll());
+                    if (! success) {
+                        for (DeviceConnectionListener listener : mDeviceConnectionListenerList) {
+                            listener.onDeviceConnectionError(DeviceConnectionListener.DEVICE_CONNECTION_ERROR_READ);
+                        }
+                    }
                 }
                 else {
                     for (DeviceConnectionListener listener : mDeviceConnectionListenerList) {
@@ -233,7 +245,12 @@ public class BluetoothDeviceConnectionService extends Service {
             synchronized (mWriteCharacteristicsOperationsQueue) {
 
                 if (mWriteCharacteristicsOperationsQueue.size() > 0) {
-                    gatt.writeCharacteristic(mWriteCharacteristicsOperationsQueue.poll());
+                    boolean success = gatt.writeCharacteristic(mWriteCharacteristicsOperationsQueue.poll());
+                    if (! success) {
+                        for (DeviceConnectionListener listener : mDeviceConnectionListenerList) {
+                            listener.onDeviceConnectionError(DeviceConnectionListener.DEVICE_CONNECTION_ERROR_WRITE);
+                        }
+                    }
                 }
                 else if (mDisconnectPending) {
                     disconnectDevice();

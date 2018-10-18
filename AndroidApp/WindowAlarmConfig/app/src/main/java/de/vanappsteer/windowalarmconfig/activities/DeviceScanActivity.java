@@ -52,7 +52,8 @@ public class DeviceScanActivity extends AppCompatActivity {
 
     private final int COMMAND_SHOW_CONNECTION_ERROR_DIALOG = 1;
     private final int COMMAND_SHOW_DEVICE_UNSUPPORTED_DIALOG = 2;
-    private final int COMMAND_SHOW_DEVICE_WRITE_ERROR_DIALOG = 3;
+    private final int COMMAND_SHOW_DEVICE_READ_ERROR_DIALOG = 3;
+    private final int COMMAND_SHOW_DEVICE_WRITE_ERROR_DIALOG = 4;
 
     private final int ACTIVITY_RESULT_ENABLE_BLUETOOTH = 1;
     private final int ACTIVITY_RESULT_ENABLE_LOCATION_PERMISSION = 2;
@@ -503,24 +504,29 @@ public class DeviceScanActivity extends AppCompatActivity {
             AlertDialog.Builder builder;
             AlertDialog dialog;
 
+            builder = new AlertDialog.Builder(DeviceScanActivity.this);
+
             switch (message.what) {
 
                 case COMMAND_SHOW_CONNECTION_ERROR_DIALOG:
-                    builder = new AlertDialog.Builder(DeviceScanActivity.this);
                     builder.setTitle(R.string.dialog_bluetooth_device_connection_error_title);
                     builder.setMessage(R.string.dialog_bluetooth_device_connection_error_message);
                     builder.setPositiveButton(R.string.button_ok, null);
                     break;
 
                 case COMMAND_SHOW_DEVICE_UNSUPPORTED_DIALOG:
-                    builder = new AlertDialog.Builder(DeviceScanActivity.this);
                     builder.setTitle(R.string.dialog_bluetooth_device_not_supported_title);
                     builder.setMessage(R.string.dialog_bluetooth_device_not_supported_message);
                     builder.setPositiveButton(R.string.button_ok, null);
                     break;
 
+                case COMMAND_SHOW_DEVICE_READ_ERROR_DIALOG:
+                    builder.setTitle(R.string.dialog_bluetooth_device_read_error_title);
+                    builder.setMessage(R.string.dialog_bluetooth_device_read_error_message);
+                    builder.setPositiveButton(R.string.button_ok, null);
+                    break;
+
                 case COMMAND_SHOW_DEVICE_WRITE_ERROR_DIALOG:
-                    builder = new AlertDialog.Builder(DeviceScanActivity.this);
                     builder.setTitle(R.string.dialog_bluetooth_device_write_error_title);
                     builder.setMessage(R.string.dialog_bluetooth_device_write_error_message);
                     builder.setPositiveButton(R.string.button_ok, null);
@@ -575,6 +581,16 @@ public class DeviceScanActivity extends AppCompatActivity {
 
                 case DeviceConnectionListener.DEVICE_CONNECTION_ERROR_UNSUPPORTED:
                     message = mUiHandler.obtainMessage(COMMAND_SHOW_DEVICE_UNSUPPORTED_DIALOG, null);
+                    message.sendToTarget();
+                    break;
+
+                case DeviceConnectionListener.DEVICE_CONNECTION_ERROR_READ:
+                    message = mUiHandler.obtainMessage(COMMAND_SHOW_DEVICE_READ_ERROR_DIALOG, null);
+                    message.sendToTarget();
+                    break;
+
+                case DeviceConnectionListener.DEVICE_CONNECTION_ERROR_WRITE:
+                    message = mUiHandler.obtainMessage(COMMAND_SHOW_DEVICE_WRITE_ERROR_DIALOG, null);
                     message.sendToTarget();
                     break;
 
