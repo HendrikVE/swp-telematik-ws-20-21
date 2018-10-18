@@ -25,6 +25,8 @@
     <string name="dialog_bluetooth_device_connection_error_message">An error occurred while making the connection. Please try again.</string>
     <string name="dialog_bluetooth_device_not_supported_title">Device not supported</string>
     <string name="dialog_bluetooth_device_not_supported_message">The selected device does not offer the required service to configure it as a window alert node.</string>
+    <string name="dialog_bluetooth_device_write_error_title">Could not write data</string>
+    <string name="dialog_bluetooth_device_write_error_message">It was not possible to write all data to the device. Please refresh the connection and retry.</string>
     <!-- end dialogs -->
 
     <string name="github_project_link_text">\u0040github</string>

@@ -104,15 +104,21 @@ public class DeviceConfigActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                for (int i = 0; i < adapter.getCount(); i++) {
-                    ConfigFragment configFragment = (ConfigFragment) adapter.getItem(i);
+                if (mDeviceServiceBound) {
+                    for (int i = 0; i < adapter.getCount(); i++) {
+                        ConfigFragment configFragment = (ConfigFragment) adapter.getItem(i);
 
-                    Map<UUID, String> map = configFragment.getInputData();
-                    mDeviceService.writeCharacteristics(map);
+                        Map<UUID, String> map = configFragment.getInputData();
+                        mDeviceService.writeCharacteristics(map);
+                    }
+
+                    setResult(RESULT_OK);
+                    DeviceConfigActivity.this.finish();
                 }
-
-                setResult(RESULT_OK);
-                DeviceConfigActivity.this.finish();
+                else {
+                    // TODO: keep config activity instead and retry?
+                    setResult(RESULT_CANCELED);
+                }
             }
         });
         Button buttonCancel = findViewById(R.id.buttonCancel);

@@ -52,6 +52,7 @@ public class DeviceScanActivity extends AppCompatActivity {
 
     private final int COMMAND_SHOW_CONNECTION_ERROR_DIALOG = 1;
     private final int COMMAND_SHOW_DEVICE_UNSUPPORTED_DIALOG = 2;
+    private final int COMMAND_SHOW_DEVICE_WRITE_ERROR_DIALOG = 3;
 
     private final int ACTIVITY_RESULT_ENABLE_BLUETOOTH = 1;
     private final int ACTIVITY_RESULT_ENABLE_LOCATION_PERMISSION = 2;
@@ -170,10 +171,12 @@ public class DeviceScanActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
 
-        mDeviceService.disconnectDevice();
-        mDeviceService.removeDeviceConnectionListener(mDeviceErrorListener);
-        unbindService(mConnection);
-        mDeviceServiceBound = false;
+        if (mDeviceServiceBound) {
+            mDeviceService.disconnectDevice();
+            mDeviceService.removeDeviceConnectionListener(mDeviceErrorListener);
+            unbindService(mConnection);
+            mDeviceServiceBound = false;
+        }
 
         unregisterReceiver(mBroadcastReceiver);
     }
@@ -193,7 +196,15 @@ public class DeviceScanActivity extends AppCompatActivity {
             checkPermissions();
         }
         else if (requestCode == ACTIVITY_RESULT_CONFIGURE_DEVICE) {
-            mDeviceService.disconnectDevice();
+            if (resultCode == RESULT_OK) {
+                if (mDeviceServiceBound) {
+                    mDeviceService.disconnectDevice();
+                }
+            }
+            else {
+                Message message = mUiHandler.obtainMessage(COMMAND_SHOW_DEVICE_WRITE_ERROR_DIALOG, null);
+                message.sendToTarget();
+            }
         }
     }
 
@@ -326,7 +337,13 @@ public class DeviceScanActivity extends AppCompatActivity {
             @Override
             public void onDeviceSelected(BluetoothDevice device) {
 
-                mDeviceService.connectDevice(device);
+                if (mDeviceServiceBound) {
+                    mDeviceService.connectDevice(device);
+                }
+                else {
+                    Message message = mUiHandler.obtainMessage(COMMAND_SHOW_CONNECTION_ERROR_DIALOG, null);
+                    message.sendToTarget();
+                }
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(DeviceScanActivity.this);
                 builder.setTitle(R.string.dialog_bluetooth_device_connecting_title);
@@ -334,7 +351,9 @@ public class DeviceScanActivity extends AppCompatActivity {
                 builder.setNegativeButton(R.string.button_cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        mDeviceService.disconnectDevice();
+                        if (mDeviceServiceBound) {
+                            mDeviceService.disconnectDevice();
+                        }
                     }
                 });
                 builder.setCancelable(false);
@@ -491,9 +510,6 @@ public class DeviceScanActivity extends AppCompatActivity {
                     builder.setTitle(R.string.dialog_bluetooth_device_connection_error_title);
                     builder.setMessage(R.string.dialog_bluetooth_device_connection_error_message);
                     builder.setPositiveButton(R.string.button_ok, null);
-
-                    dialog = builder.create();
-                    dialog.show();
                     break;
 
                 case COMMAND_SHOW_DEVICE_UNSUPPORTED_DIALOG:
@@ -501,14 +517,22 @@ public class DeviceScanActivity extends AppCompatActivity {
                     builder.setTitle(R.string.dialog_bluetooth_device_not_supported_title);
                     builder.setMessage(R.string.dialog_bluetooth_device_not_supported_message);
                     builder.setPositiveButton(R.string.button_ok, null);
+                    break;
 
-                    dialog = builder.create();
-                    dialog.show();
+                case COMMAND_SHOW_DEVICE_WRITE_ERROR_DIALOG:
+                    builder = new AlertDialog.Builder(DeviceScanActivity.this);
+                    builder.setTitle(R.string.dialog_bluetooth_device_write_error_title);
+                    builder.setMessage(R.string.dialog_bluetooth_device_write_error_message);
+                    builder.setPositiveButton(R.string.button_ok, null);
                     break;
 
                 default:
                     LoggingUtil.warning("unhandled command: " + message.what);
+                    return;
             }
+
+            dialog = builder.create();
+            dialog.show();
         }
     };
 
