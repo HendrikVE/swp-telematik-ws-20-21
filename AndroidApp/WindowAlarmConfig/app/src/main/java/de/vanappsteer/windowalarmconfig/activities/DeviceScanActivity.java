@@ -55,6 +55,11 @@ public class DeviceScanActivity extends AppCompatActivity {
     private final int COMMAND_SHOW_DEVICE_READ_ERROR_DIALOG = 3;
     private final int COMMAND_SHOW_DEVICE_WRITE_ERROR_DIALOG = 4;
 
+    private boolean mDialogConnectionErrorShown = false;
+    private boolean mDialogUnsupportedErrorShown = false;
+    private boolean mDialogReadErrorShown = false;
+    private boolean mDialogWriteErrorShown = false;
+
     private final int ACTIVITY_RESULT_ENABLE_BLUETOOTH = 1;
     private final int ACTIVITY_RESULT_ENABLE_LOCATION_PERMISSION = 2;
     private final int ACTIVITY_RESULT_CONFIGURE_DEVICE = 3;
@@ -509,27 +514,63 @@ public class DeviceScanActivity extends AppCompatActivity {
             switch (message.what) {
 
                 case COMMAND_SHOW_CONNECTION_ERROR_DIALOG:
+                    if (mDialogConnectionErrorShown) {
+                        return;
+                    }
                     builder.setTitle(R.string.dialog_bluetooth_device_connection_error_title);
                     builder.setMessage(R.string.dialog_bluetooth_device_connection_error_message);
                     builder.setPositiveButton(R.string.button_ok, null);
+                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialogInterface) {
+                            mDialogConnectionErrorShown = false;
+                        }
+                    });
                     break;
 
                 case COMMAND_SHOW_DEVICE_UNSUPPORTED_DIALOG:
+                    if (mDialogUnsupportedErrorShown) {
+                        return;
+                    }
                     builder.setTitle(R.string.dialog_bluetooth_device_not_supported_title);
                     builder.setMessage(R.string.dialog_bluetooth_device_not_supported_message);
                     builder.setPositiveButton(R.string.button_ok, null);
+                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialogInterface) {
+                            mDialogUnsupportedErrorShown = false;
+                        }
+                    });
                     break;
 
                 case COMMAND_SHOW_DEVICE_READ_ERROR_DIALOG:
+                    if (mDialogReadErrorShown) {
+                        return;
+                    }
                     builder.setTitle(R.string.dialog_bluetooth_device_read_error_title);
                     builder.setMessage(R.string.dialog_bluetooth_device_read_error_message);
                     builder.setPositiveButton(R.string.button_ok, null);
+                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialogInterface) {
+                            mDialogReadErrorShown = false;
+                        }
+                    });
                     break;
 
                 case COMMAND_SHOW_DEVICE_WRITE_ERROR_DIALOG:
+                    if (mDialogWriteErrorShown) {
+                        return;
+                    }
                     builder.setTitle(R.string.dialog_bluetooth_device_write_error_title);
                     builder.setMessage(R.string.dialog_bluetooth_device_write_error_message);
                     builder.setPositiveButton(R.string.button_ok, null);
+                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialogInterface) {
+                            mDialogWriteErrorShown = false;
+                        }
+                    });
                     break;
 
                 default:
