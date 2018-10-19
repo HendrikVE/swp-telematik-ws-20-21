@@ -314,7 +314,9 @@ public class DeviceScanActivity extends AppCompatActivity {
         // mBluetoothAdapter is null if only checkPermissions() was called, but not checkBluetooth()
         if (mBluetoothAdapter != null) {
             mIsScanning = false;
-            mBluetoothAdapter.stopLeScan(mLeScanCallback);
+            if (mBluetoothAdapter.getState() == BluetoothAdapter.STATE_ON) {
+                mBluetoothAdapter.stopLeScan(mLeScanCallback);
+            }
         }
 
         bleDeviceSet.clear();

@@ -77,6 +77,14 @@ public class SensorConfigFragment extends ConfigFragment {
         return map;
     }
 
+    public static boolean includesFullDataSet(Map<UUID, String> map) {
+
+        boolean valid;
+        valid = map.containsKey(BLE_CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID);
+
+        return valid;
+    }
+
     private void initViews() {
         mEditTextSensorPollInterval = getView().findViewById(R.id.editTextSensorPollInterval);
         mEditTextSensorPollInterval.addTextChangedListener(new TextChangeWatcher() {

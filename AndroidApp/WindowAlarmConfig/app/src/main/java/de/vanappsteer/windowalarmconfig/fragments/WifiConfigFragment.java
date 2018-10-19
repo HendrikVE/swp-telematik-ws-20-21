@@ -86,6 +86,15 @@ public class WifiConfigFragment extends ConfigFragment {
         return map;
     }
 
+    public static boolean includesFullDataSet(Map<UUID, String> map) {
+
+        boolean valid;
+        valid = map.containsKey(BLE_CHARACTERISTIC_CONFIG_WIFI_SSID_UUID);
+        valid &= map.containsKey(BLE_CHARACTERISTIC_CONFIG_WIFI_PASSWORD_UUID);
+
+        return valid;
+    }
+
     private void  initViews() {
         mEditTextWifiSsid = getView().findViewById(R.id.editTextWifiSsid);
         mEditTextWifiSsid.addTextChangedListener(new TextChangeWatcher() {

@@ -104,6 +104,17 @@ public class MqttConfigFragment extends ConfigFragment {
         return map;
     }
 
+    public static boolean includesFullDataSet(Map<UUID, String> map) {
+
+        boolean valid;
+        valid = map.containsKey(BLE_CHARACTERISTIC_CONFIG_MQTT_USER_UUID);
+        valid &= map.containsKey(BLE_CHARACTERISTIC_CONFIG_MQTT_PASSWORD_UUID);
+        valid &= map.containsKey(BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_IP_UUID);
+        valid &= map.containsKey(BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_PORT_UUID);
+
+        return valid;
+    }
+
     private void initViews() {
 
         mEditTextMqttUsername = getView().findViewById(R.id.editTextMqttUsername);

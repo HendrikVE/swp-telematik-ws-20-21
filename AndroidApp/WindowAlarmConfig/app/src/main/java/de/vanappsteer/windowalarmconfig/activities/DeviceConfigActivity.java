@@ -1,6 +1,5 @@
 package de.vanappsteer.windowalarmconfig.activities;
 
-import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -21,6 +20,11 @@ import java.util.UUID;
 import de.vanappsteer.windowalarmconfig.adapter.PagerAdapter;
 import de.vanappsteer.windowalarmconfig.R;
 import de.vanappsteer.windowalarmconfig.fragments.ConfigFragment;
+import de.vanappsteer.windowalarmconfig.fragments.DeviceConfigFragment;
+import de.vanappsteer.windowalarmconfig.fragments.MqttConfigFragment;
+import de.vanappsteer.windowalarmconfig.fragments.OtaConfigFragment;
+import de.vanappsteer.windowalarmconfig.fragments.SensorConfigFragment;
+import de.vanappsteer.windowalarmconfig.fragments.WifiConfigFragment;
 import de.vanappsteer.windowalarmconfig.services.BluetoothDeviceConnectionService;
 import de.vanappsteer.windowalarmconfig.util.LoggingUtil;
 
@@ -112,6 +116,11 @@ public class DeviceConfigActivity extends AppCompatActivity {
                         map.putAll(configFragment.getInputData());
                     }
 
+                    boolean valid = checkCharacteristicsMap(map);
+                    if (! valid) {
+                        LoggingUtil.error("checkCharacteristicsMap() returned false! Some data is missing!");
+                    }
+
                     boolean success  = mDeviceService.writeCharacteristics(map);
 
                     if (!success) {
@@ -120,14 +129,13 @@ public class DeviceConfigActivity extends AppCompatActivity {
                     else {
                         setResult(RESULT_OK);
                     }
-                    
-                    DeviceConfigActivity.this.finish();
                 }
                 else {
                     // TODO: keep config activity instead and retry?
                     setResult(RESULT_CANCELED);
-                    DeviceConfigActivity.this.finish();
                 }
+
+                DeviceConfigActivity.this.finish();
             }
         });
         Button buttonCancel = findViewById(R.id.buttonCancel);
@@ -137,6 +145,18 @@ public class DeviceConfigActivity extends AppCompatActivity {
                 DeviceConfigActivity.this.finish();
             }
         });
+    }
+
+    private boolean checkCharacteristicsMap(Map<UUID, String> map) {
+
+        boolean valid;
+        valid = DeviceConfigFragment.includesFullDataSet(map);
+        valid &= MqttConfigFragment.includesFullDataSet(map);
+        valid &= OtaConfigFragment.includesFullDataSet(map);
+        valid &= SensorConfigFragment.includesFullDataSet(map);
+        valid &= WifiConfigFragment.includesFullDataSet(map);
+
+        return valid;
     }
 
     private ServiceConnection mConnection = new ServiceConnection() {

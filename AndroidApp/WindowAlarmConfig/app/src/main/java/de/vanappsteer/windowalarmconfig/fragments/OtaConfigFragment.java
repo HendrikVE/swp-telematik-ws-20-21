@@ -104,6 +104,17 @@ public class OtaConfigFragment extends ConfigFragment {
         return map;
     }
 
+    public static boolean includesFullDataSet(Map<UUID, String> map) {
+
+        boolean valid;
+        valid = map.containsKey(BLE_CHARACTERISTIC_CONFIG_OTA_HOST_UUID);
+        valid &= map.containsKey(BLE_CHARACTERISTIC_CONFIG_OTA_FILENAME_UUID);
+        valid &= map.containsKey(BLE_CHARACTERISTIC_CONFIG_OTA_SERVER_USERNAME_UUID);
+        valid &= map.containsKey(BLE_CHARACTERISTIC_CONFIG_OTA_SERVER_PASSWORD_UUID);
+
+        return valid;
+    }
+
     private void initViews() {
         mEditTextOtaServerAddress = getView().findViewById(R.id.editTextOtaServerAddress);
         mEditTextOtaServerAddress.addTextChangedListener(new TextChangeWatcher() {

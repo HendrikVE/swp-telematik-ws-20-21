@@ -63,6 +63,11 @@ public class BluetoothDeviceConnectionService extends Service {
         return mBinder;
     }
 
+    @Override
+    public void onDestroy() {
+        disconnectDevice();
+    }
+
     public void connectDevice(BluetoothDevice device) {
 
         LoggingUtil.debug("connectDevice()");

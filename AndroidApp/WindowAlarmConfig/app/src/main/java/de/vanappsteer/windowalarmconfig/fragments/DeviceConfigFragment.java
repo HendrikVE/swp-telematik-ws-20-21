@@ -87,6 +87,15 @@ public class DeviceConfigFragment extends ConfigFragment {
         return map;
     }
 
+    public static boolean includesFullDataSet(Map<UUID, String> map) {
+
+        boolean valid;
+        valid = map.containsKey(BLE_CHARACTERISTIC_CONFIG_DEVICE_ROOM_UUID);
+        valid &= map.containsKey(BLE_CHARACTERISTIC_CONFIG_DEVICE_ID_UUID);
+
+        return valid;
+    }
+
     private void initViews() {
 
         mEditTextDeviceRoom = getView().findViewById(R.id.editTextDeviceRoom);
