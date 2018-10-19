@@ -105,19 +105,22 @@ public class DeviceConfigActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 if (mDeviceServiceBound) {
+                    Map<UUID, String> map = new HashMap<>();
+
                     for (int i = 0; i < adapter.getCount(); i++) {
                         ConfigFragment configFragment = (ConfigFragment) adapter.getItem(i);
-
-                        Map<UUID, String> map = configFragment.getInputData();
-                        boolean success  = mDeviceService.writeCharacteristics(map);
-
-                        if (!success) {
-                            setResult(RESULT_CANCELED);
-                            DeviceConfigActivity.this.finish();
-                        }
+                        map.putAll(configFragment.getInputData());
                     }
 
-                    setResult(RESULT_OK);
+                    boolean success  = mDeviceService.writeCharacteristics(map);
+
+                    if (!success) {
+                        setResult(RESULT_CANCELED);
+                    }
+                    else {
+                        setResult(RESULT_OK);
+                    }
+                    
                     DeviceConfigActivity.this.finish();
                 }
                 else {
