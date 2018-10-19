@@ -1,5 +1,6 @@
 package de.vanappsteer.windowalarmconfig.fragments;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.text.Editable;
@@ -40,18 +41,14 @@ public class OtaConfigFragment extends ConfigFragment {
         // Required empty public constructor
     }
 
-    public static OtaConfigFragment newInstance(String host, String filename, String username, String password) {
+    @SuppressLint("ValidFragment")
+    public OtaConfigFragment(String host, String filename, String username, String password) {
+        super();
 
-        Bundle bundle = new Bundle();
-        bundle.putString(KEY_BLE_CHARACTERISTIC_CONFIG_OTA_HOST_UUID, host);
-        bundle.putString(KEY_BLE_CHARACTERISTIC_CONFIG_OTA_FILENAME_UUID, filename);
-        bundle.putString(KEY_BLE_CHARACTERISTIC_CONFIG_OTA_SERVER_USERNAME_UUID, username);
-        bundle.putString(KEY_BLE_CHARACTERISTIC_CONFIG_OTA_SERVER_PASSWORD_UUID, password);
-
-        OtaConfigFragment fragment = new OtaConfigFragment();
-        fragment.setArguments(bundle);
-
-        return fragment;
+        mOtaServerAddress = host;
+        mOtaFilename = filename;
+        mOtaUsername = username;
+        mOtaPassword = password;
     }
 
     @Override
@@ -66,14 +63,6 @@ public class OtaConfigFragment extends ConfigFragment {
         super.onActivityCreated(savedInstanceState);
 
         initViews();
-
-        Bundle bundle = getArguments();
-        if (bundle != null) {
-            mOtaServerAddress = getArguments().getString(KEY_BLE_CHARACTERISTIC_CONFIG_OTA_HOST_UUID);
-            mOtaFilename = getArguments().getString(KEY_BLE_CHARACTERISTIC_CONFIG_OTA_FILENAME_UUID);
-            mOtaUsername = getArguments().getString(KEY_BLE_CHARACTERISTIC_CONFIG_OTA_SERVER_USERNAME_UUID);
-            mOtaPassword = getArguments().getString(KEY_BLE_CHARACTERISTIC_CONFIG_OTA_SERVER_PASSWORD_UUID);
-        }
 
         mEditTextOtaServerAddress.setText(mOtaServerAddress);
         mEditTextOtaFilename.setText(mOtaFilename);

@@ -1,5 +1,6 @@
 package de.vanappsteer.windowalarmconfig.fragments;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.text.Editable;
@@ -33,16 +34,12 @@ public class DeviceConfigFragment extends ConfigFragment {
         // Required empty public constructor
     }
 
-    public static DeviceConfigFragment newInstance(String deviceRoom, String deviceID) {
+    @SuppressLint("ValidFragment")
+    public DeviceConfigFragment(String deviceRoom, String deviceID) {
+        super();
 
-        Bundle bundle = new Bundle();
-        bundle.putString(KEY_BLE_CHARACTERISTIC_CONFIG_DEVICE_ROOM_UUID, deviceRoom);
-        bundle.putString(KEY_BLE_CHARACTERISTIC_CONFIG_DEVICE_ID_UUID, deviceID);
-
-        DeviceConfigFragment fragment = new DeviceConfigFragment();
-        fragment.setArguments(bundle);
-
-        return fragment;
+        mDeviceRoom = deviceRoom;
+        mDeviceID = deviceID;
     }
 
     @Override
@@ -57,12 +54,6 @@ public class DeviceConfigFragment extends ConfigFragment {
         super.onActivityCreated(savedInstanceState);
 
         initViews();
-
-        Bundle bundle = getArguments();
-        if (bundle != null) {
-            mDeviceRoom = getArguments().getString(KEY_BLE_CHARACTERISTIC_CONFIG_DEVICE_ROOM_UUID);
-            mDeviceID = getArguments().getString(KEY_BLE_CHARACTERISTIC_CONFIG_DEVICE_ID_UUID);
-        }
 
         mEditTextDeviceRoom.setText(mDeviceRoom);
         mEditTextDeviceID.setText(mDeviceID);

@@ -1,5 +1,6 @@
 package de.vanappsteer.windowalarmconfig.fragments;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.text.Editable;
@@ -28,15 +29,11 @@ public class SensorConfigFragment extends ConfigFragment {
         // Required empty public constructor
     }
 
-    public static SensorConfigFragment newInstance(String pollInterval) {
+    @SuppressLint("ValidFragment")
+    public SensorConfigFragment(String pollInterval) {
+        super();
 
-        Bundle bundle = new Bundle();
-        bundle.putString(KEY_BLE_CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID, pollInterval);
-
-        SensorConfigFragment fragment = new SensorConfigFragment();
-        fragment.setArguments(bundle);
-
-        return fragment;
+        mSensorPollInterval = pollInterval;
     }
 
     @Override
@@ -51,11 +48,6 @@ public class SensorConfigFragment extends ConfigFragment {
         super.onActivityCreated(savedInstanceState);
 
         initViews();
-
-        Bundle bundle = getArguments();
-        if (bundle != null) {
-            mSensorPollInterval = getArguments().getString(KEY_BLE_CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID);
-        }
 
         mEditTextSensorPollInterval.setText(mSensorPollInterval);
     }

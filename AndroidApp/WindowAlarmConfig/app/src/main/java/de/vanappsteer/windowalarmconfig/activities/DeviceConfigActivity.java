@@ -114,20 +114,27 @@ public class DeviceConfigActivity extends AppCompatActivity {
                     for (int i = 0; i < adapter.getCount(); i++) {
                         ConfigFragment configFragment = (ConfigFragment) adapter.getItem(i);
                         map.putAll(configFragment.getInputData());
+
+                        for (Map.Entry<UUID, String> entry : configFragment.getInputData().entrySet()) {
+                            LoggingUtil.debug(entry.getKey().toString());
+                            LoggingUtil.debug(entry.getValue());
+                        }
                     }
 
                     boolean valid = checkCharacteristicsMap(map);
                     if (! valid) {
                         LoggingUtil.error("checkCharacteristicsMap() returned false! Some data is missing!");
-                    }
-
-                    boolean success  = mDeviceService.writeCharacteristics(map);
-
-                    if (!success) {
                         setResult(RESULT_CANCELED);
                     }
                     else {
-                        setResult(RESULT_OK);
+                        boolean success = mDeviceService.writeCharacteristics(map);
+
+                        if (!success) {
+                            setResult(RESULT_CANCELED);
+                        }
+                        else {
+                            setResult(RESULT_OK);
+                        }
                     }
                 }
                 else {

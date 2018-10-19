@@ -1,5 +1,6 @@
 package de.vanappsteer.windowalarmconfig.fragments;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.text.Editable;
@@ -12,6 +13,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import de.vanappsteer.windowalarmconfig.R;
+import de.vanappsteer.windowalarmconfig.util.LoggingUtil;
 import de.vanappsteer.windowalarmconfig.util.TextChangeWatcher;
 
 public class WifiConfigFragment extends ConfigFragment {
@@ -32,16 +34,12 @@ public class WifiConfigFragment extends ConfigFragment {
         // Required empty public constructor
     }
 
-    public static WifiConfigFragment newInstance(String ssid, String password) {
+    @SuppressLint("ValidFragment")
+    public WifiConfigFragment(String ssid, String password) {
+        super();
 
-        Bundle bundle = new Bundle();
-        bundle.putString(KEY_BLE_CHARACTERISTIC_CONFIG_WIFI_SSID_UUID, ssid);
-        bundle.putString(KEY_BLE_CHARACTERISTIC_CONFIG_WIFI_PASSWORD_UUID, password);
-
-        WifiConfigFragment fragment = new WifiConfigFragment();
-        fragment.setArguments(bundle);
-
-        return fragment;
+        mWifiSsid = ssid;
+        mWifiPassword = password;
     }
 
     @Override
@@ -56,12 +54,6 @@ public class WifiConfigFragment extends ConfigFragment {
         super.onActivityCreated(savedInstanceState);
 
         initViews();
-
-        Bundle bundle = getArguments();
-        if (bundle != null) {
-            mWifiSsid = getArguments().getString(KEY_BLE_CHARACTERISTIC_CONFIG_WIFI_SSID_UUID);
-            mWifiPassword = getArguments().getString(KEY_BLE_CHARACTERISTIC_CONFIG_WIFI_PASSWORD_UUID);
-        }
 
         mEditTextWifiSsid.setText(mWifiSsid);
         mEditTextWifiPassword.setText(mWifiPassword);

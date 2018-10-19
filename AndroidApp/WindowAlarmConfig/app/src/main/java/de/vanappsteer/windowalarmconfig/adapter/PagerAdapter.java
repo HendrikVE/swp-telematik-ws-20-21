@@ -29,31 +29,31 @@ public class PagerAdapter extends FragmentStatePagerAdapter {
         super(fm);
         this.mNumerOfTabs = numberOfTabs;
 
-        mDeviceConfigFragment = DeviceConfigFragment.newInstance(
+        mDeviceConfigFragment = new DeviceConfigFragment(
                 characteristicHashMap.get(DeviceConfigFragment.BLE_CHARACTERISTIC_CONFIG_DEVICE_ROOM_UUID),
                 characteristicHashMap.get(DeviceConfigFragment.BLE_CHARACTERISTIC_CONFIG_DEVICE_ID_UUID)
         );
 
-        mOtaConfigFragment = OtaConfigFragment.newInstance(
+        mOtaConfigFragment = new OtaConfigFragment(
                 characteristicHashMap.get(OtaConfigFragment.BLE_CHARACTERISTIC_CONFIG_OTA_HOST_UUID),
                 characteristicHashMap.get(OtaConfigFragment.BLE_CHARACTERISTIC_CONFIG_OTA_FILENAME_UUID),
                 characteristicHashMap.get(OtaConfigFragment.BLE_CHARACTERISTIC_CONFIG_OTA_SERVER_USERNAME_UUID),
                 characteristicHashMap.get(OtaConfigFragment.BLE_CHARACTERISTIC_CONFIG_OTA_SERVER_PASSWORD_UUID)
         );
 
-        mWifiConfigFragment = WifiConfigFragment.newInstance(
+        mWifiConfigFragment = new WifiConfigFragment(
                 characteristicHashMap.get(WifiConfigFragment.BLE_CHARACTERISTIC_CONFIG_WIFI_SSID_UUID),
                 characteristicHashMap.get(WifiConfigFragment.BLE_CHARACTERISTIC_CONFIG_WIFI_PASSWORD_UUID)
         );
 
-        mMqttConfigFragment = MqttConfigFragment.newInstance(
+        mMqttConfigFragment = new MqttConfigFragment(
                 characteristicHashMap.get(MqttConfigFragment.BLE_CHARACTERISTIC_CONFIG_MQTT_USER_UUID),
                 characteristicHashMap.get(MqttConfigFragment.BLE_CHARACTERISTIC_CONFIG_MQTT_PASSWORD_UUID),
                 characteristicHashMap.get(MqttConfigFragment.BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_IP_UUID),
                 characteristicHashMap.get(MqttConfigFragment.BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_PORT_UUID)
         );
 
-        mSensorConfigFragment = SensorConfigFragment.newInstance(
+        mSensorConfigFragment = new SensorConfigFragment(
                 characteristicHashMap.get(SensorConfigFragment.BLE_CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID)
         );
     }

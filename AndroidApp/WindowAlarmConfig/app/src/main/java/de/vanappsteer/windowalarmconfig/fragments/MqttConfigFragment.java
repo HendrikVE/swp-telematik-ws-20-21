@@ -1,5 +1,6 @@
 package de.vanappsteer.windowalarmconfig.fragments;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.text.Editable;
@@ -40,18 +41,14 @@ public class MqttConfigFragment extends ConfigFragment {
         // Required empty public constructor
     }
 
-    public static MqttConfigFragment newInstance(String username, String password, String brokerAddress, String brokerPort) {
+    @SuppressLint("ValidFragment")
+    public MqttConfigFragment(String username, String password, String brokerAddress, String brokerPort) {
+        super();
 
-        Bundle bundle = new Bundle();
-        bundle.putString(KEY_BLE_CHARACTERISTIC_CONFIG_MQTT_USER_UUID, username);
-        bundle.putString(KEY_BLE_CHARACTERISTIC_CONFIG_MQTT_PASSWORD_UUID, password);
-        bundle.putString(KEY_BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_IP_UUID, brokerAddress);
-        bundle.putString(KEY_BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_PORT_UUID, brokerPort);
-
-        MqttConfigFragment fragment = new MqttConfigFragment();
-        fragment.setArguments(bundle);
-
-        return fragment;
+        mMqttUsername = username;
+        mMqttPassword = password;
+        mMqttBrokerAddress = brokerAddress;
+        mMqttBrokerPort = brokerPort;
     }
 
     @Override
@@ -66,14 +63,6 @@ public class MqttConfigFragment extends ConfigFragment {
         super.onActivityCreated(savedInstanceState);
 
         initViews();
-
-        Bundle bundle = getArguments();
-        if (bundle != null) {
-            mMqttUsername = getArguments().getString(KEY_BLE_CHARACTERISTIC_CONFIG_MQTT_USER_UUID);
-            mMqttPassword = getArguments().getString(KEY_BLE_CHARACTERISTIC_CONFIG_MQTT_PASSWORD_UUID);
-            mMqttBrokerAddress = getArguments().getString(KEY_BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_IP_UUID);
-            mMqttBrokerPort = getArguments().getString(KEY_BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_PORT_UUID);
-        }
 
         mEditTextMqttUsername.setText(mMqttUsername);
         mEditTextMqttPassword.setText(mMqttPassword);
