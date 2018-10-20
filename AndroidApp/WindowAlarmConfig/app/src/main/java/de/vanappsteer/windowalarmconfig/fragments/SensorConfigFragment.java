@@ -1,39 +1,26 @@
 package de.vanappsteer.windowalarmconfig.fragments;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
+import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
 import de.vanappsteer.windowalarmconfig.R;
+import de.vanappsteer.windowalarmconfig.controller.SensorConfigController;
+import de.vanappsteer.windowalarmconfig.models.SensorConfigModel;
 import de.vanappsteer.windowalarmconfig.util.TextChangeWatcher;
 
-public class SensorConfigFragment extends ConfigFragment {
-
-    public static final String KEY_BLE_CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID = "BLE_CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID";
-
-    public static final UUID BLE_CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID = UUID.fromString("68011c92-854a-4f2c-a94c-5ee37dc607c3");
+public class SensorConfigFragment extends Fragment implements SensorConfigController.View {
 
     private TextInputEditText mEditTextSensorPollInterval;
 
-    private String mSensorPollInterval = "";
+    private SensorConfigController mController;
 
     public SensorConfigFragment() {
         // Required empty public constructor
-    }
-
-    @SuppressLint("ValidFragment")
-    public SensorConfigFragment(String pollInterval) {
-        super();
-
-        mSensorPollInterval = pollInterval;
     }
 
     @Override
@@ -48,8 +35,6 @@ public class SensorConfigFragment extends ConfigFragment {
         super.onActivityCreated(savedInstanceState);
 
         initViews();
-
-        mEditTextSensorPollInterval.setText(mSensorPollInterval);
     }
 
     @Override
@@ -60,31 +45,30 @@ public class SensorConfigFragment extends ConfigFragment {
         super.onDestroyView();
     }
 
-    @Override
-    public Map<UUID, String> getInputData() {
-
-        Map<UUID, String> map = new HashMap<>();
-        map.put(BLE_CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID, mSensorPollInterval);
-
-        return map;
-    }
-
-    public static boolean includesFullDataSet(Map<UUID, String> map) {
-
-        boolean valid;
-        valid = map.containsKey(BLE_CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID);
-
-        return valid;
-    }
-
     private void initViews() {
         mEditTextSensorPollInterval = getView().findViewById(R.id.editTextSensorPollInterval);
+        updateSensorPollInterval(mController.getSensorPollInterval());
         mEditTextSensorPollInterval.addTextChangedListener(new TextChangeWatcher() {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                mSensorPollInterval = editable.toString();
+                mController.setSensorPollInterval(editable.toString());
             }
         });
+    }
+
+    @Override
+    public void updateSensorPollInterval(String pollInterval) {
+        mEditTextSensorPollInterval.setText(pollInterval);
+    }
+
+    @Override
+    public void setModel(SensorConfigModel model) {
+        mController = new SensorConfigController(model, this);
+    }
+
+    @Override
+    public SensorConfigModel getModel() {
+        return mController.getModel();
     }
 }

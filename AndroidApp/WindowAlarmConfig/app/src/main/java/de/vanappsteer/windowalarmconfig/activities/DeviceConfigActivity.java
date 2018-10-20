@@ -17,14 +17,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import de.vanappsteer.windowalarmconfig.adapter.PagerAdapter;
 import de.vanappsteer.windowalarmconfig.R;
-import de.vanappsteer.windowalarmconfig.fragments.ConfigFragment;
-import de.vanappsteer.windowalarmconfig.fragments.DeviceConfigFragment;
-import de.vanappsteer.windowalarmconfig.fragments.MqttConfigFragment;
-import de.vanappsteer.windowalarmconfig.fragments.OtaConfigFragment;
-import de.vanappsteer.windowalarmconfig.fragments.SensorConfigFragment;
-import de.vanappsteer.windowalarmconfig.fragments.WifiConfigFragment;
+import de.vanappsteer.windowalarmconfig.adapter.PagerAdapter;
+import de.vanappsteer.windowalarmconfig.interfaces.ConfigView;
+import de.vanappsteer.windowalarmconfig.models.ConfigModel;
 import de.vanappsteer.windowalarmconfig.services.BluetoothDeviceConnectionService;
 import de.vanappsteer.windowalarmconfig.util.LoggingUtil;
 
@@ -112,16 +108,17 @@ public class DeviceConfigActivity extends AppCompatActivity {
                     Map<UUID, String> map = new HashMap<>();
 
                     for (int i = 0; i < adapter.getCount(); i++) {
-                        ConfigFragment configFragment = (ConfigFragment) adapter.getItem(i);
-                        map.putAll(configFragment.getInputData());
+                        ConfigView configView = (ConfigView) adapter.getItem(i);
+                        ConfigModel configModel = configView.getModel();
+                        map.putAll(configModel.getInputData());
 
-                        for (Map.Entry<UUID, String> entry : configFragment.getInputData().entrySet()) {
+                        for (Map.Entry<UUID, String> entry : configModel.getInputData().entrySet()) {
                             LoggingUtil.debug(entry.getKey().toString());
                             LoggingUtil.debug(entry.getValue());
                         }
                     }
 
-                    boolean valid = checkCharacteristicsMap(map);
+                    boolean valid = true;//checkCharacteristicsMap(map);
                     if (! valid) {
                         LoggingUtil.error("checkCharacteristicsMap() returned false! Some data is missing!");
                         setResult(RESULT_CANCELED);
@@ -154,7 +151,7 @@ public class DeviceConfigActivity extends AppCompatActivity {
         });
     }
 
-    private boolean checkCharacteristicsMap(Map<UUID, String> map) {
+    /*private boolean checkCharacteristicsMap(Map<UUID, String> map) {
 
         boolean valid;
         valid = DeviceConfigFragment.includesFullDataSet(map);
@@ -164,7 +161,7 @@ public class DeviceConfigActivity extends AppCompatActivity {
         valid &= WifiConfigFragment.includesFullDataSet(map);
 
         return valid;
-    }
+    }*/
 
     private ServiceConnection mConnection = new ServiceConnection() {
 

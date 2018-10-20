@@ -1,45 +1,27 @@
 package de.vanappsteer.windowalarmconfig.fragments;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
+import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
 import de.vanappsteer.windowalarmconfig.R;
-import de.vanappsteer.windowalarmconfig.util.LoggingUtil;
+import de.vanappsteer.windowalarmconfig.controller.DeviceConfigController;
+import de.vanappsteer.windowalarmconfig.models.DeviceConfigModel;
 import de.vanappsteer.windowalarmconfig.util.TextChangeWatcher;
 
-public class DeviceConfigFragment extends ConfigFragment {
-
-    public static final String KEY_BLE_CHARACTERISTIC_CONFIG_DEVICE_ROOM_UUID = "BLE_CHARACTERISTIC_CONFIG_DEVICE_ROOM_UUID";
-    public static final String KEY_BLE_CHARACTERISTIC_CONFIG_DEVICE_ID_UUID = "BLE_CHARACTERISTIC_CONFIG_DEVICE_ID_UUID";
-
-    public static final UUID BLE_CHARACTERISTIC_CONFIG_DEVICE_ROOM_UUID = UUID.fromString("d3491796-683b-4b9c-aafb-f51a35459d43");
-    public static final UUID BLE_CHARACTERISTIC_CONFIG_DEVICE_ID_UUID = UUID.fromString("4745e11f-b403-4cfb-83bb-710d46897875");
+public class DeviceConfigFragment extends Fragment implements DeviceConfigController.View {
 
     private TextInputEditText mEditTextDeviceRoom;
     private TextInputEditText mEditTextDeviceID;
 
-    private String mDeviceRoom = "";
-    private String mDeviceID = "";
+    private DeviceConfigController mController;
 
     public DeviceConfigFragment() {
         // Required empty public constructor
-    }
-
-    @SuppressLint("ValidFragment")
-    public DeviceConfigFragment(String deviceRoom, String deviceID) {
-        super();
-
-        mDeviceRoom = deviceRoom;
-        mDeviceID = deviceID;
     }
 
     @Override
@@ -54,9 +36,6 @@ public class DeviceConfigFragment extends ConfigFragment {
         super.onActivityCreated(savedInstanceState);
 
         initViews();
-
-        mEditTextDeviceRoom.setText(mDeviceRoom);
-        mEditTextDeviceID.setText(mDeviceID);
     }
 
     @Override
@@ -68,43 +47,46 @@ public class DeviceConfigFragment extends ConfigFragment {
         super.onDestroyView();
     }
 
-    @Override
-    public Map<UUID, String> getInputData() {
-
-        Map<UUID, String> map = new HashMap<>();
-        map.put(BLE_CHARACTERISTIC_CONFIG_DEVICE_ROOM_UUID, mDeviceRoom);
-        map.put(BLE_CHARACTERISTIC_CONFIG_DEVICE_ID_UUID, mDeviceID);
-
-        return map;
-    }
-
-    public static boolean includesFullDataSet(Map<UUID, String> map) {
-
-        boolean valid;
-        valid = map.containsKey(BLE_CHARACTERISTIC_CONFIG_DEVICE_ROOM_UUID);
-        valid &= map.containsKey(BLE_CHARACTERISTIC_CONFIG_DEVICE_ID_UUID);
-
-        return valid;
-    }
-
     private void initViews() {
 
         mEditTextDeviceRoom = getView().findViewById(R.id.editTextDeviceRoom);
+        updateDeviceRoom(mController.getDeviceRoom());
         mEditTextDeviceRoom.addTextChangedListener(new TextChangeWatcher() {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                mDeviceRoom = editable.toString();
+                mController.setDeviceRoom(editable.toString());
             }
         });
 
         mEditTextDeviceID = getView().findViewById(R.id.editTextDeviceID);
+        updateDeviceId(mController.getDeviceId());
         mEditTextDeviceID.addTextChangedListener(new TextChangeWatcher() {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                mDeviceID = editable.toString();
+                mController.setDeviceId(editable.toString());
             }
         });
+    }
+
+    @Override
+    public void updateDeviceRoom(String room) {
+        mEditTextDeviceRoom.setText(room);
+    }
+
+    @Override
+    public void updateDeviceId(String id) {
+        mEditTextDeviceID.setText(id);
+    }
+
+    @Override
+    public void setModel(DeviceConfigModel model) {
+        mController = new DeviceConfigController(model, this);
+    }
+
+    @Override
+    public DeviceConfigModel getModel() {
+        return mController.getModel();
     }
 }
