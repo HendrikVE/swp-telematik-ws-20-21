@@ -5,5 +5,5 @@ import java.util.UUID;
 
 public abstract class ConfigModel {
 
-    public abstract Map<UUID, String> getInputData();
+    public abstract Map<UUID, String> getDataMap();
 }

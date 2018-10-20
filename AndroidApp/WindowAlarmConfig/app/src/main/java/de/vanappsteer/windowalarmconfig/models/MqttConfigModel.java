@@ -24,7 +24,7 @@ public class MqttConfigModel extends ConfigModel {
     }
 
     @Override
-    public Map<UUID, String> getInputData() {
+    public Map<UUID, String> getDataMap() {
 
         Map<java.util.UUID, java.lang.String> map = new HashMap<>();
         map.put(BLE_CHARACTERISTIC_CONFIG_MQTT_USER_UUID, mMqttUsername);

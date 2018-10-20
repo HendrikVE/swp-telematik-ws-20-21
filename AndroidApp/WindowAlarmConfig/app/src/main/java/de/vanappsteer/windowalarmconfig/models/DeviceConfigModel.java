@@ -18,7 +18,7 @@ public class DeviceConfigModel extends ConfigModel {
     }
 
     @Override
-    public Map<UUID, String> getInputData() {
+    public Map<UUID, String> getDataMap() {
 
         Map<UUID, String> map = new HashMap<>();
         map.put(BLE_CHARACTERISTIC_CONFIG_DEVICE_ROOM_UUID, mDeviceRoom);

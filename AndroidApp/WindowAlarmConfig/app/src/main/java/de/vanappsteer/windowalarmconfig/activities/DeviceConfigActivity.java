@@ -110,14 +110,14 @@ public class DeviceConfigActivity extends AppCompatActivity {
                     for (int i = 0; i < adapter.getCount(); i++) {
                         ConfigView configView = (ConfigView) adapter.getItem(i);
                         ConfigModel configModel = configView.getModel();
-                        map.putAll(configModel.getInputData());
+                        map.putAll(configModel.getDataMap());
 
-                        for (Map.Entry<UUID, String> entry : configModel.getInputData().entrySet()) {
+                        for (Map.Entry<UUID, String> entry : configModel.getDataMap().entrySet()) {
                             LoggingUtil.debug(entry.getKey().toString());
                             LoggingUtil.debug(entry.getValue());
                         }
                     }
-                    
+
                     boolean success = mDeviceService.writeCharacteristics(map);
 
                     if (!success) {

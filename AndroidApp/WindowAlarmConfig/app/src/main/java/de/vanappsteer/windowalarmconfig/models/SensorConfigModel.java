@@ -15,7 +15,7 @@ public class SensorConfigModel extends ConfigModel {
     }
 
     @Override
-    public Map<UUID, String> getInputData() {
+    public Map<UUID, String> getDataMap() {
 
         Map<UUID, String> map = new HashMap<>();
         map.put(BLE_CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID, mSensorPollInterval);
