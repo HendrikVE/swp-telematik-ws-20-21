@@ -27,15 +27,6 @@ public class DeviceConfigModel extends ConfigModel {
         return map;
     }
 
-    public static boolean includesFullDataSet(Map<UUID, String> map) {
-
-        boolean valid;
-        valid = map.containsKey(BLE_CHARACTERISTIC_CONFIG_DEVICE_ROOM_UUID);
-        valid &= map.containsKey(BLE_CHARACTERISTIC_CONFIG_DEVICE_ID_UUID);
-
-        return valid;
-    }
-
 
     /* BEGIN GETTER */
     public String getDeviceRoom() {

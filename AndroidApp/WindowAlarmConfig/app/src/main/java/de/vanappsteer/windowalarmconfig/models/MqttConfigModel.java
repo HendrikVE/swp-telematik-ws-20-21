@@ -35,17 +35,6 @@ public class MqttConfigModel extends ConfigModel {
         return map;
     }
 
-    public static boolean includesFullDataSet(Map<UUID, String> map) {
-
-        boolean valid;
-        valid = map.containsKey(BLE_CHARACTERISTIC_CONFIG_MQTT_USER_UUID);
-        valid &= map.containsKey(BLE_CHARACTERISTIC_CONFIG_MQTT_PASSWORD_UUID);
-        valid &= map.containsKey(BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_IP_UUID);
-        valid &= map.containsKey(BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_PORT_UUID);
-
-        return valid;
-    }
-
 
     /* BEGIN GETTER */
     public String getMqttUsername() {

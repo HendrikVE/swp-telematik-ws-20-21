@@ -35,17 +35,6 @@ public class OtaConfigModel extends ConfigModel {
         return map;
     }
 
-    public static boolean includesFullDataSet(Map<UUID, String> map) {
-
-        boolean valid;
-        valid = map.containsKey(BLE_CHARACTERISTIC_CONFIG_OTA_HOST_UUID);
-        valid &= map.containsKey(BLE_CHARACTERISTIC_CONFIG_OTA_FILENAME_UUID);
-        valid &= map.containsKey(BLE_CHARACTERISTIC_CONFIG_OTA_SERVER_USERNAME_UUID);
-        valid &= map.containsKey(BLE_CHARACTERISTIC_CONFIG_OTA_SERVER_PASSWORD_UUID);
-
-        return valid;
-    }
-
 
     /* BEGIN GETTER */
     public String getOtaServerAddress() {

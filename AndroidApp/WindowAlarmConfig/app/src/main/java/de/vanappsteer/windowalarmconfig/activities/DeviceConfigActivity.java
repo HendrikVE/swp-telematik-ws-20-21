@@ -117,21 +117,14 @@ public class DeviceConfigActivity extends AppCompatActivity {
                             LoggingUtil.debug(entry.getValue());
                         }
                     }
+                    
+                    boolean success = mDeviceService.writeCharacteristics(map);
 
-                    boolean valid = true;//checkCharacteristicsMap(map);
-                    if (! valid) {
-                        LoggingUtil.error("checkCharacteristicsMap() returned false! Some data is missing!");
+                    if (!success) {
                         setResult(RESULT_CANCELED);
                     }
                     else {
-                        boolean success = mDeviceService.writeCharacteristics(map);
-
-                        if (!success) {
-                            setResult(RESULT_CANCELED);
-                        }
-                        else {
-                            setResult(RESULT_OK);
-                        }
+                        setResult(RESULT_OK);
                     }
                 }
                 else {

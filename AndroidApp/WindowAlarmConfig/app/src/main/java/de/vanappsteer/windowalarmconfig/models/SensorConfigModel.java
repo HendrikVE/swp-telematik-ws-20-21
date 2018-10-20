@@ -23,14 +23,6 @@ public class SensorConfigModel extends ConfigModel {
         return map;
     }
 
-    public static boolean includesFullDataSet(Map<UUID, String> map) {
-
-        boolean valid;
-        valid = map.containsKey(BLE_CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID);
-
-        return valid;
-    }
-
 
     /* BEGIN GETTER */
     public String getSensorPollInterval() {
