@@ -27,7 +27,8 @@ public class BluetoothDeviceConnectionService extends Service {
 
     private final IBinder mBinder = new LocalBinder();
 
-    private BluetoothGatt mConnectedBluetoothGatt = null;
+    private BluetoothGatt mBluetoothGatt = null;
+    private BluetoothGattService mBluetoothGattService = null;
     private boolean mDisconnectPending = false;
 
     private HashMap<UUID, String> mCharacteristicHashMap;
@@ -47,15 +48,19 @@ public class BluetoothDeviceConnectionService extends Service {
         }
     }
 
-    public static abstract class DeviceConnectionListener {
+    public static class DeviceConnectionListener {
 
+        public static final int DEVICE_DISCONNECTED = 0;
         public static final int DEVICE_CONNECTION_ERROR_GENERIC = 1;
         public static final int DEVICE_CONNECTION_ERROR_UNSUPPORTED = 2;
         public static final int DEVICE_CONNECTION_ERROR_READ = 3;
         public static final int DEVICE_CONNECTION_ERROR_WRITE = 4;
 
-        public abstract void onCharacteristicsRead(Map<UUID, String> characteristicMap);
-        public abstract void onDeviceConnectionError(int errorCode);
+        public void onDeviceConnected() {};
+        public void onDeviceDisconnected() {};
+        public void onAllCharacteristicsRead(Map<UUID, String> characteristicMap) {};
+        public void onAllCharacteristicsWrote() {};
+        public void onDeviceConnectionError(int errorCode) {};
     }
 
     @Override
@@ -72,19 +77,19 @@ public class BluetoothDeviceConnectionService extends Service {
 
         LoggingUtil.debug("connectDevice()");
 
-        mConnectedBluetoothGatt = device.connectGatt(BluetoothDeviceConnectionService.this, false, mGattCharacteristicCallback);
+        mBluetoothGatt = device.connectGatt(BluetoothDeviceConnectionService.this, false, mGattCharacteristicCallback);
     }
 
     public void disconnectDevice() {
 
-        if (mConnectedBluetoothGatt != null) {
+        if (mBluetoothGatt != null) {
 
             synchronized (mReadCharacteristicsOperationsQueue) {
                 synchronized (mWriteCharacteristicsOperationsQueue) {
                     int operationsPending = mReadCharacteristicsOperationsQueue.size() + mWriteCharacteristicsOperationsQueue.size();
 
                     if (operationsPending == 0) {
-                        mConnectedBluetoothGatt.disconnect();
+                        mBluetoothGatt.disconnect();
                         mDisconnectPending = false;
                     }
                     else {
@@ -95,21 +100,49 @@ public class BluetoothDeviceConnectionService extends Service {
         }
     }
 
-    /*
+    private boolean isDisconnected() {
+        return mBluetoothGatt == null || mBluetoothGattService == null;
+    }
+
     public void readCharacteristics() {
 
+        if (isDisconnected()) {
+            for (DeviceConnectionListener listener : mDeviceConnectionListenerList) {
+                listener.onDeviceConnectionError(DeviceConnectionListener.DEVICE_DISCONNECTED);
+            }
+
+            return;
+        }
+
+        List<BluetoothGattCharacteristic> characteristicList = mBluetoothGattService.getCharacteristics();
+        mCharacteristicHashMap = new HashMap<>();
+
+        mReadCharacteristicsOperationsQueue.addAll(characteristicList);
+
+        // initial call of readCharacteristic, further calls are done within onCharacteristicRead afterwards
+        boolean success = mBluetoothGatt.readCharacteristic(mReadCharacteristicsOperationsQueue.poll());
+        if (! success) {
+            for (DeviceConnectionListener listener : mDeviceConnectionListenerList) {
+                listener.onDeviceConnectionError(DeviceConnectionListener.DEVICE_CONNECTION_ERROR_READ);
+            }
+        }
     }
-    */
 
-    public boolean writeCharacteristics(Map<UUID, String> characteristicMap) {
+    public void writeCharacteristics(Map<UUID, String> characteristicMap) {
 
-        LoggingUtil.debug("writeCharacteristics()");
+        if (isDisconnected()) {
+            for (DeviceConnectionListener listener : mDeviceConnectionListenerList) {
+                listener.onDeviceConnectionError(DeviceConnectionListener.DEVICE_DISCONNECTED);
+            }
+
+            return;
+        }
 
         synchronized (mWriteCharacteristicsOperationsQueue) {
 
             boolean needInitialCall = mWriteCharacteristicsOperationsQueue.size() == 0;
 
-            BluetoothGattService gattService = mConnectedBluetoothGatt.getService(BLE_SERVICE_UUID);
+            BluetoothGattService gattService = mBluetoothGatt.getService(BLE_SERVICE_UUID);
 
             for (Map.Entry<UUID, String> entry : characteristicMap.entrySet()) {
 
@@ -124,10 +157,13 @@ public class BluetoothDeviceConnectionService extends Service {
 
             if (needInitialCall) {
                 // initial call of writeCharacteristic, further calls are done within onCharacteristicWrite afterwards
-                return mConnectedBluetoothGatt.writeCharacteristic(mWriteCharacteristicsOperationsQueue.poll());
+                boolean success = mBluetoothGatt.writeCharacteristic(mWriteCharacteristicsOperationsQueue.poll());
+                if (! success) {
+                    for (DeviceConnectionListener listener : mDeviceConnectionListenerList) {
+                        listener.onDeviceConnectionError(DeviceConnectionListener.DEVICE_CONNECTION_ERROR_WRITE);
+                    }
+                }
             }
-
-            return true;
         }
     }
 
@@ -159,6 +195,11 @@ public class BluetoothDeviceConnectionService extends Service {
 
                     case BluetoothProfile.STATE_DISCONNECTED:
                         gatt.close();
+                        mBluetoothGatt = null;
+                        mBluetoothGattService = null;
+                        for (DeviceConnectionListener listener : mDeviceConnectionListenerList) {
+                            listener.onDeviceDisconnected();
+                        }
                         break;
 
                     default:
@@ -187,8 +228,8 @@ public class BluetoothDeviceConnectionService extends Service {
                 return;
             }
 
-            BluetoothGattService gattService = gatt.getService(BLE_SERVICE_UUID);
-            if (gattService == null) {
+            mBluetoothGattService = gatt.getService(BLE_SERVICE_UUID);
+            if (mBluetoothGattService == null) {
 
                 gatt.disconnect();
 
@@ -199,17 +240,8 @@ public class BluetoothDeviceConnectionService extends Service {
                 return;
             }
 
-            List<BluetoothGattCharacteristic> characteristicList = gattService.getCharacteristics();
-            mCharacteristicHashMap = new HashMap<>();
-
-            mReadCharacteristicsOperationsQueue.addAll(characteristicList);
-
-            // initial call of readCharacteristic, further calls are done within onCharacteristicRead afterwards
-            boolean success = gatt.readCharacteristic(mReadCharacteristicsOperationsQueue.poll());
-            if (! success) {
-                for (DeviceConnectionListener listener : mDeviceConnectionListenerList) {
-                    listener.onDeviceConnectionError(DeviceConnectionListener.DEVICE_CONNECTION_ERROR_READ);
-                }
+            for (DeviceConnectionListener listener : mDeviceConnectionListenerList) {
+                listener.onDeviceConnected();
             }
         }
 
@@ -234,7 +266,7 @@ public class BluetoothDeviceConnectionService extends Service {
                 }
                 else {
                     for (DeviceConnectionListener listener : mDeviceConnectionListenerList) {
-                        listener.onCharacteristicsRead(mCharacteristicHashMap);
+                        listener.onAllCharacteristicsRead(mCharacteristicHashMap);
                     }
                 }
             }
@@ -251,7 +283,12 @@ public class BluetoothDeviceConnectionService extends Service {
 
                 if (mWriteCharacteristicsOperationsQueue.size() > 0) {
                     boolean success = gatt.writeCharacteristic(mWriteCharacteristicsOperationsQueue.poll());
-                    if (! success) {
+                    if (success) {
+                        for (DeviceConnectionListener listener : mDeviceConnectionListenerList) {
+                            listener.onAllCharacteristicsWrote();
+                        }
+                    }
+                    else {
                         for (DeviceConnectionListener listener : mDeviceConnectionListenerList) {
                             listener.onDeviceConnectionError(DeviceConnectionListener.DEVICE_CONNECTION_ERROR_WRITE);
                         }

@@ -22,6 +22,7 @@ import de.vanappsteer.windowalarmconfig.adapter.PagerAdapter;
 import de.vanappsteer.windowalarmconfig.interfaces.ConfigView;
 import de.vanappsteer.windowalarmconfig.models.ConfigModel;
 import de.vanappsteer.windowalarmconfig.services.BluetoothDeviceConnectionService;
+import de.vanappsteer.windowalarmconfig.services.BluetoothDeviceConnectionService.DeviceConnectionListener;
 import de.vanappsteer.windowalarmconfig.util.LoggingUtil;
 
 public class DeviceConfigActivity extends AppCompatActivity {
@@ -118,21 +119,14 @@ public class DeviceConfigActivity extends AppCompatActivity {
                         }
                     }
 
-                    boolean success = mDeviceService.writeCharacteristics(map);
+                    mDeviceService.writeCharacteristics(map);
 
-                    if (!success) {
-                        setResult(RESULT_CANCELED);
-                    }
-                    else {
-                        setResult(RESULT_OK);
-                    }
                 }
                 else {
                     // TODO: keep config activity instead and retry?
                     setResult(RESULT_CANCELED);
+                    DeviceConfigActivity.this.finish();
                 }
-
-                DeviceConfigActivity.this.finish();
             }
         });
         Button buttonCancel = findViewById(R.id.buttonCancel);
@@ -150,12 +144,28 @@ public class DeviceConfigActivity extends AppCompatActivity {
         public void onServiceConnected(ComponentName className, IBinder service) {
             BluetoothDeviceConnectionService.LocalBinder binder = (BluetoothDeviceConnectionService.LocalBinder) service;
             mDeviceService = binder.getService();
+            mDeviceService.addDeviceConnectionListener(mDeviceConnectionListener);
             mDeviceServiceBound = true;
         }
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
             mDeviceServiceBound = false;
+        }
+    };
+
+    DeviceConnectionListener mDeviceConnectionListener = new DeviceConnectionListener() {
+
+        @Override
+        public void onAllCharacteristicsWrote() {
+            setResult(RESULT_OK);
+            DeviceConfigActivity.this.finish();
+        }
+
+        @Override
+        public void onDeviceConnectionError(int errorCode) {
+            setResult(RESULT_CANCELED);
+            DeviceConfigActivity.this.finish();
         }
     };
 }

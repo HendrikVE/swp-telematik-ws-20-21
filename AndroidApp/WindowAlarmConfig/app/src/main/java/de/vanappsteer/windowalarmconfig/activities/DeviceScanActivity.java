@@ -50,11 +50,13 @@ import de.vanappsteer.windowalarmconfig.util.LoggingUtil;
 
 public class DeviceScanActivity extends AppCompatActivity {
 
+    private final int COMMAND_SHOW_DISCONNECTED = 0;
     private final int COMMAND_SHOW_CONNECTION_ERROR_DIALOG = 1;
     private final int COMMAND_SHOW_DEVICE_UNSUPPORTED_DIALOG = 2;
     private final int COMMAND_SHOW_DEVICE_READ_ERROR_DIALOG = 3;
     private final int COMMAND_SHOW_DEVICE_WRITE_ERROR_DIALOG = 4;
 
+    private boolean mDialogDisconnectedShown = false;
     private boolean mDialogConnectionErrorShown = false;
     private boolean mDialogUnsupportedErrorShown = false;
     private boolean mDialogReadErrorShown = false;
@@ -514,6 +516,21 @@ public class DeviceScanActivity extends AppCompatActivity {
 
             switch (message.what) {
 
+                case COMMAND_SHOW_DISCONNECTED:
+                    if (mDialogDisconnectedShown) {
+                        return;
+                    }
+                    builder.setTitle(R.string.dialog_bluetooth_device_disconnected_title);
+                    builder.setMessage(R.string.dialog_bluetooth_device_disconnected_message);
+                    builder.setPositiveButton(R.string.button_ok, null);
+                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialogInterface) {
+                            mDialogDisconnectedShown = false;
+                        }
+                    });
+                    break;
+
                 case COMMAND_SHOW_CONNECTION_ERROR_DIALOG:
                     if (mDialogConnectionErrorShown) {
                         return;
@@ -603,7 +620,12 @@ public class DeviceScanActivity extends AppCompatActivity {
     DeviceConnectionListener mDeviceConnectionListener = new DeviceConnectionListener() {
 
         @Override
-        public void onCharacteristicsRead(Map<UUID, String> characteristicMap) {
+        public void onDeviceConnected() {
+            mDeviceService.readCharacteristics();
+        }
+
+        @Override
+        public void onAllCharacteristicsRead(Map<UUID, String> characteristicMap) {
             mDialogConnectDevice.dismiss();
             openDeviceConfigActivity((HashMap<UUID, String>) characteristicMap);
         }
@@ -615,6 +637,10 @@ public class DeviceScanActivity extends AppCompatActivity {
 
             Message message = null;
             switch (errorCode) {
+
+                case DeviceConnectionListener.DEVICE_DISCONNECTED:
+                    message = mUiHandler.obtainMessage(COMMAND_SHOW_DISCONNECTED, null);
+                    break;
 
                 case DeviceConnectionListener.DEVICE_CONNECTION_ERROR_GENERIC:
                     message = mUiHandler.obtainMessage(COMMAND_SHOW_CONNECTION_ERROR_DIALOG, null);
