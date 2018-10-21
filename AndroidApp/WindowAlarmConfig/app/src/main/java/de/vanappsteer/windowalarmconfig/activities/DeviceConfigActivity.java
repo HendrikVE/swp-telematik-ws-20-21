@@ -144,18 +144,6 @@ public class DeviceConfigActivity extends AppCompatActivity {
         });
     }
 
-    /*private boolean checkCharacteristicsMap(Map<UUID, String> map) {
-
-        boolean valid;
-        valid = DeviceConfigFragment.includesFullDataSet(map);
-        valid &= MqttConfigFragment.includesFullDataSet(map);
-        valid &= OtaConfigFragment.includesFullDataSet(map);
-        valid &= SensorConfigFragment.includesFullDataSet(map);
-        valid &= WifiConfigFragment.includesFullDataSet(map);
-
-        return valid;
-    }*/
-
     private ServiceConnection mConnection = new ServiceConnection() {
 
         @Override

@@ -179,7 +179,7 @@ public class DeviceScanActivity extends AppCompatActivity {
 
         if (mDeviceServiceBound) {
             mDeviceService.disconnectDevice();
-            mDeviceService.removeDeviceConnectionListener(mDeviceErrorListener);
+            mDeviceService.removeDeviceConnectionListener(mDeviceConnectionListener);
             unbindService(mConnection);
             mDeviceServiceBound = false;
         }
@@ -202,14 +202,13 @@ public class DeviceScanActivity extends AppCompatActivity {
             checkPermissions();
         }
         else if (requestCode == ACTIVITY_RESULT_CONFIGURE_DEVICE) {
-            if (resultCode == RESULT_OK) {
-                if (mDeviceServiceBound) {
-                    mDeviceService.disconnectDevice();
-                }
-            }
-            else {
+            if (resultCode != RESULT_OK) {
                 Message message = mUiHandler.obtainMessage(COMMAND_SHOW_DEVICE_WRITE_ERROR_DIALOG, null);
                 message.sendToTarget();
+            }
+
+            if (mDeviceServiceBound) {
+                mDeviceService.disconnectDevice();
             }
         }
     }
@@ -591,7 +590,7 @@ public class DeviceScanActivity extends AppCompatActivity {
         public void onServiceConnected(ComponentName className, IBinder service) {
             BluetoothDeviceConnectionService.LocalBinder binder = (BluetoothDeviceConnectionService.LocalBinder) service;
             mDeviceService = binder.getService();
-            mDeviceService.addDeviceConnectionListener(mDeviceErrorListener);
+            mDeviceService.addDeviceConnectionListener(mDeviceConnectionListener);
             mDeviceServiceBound = true;
         }
 
@@ -601,7 +600,7 @@ public class DeviceScanActivity extends AppCompatActivity {
         }
     };
 
-    DeviceConnectionListener mDeviceErrorListener = new DeviceConnectionListener() {
+    DeviceConnectionListener mDeviceConnectionListener = new DeviceConnectionListener() {
 
         @Override
         public void onCharacteristicsRead(Map<UUID, String> characteristicMap) {
@@ -614,31 +613,31 @@ public class DeviceScanActivity extends AppCompatActivity {
 
             mDialogConnectDevice.dismiss();
 
-            Message message;
+            Message message = null;
             switch (errorCode) {
 
                 case DeviceConnectionListener.DEVICE_CONNECTION_ERROR_GENERIC:
                     message = mUiHandler.obtainMessage(COMMAND_SHOW_CONNECTION_ERROR_DIALOG, null);
-                    message.sendToTarget();
                     break;
 
                 case DeviceConnectionListener.DEVICE_CONNECTION_ERROR_UNSUPPORTED:
                     message = mUiHandler.obtainMessage(COMMAND_SHOW_DEVICE_UNSUPPORTED_DIALOG, null);
-                    message.sendToTarget();
                     break;
 
                 case DeviceConnectionListener.DEVICE_CONNECTION_ERROR_READ:
                     message = mUiHandler.obtainMessage(COMMAND_SHOW_DEVICE_READ_ERROR_DIALOG, null);
-                    message.sendToTarget();
                     break;
 
                 case DeviceConnectionListener.DEVICE_CONNECTION_ERROR_WRITE:
                     message = mUiHandler.obtainMessage(COMMAND_SHOW_DEVICE_WRITE_ERROR_DIALOG, null);
-                    message.sendToTarget();
                     break;
 
                 default:
                     LoggingUtil.warning("unhandled error code: " + errorCode);
+            }
+
+            if (message != null) {
+                message.sendToTarget();
             }
         }
     };
