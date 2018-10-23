@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import de.vanappsteer.windowalarmconfig.R;
-import de.vanappsteer.windowalarmconfig.controller.DeviceConfigController;
+import de.vanappsteer.windowalarmconfig.presenter.DeviceConfigPresenter;
 import de.vanappsteer.windowalarmconfig.interfaces.DeviceConfigView;
 import de.vanappsteer.windowalarmconfig.models.DeviceConfigModel;
 import de.vanappsteer.windowalarmconfig.util.TextChangeWatcher;
@@ -19,7 +19,7 @@ public class DeviceConfigFragment extends Fragment implements DeviceConfigView {
     private TextInputEditText mEditTextDeviceRoom;
     private TextInputEditText mEditTextDeviceID;
 
-    private DeviceConfigController mController;
+    private DeviceConfigPresenter mPresenter;
 
     public DeviceConfigFragment() {
         // Required empty public constructor
@@ -51,22 +51,22 @@ public class DeviceConfigFragment extends Fragment implements DeviceConfigView {
     private void initViews() {
 
         mEditTextDeviceRoom = getView().findViewById(R.id.editTextDeviceRoom);
-        updateDeviceRoom(mController.getDeviceRoom());
+        updateDeviceRoom(mPresenter.getDeviceRoom());
         mEditTextDeviceRoom.addTextChangedListener(new TextChangeWatcher() {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                mController.setDeviceRoom(editable.toString());
+                mPresenter.setDeviceRoom(editable.toString());
             }
         });
 
         mEditTextDeviceID = getView().findViewById(R.id.editTextDeviceID);
-        updateDeviceId(mController.getDeviceId());
+        updateDeviceId(mPresenter.getDeviceId());
         mEditTextDeviceID.addTextChangedListener(new TextChangeWatcher() {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                mController.setDeviceId(editable.toString());
+                mPresenter.setDeviceId(editable.toString());
             }
         });
     }
@@ -83,11 +83,11 @@ public class DeviceConfigFragment extends Fragment implements DeviceConfigView {
 
     @Override
     public void setModel(DeviceConfigModel model) {
-        mController = new DeviceConfigController(model, this);
+        mPresenter = new DeviceConfigPresenter(model, this);
     }
 
     @Override
     public DeviceConfigModel getModel() {
-        return mController.getModel();
+        return mPresenter.getModel();
     }
 }

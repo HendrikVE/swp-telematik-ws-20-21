@@ -1,16 +1,15 @@
-package de.vanappsteer.windowalarmconfig.controller;
+package de.vanappsteer.windowalarmconfig.presenter;
 
 import de.vanappsteer.windowalarmconfig.interfaces.ConfigController;
-import de.vanappsteer.windowalarmconfig.interfaces.ConfigView;
 import de.vanappsteer.windowalarmconfig.interfaces.DeviceConfigView;
 import de.vanappsteer.windowalarmconfig.models.DeviceConfigModel;
 
-public class DeviceConfigController implements ConfigController<DeviceConfigModel> {
+public class DeviceConfigPresenter implements ConfigController<DeviceConfigModel> {
 
     private DeviceConfigModel mModel;
     private DeviceConfigView mView;
 
-    public DeviceConfigController(DeviceConfigModel model, DeviceConfigView view) {
+    public DeviceConfigPresenter(DeviceConfigModel model, DeviceConfigView view) {
         mModel = model;
         mView = view;
     }

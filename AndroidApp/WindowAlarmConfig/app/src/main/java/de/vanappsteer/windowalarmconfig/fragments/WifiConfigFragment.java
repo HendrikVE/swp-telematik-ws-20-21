@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import de.vanappsteer.windowalarmconfig.R;
-import de.vanappsteer.windowalarmconfig.controller.WifiConfigController;
+import de.vanappsteer.windowalarmconfig.presenter.WifiConfigPresenter;
 import de.vanappsteer.windowalarmconfig.interfaces.WifiConfigView;
 import de.vanappsteer.windowalarmconfig.models.WifiConfigModel;
 import de.vanappsteer.windowalarmconfig.util.TextChangeWatcher;
@@ -19,7 +19,7 @@ public class WifiConfigFragment extends Fragment implements WifiConfigView {
     private TextInputEditText mEditTextWifiSsid;
     private TextInputEditText mEditTextWifiPassword;
 
-    private WifiConfigController mController;
+    private WifiConfigPresenter mPresenter;
 
     public WifiConfigFragment() {
         // Required empty public constructor
@@ -50,22 +50,22 @@ public class WifiConfigFragment extends Fragment implements WifiConfigView {
 
     private void initViews() {
         mEditTextWifiSsid = getView().findViewById(R.id.editTextWifiSsid);
-        updateWifiSsid(mController.getSsid());
+        updateWifiSsid(mPresenter.getSsid());
         mEditTextWifiSsid.addTextChangedListener(new TextChangeWatcher() {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                mController.setWifiSsid(editable.toString());
+                mPresenter.setWifiSsid(editable.toString());
             }
         });
 
         mEditTextWifiPassword = getView().findViewById(R.id.editTextWifiPassword);
-        updateWifiPassword(mController.getPassword());
+        updateWifiPassword(mPresenter.getPassword());
         mEditTextWifiPassword.addTextChangedListener(new TextChangeWatcher() {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                mController.setWifiPassword(editable.toString());
+                mPresenter.setWifiPassword(editable.toString());
             }
         });
     }
@@ -82,11 +82,11 @@ public class WifiConfigFragment extends Fragment implements WifiConfigView {
 
     @Override
     public void setModel(WifiConfigModel model) {
-        mController = new WifiConfigController(model, this);
+        mPresenter = new WifiConfigPresenter(model, this);
     }
 
     @Override
     public WifiConfigModel getModel() {
-        return mController.getModel();
+        return mPresenter.getModel();
     }
 }

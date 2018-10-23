@@ -1,16 +1,15 @@
-package de.vanappsteer.windowalarmconfig.controller;
+package de.vanappsteer.windowalarmconfig.presenter;
 
 import de.vanappsteer.windowalarmconfig.interfaces.ConfigController;
-import de.vanappsteer.windowalarmconfig.interfaces.ConfigView;
 import de.vanappsteer.windowalarmconfig.interfaces.WifiConfigView;
 import de.vanappsteer.windowalarmconfig.models.WifiConfigModel;
 
-public class WifiConfigController implements ConfigController<WifiConfigModel> {
+public class WifiConfigPresenter implements ConfigController<WifiConfigModel> {
 
     private WifiConfigModel mModel;
     private WifiConfigView mView;
 
-    public WifiConfigController(WifiConfigModel model, WifiConfigView view) {
+    public WifiConfigPresenter(WifiConfigModel model, WifiConfigView view) {
         mModel = model;
         mView = view;
     }

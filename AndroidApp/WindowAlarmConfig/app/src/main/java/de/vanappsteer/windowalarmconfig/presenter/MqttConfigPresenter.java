@@ -1,16 +1,15 @@
-package de.vanappsteer.windowalarmconfig.controller;
+package de.vanappsteer.windowalarmconfig.presenter;
 
 import de.vanappsteer.windowalarmconfig.interfaces.ConfigController;
-import de.vanappsteer.windowalarmconfig.interfaces.ConfigView;
 import de.vanappsteer.windowalarmconfig.interfaces.MqttConfigView;
 import de.vanappsteer.windowalarmconfig.models.MqttConfigModel;
 
-public class MqttConfigController implements ConfigController<MqttConfigModel> {
+public class MqttConfigPresenter implements ConfigController<MqttConfigModel> {
 
     private MqttConfigModel mModel;
     private MqttConfigView mView;
 
-    public MqttConfigController(MqttConfigModel model, MqttConfigView view) {
+    public MqttConfigPresenter(MqttConfigModel model, MqttConfigView view) {
         mModel = model;
         mView = view;
     }

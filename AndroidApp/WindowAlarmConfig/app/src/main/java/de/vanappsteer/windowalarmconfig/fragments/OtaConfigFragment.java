@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import de.vanappsteer.windowalarmconfig.R;
-import de.vanappsteer.windowalarmconfig.controller.OtaConfigController;
+import de.vanappsteer.windowalarmconfig.presenter.OtaConfigPresenter;
 import de.vanappsteer.windowalarmconfig.interfaces.OtaConfigView;
 import de.vanappsteer.windowalarmconfig.models.OtaConfigModel;
 import de.vanappsteer.windowalarmconfig.util.TextChangeWatcher;
@@ -21,7 +21,7 @@ public class OtaConfigFragment extends Fragment implements OtaConfigView {
     private TextInputEditText mEditTextOtaUsername;
     private TextInputEditText mEditTextOtaPassword;
 
-    private OtaConfigController mController;
+    private OtaConfigPresenter mPresenter;
 
     public OtaConfigFragment() {
         // Required empty public constructor
@@ -54,42 +54,42 @@ public class OtaConfigFragment extends Fragment implements OtaConfigView {
 
     private void initViews() {
         mEditTextOtaServerAddress = getView().findViewById(R.id.editTextOtaServerAddress);
-        updateOtaServerAddress(mController.getOtaServerAddress());
+        updateOtaServerAddress(mPresenter.getOtaServerAddress());
         mEditTextOtaServerAddress.addTextChangedListener(new TextChangeWatcher() {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                mController.setOtaServerAddress(editable.toString());
+                mPresenter.setOtaServerAddress(editable.toString());
             }
         });
 
         mEditTextOtaFilename = getView().findViewById(R.id.editTextOtaFilename);
-        updateOtaFilename(mController.getOtaFilename());
+        updateOtaFilename(mPresenter.getOtaFilename());
         mEditTextOtaFilename.addTextChangedListener(new TextChangeWatcher() {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                mController.setOtaFilename(editable.toString());
+                mPresenter.setOtaFilename(editable.toString());
             }
         });
 
         mEditTextOtaUsername = getView().findViewById(R.id.editTextOtaUsername);
-        updateOtaUsername(mController.getOtaUsername());
+        updateOtaUsername(mPresenter.getOtaUsername());
         mEditTextOtaUsername.addTextChangedListener(new TextChangeWatcher() {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                mController.setOtaUsername(editable.toString());
+                mPresenter.setOtaUsername(editable.toString());
             }
         });
 
         mEditTextOtaPassword = getView().findViewById(R.id.editTextOtaPassword);
-        updateOtaPassword(mController.getOtaPassword());
+        updateOtaPassword(mPresenter.getOtaPassword());
         mEditTextOtaPassword.addTextChangedListener(new TextChangeWatcher() {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                mController.setOtaPassword(editable.toString());
+                mPresenter.setOtaPassword(editable.toString());
             }
         });
     }
@@ -116,11 +116,11 @@ public class OtaConfigFragment extends Fragment implements OtaConfigView {
 
     @Override
     public void setModel(OtaConfigModel model) {
-        mController = new OtaConfigController(model, this);
+        mPresenter = new OtaConfigPresenter(model, this);
     }
 
     @Override
     public OtaConfigModel getModel() {
-        return mController.getModel();
+        return mPresenter.getModel();
     }
 }

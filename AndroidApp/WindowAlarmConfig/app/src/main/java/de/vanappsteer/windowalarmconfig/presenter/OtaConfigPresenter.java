@@ -1,16 +1,15 @@
-package de.vanappsteer.windowalarmconfig.controller;
+package de.vanappsteer.windowalarmconfig.presenter;
 
 import de.vanappsteer.windowalarmconfig.interfaces.ConfigController;
-import de.vanappsteer.windowalarmconfig.interfaces.ConfigView;
 import de.vanappsteer.windowalarmconfig.interfaces.OtaConfigView;
 import de.vanappsteer.windowalarmconfig.models.OtaConfigModel;
 
-public class OtaConfigController implements ConfigController<OtaConfigModel> {
+public class OtaConfigPresenter implements ConfigController<OtaConfigModel> {
 
     private OtaConfigModel mModel;
     private OtaConfigView mView;
 
-    public OtaConfigController(OtaConfigModel model, OtaConfigView view) {
+    public OtaConfigPresenter(OtaConfigModel model, OtaConfigView view) {
         mModel = model;
         mView = view;
     }

@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import de.vanappsteer.windowalarmconfig.R;
-import de.vanappsteer.windowalarmconfig.controller.SensorConfigController;
+import de.vanappsteer.windowalarmconfig.presenter.SensorConfigPresenter;
 import de.vanappsteer.windowalarmconfig.interfaces.SensorConfigView;
 import de.vanappsteer.windowalarmconfig.models.SensorConfigModel;
 import de.vanappsteer.windowalarmconfig.util.TextChangeWatcher;
@@ -18,7 +18,7 @@ public class SensorConfigFragment extends Fragment implements SensorConfigView {
 
     private TextInputEditText mEditTextSensorPollInterval;
 
-    private SensorConfigController mController;
+    private SensorConfigPresenter mPresenter;
 
     public SensorConfigFragment() {
         // Required empty public constructor
@@ -48,12 +48,12 @@ public class SensorConfigFragment extends Fragment implements SensorConfigView {
 
     private void initViews() {
         mEditTextSensorPollInterval = getView().findViewById(R.id.editTextSensorPollInterval);
-        updateSensorPollInterval(mController.getSensorPollInterval());
+        updateSensorPollInterval(mPresenter.getSensorPollInterval());
         mEditTextSensorPollInterval.addTextChangedListener(new TextChangeWatcher() {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                mController.setSensorPollInterval(editable.toString());
+                mPresenter.setSensorPollInterval(editable.toString());
             }
         });
     }
@@ -65,11 +65,11 @@ public class SensorConfigFragment extends Fragment implements SensorConfigView {
 
     @Override
     public void setModel(SensorConfigModel model) {
-        mController = new SensorConfigController(model, this);
+        mPresenter = new SensorConfigPresenter(model, this);
     }
 
     @Override
     public SensorConfigModel getModel() {
-        return mController.getModel();
+        return mPresenter.getModel();
     }
 }

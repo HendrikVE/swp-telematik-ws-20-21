@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import de.vanappsteer.windowalarmconfig.R;
-import de.vanappsteer.windowalarmconfig.controller.MqttConfigController;
+import de.vanappsteer.windowalarmconfig.presenter.MqttConfigPresenter;
 import de.vanappsteer.windowalarmconfig.interfaces.MqttConfigView;
 import de.vanappsteer.windowalarmconfig.models.MqttConfigModel;
 import de.vanappsteer.windowalarmconfig.util.TextChangeWatcher;
@@ -21,7 +21,7 @@ public class MqttConfigFragment extends Fragment implements MqttConfigView {
     private TextInputEditText mEditTextMqttBrokerAddress;
     private TextInputEditText mEditTextMqttBrokerPort;
 
-    private MqttConfigController mController;
+    private MqttConfigPresenter mPresenter;
 
     public MqttConfigFragment() {
         // Required empty public constructor
@@ -55,42 +55,42 @@ public class MqttConfigFragment extends Fragment implements MqttConfigView {
     private void initViews() {
 
         mEditTextMqttUsername = getView().findViewById(R.id.editTextMqttUsername);
-        updateMqttUsername(mController.getMqttUsername());
+        updateMqttUsername(mPresenter.getMqttUsername());
         mEditTextMqttUsername.addTextChangedListener(new TextChangeWatcher() {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                mController.setMqttUsername(editable.toString());
+                mPresenter.setMqttUsername(editable.toString());
             }
         });
 
         mEditTextMqttPassword = getView().findViewById(R.id.editTextMqttPassword);
-        updateMqttPassword(mController.getMqttPassword());
+        updateMqttPassword(mPresenter.getMqttPassword());
         mEditTextMqttPassword.addTextChangedListener(new TextChangeWatcher() {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                mController.setMqttPassword(editable.toString());
+                mPresenter.setMqttPassword(editable.toString());
             }
         });
 
         mEditTextMqttBrokerAddress = getView().findViewById(R.id.editTextMqttBrokerAddress);
-        updateMqttBrokerAddress(mController.getMqttBrokerAddress());
+        updateMqttBrokerAddress(mPresenter.getMqttBrokerAddress());
         mEditTextMqttBrokerAddress.addTextChangedListener(new TextChangeWatcher() {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                mController.setMqttBrokerAddress(editable.toString());
+                mPresenter.setMqttBrokerAddress(editable.toString());
             }
         });
 
         mEditTextMqttBrokerPort = getView().findViewById(R.id.editTextMqttBrokerPort);
-        updateMqttBrokerPort(mController.getMqttBrokerPort());
+        updateMqttBrokerPort(mPresenter.getMqttBrokerPort());
         mEditTextMqttBrokerPort.addTextChangedListener(new TextChangeWatcher() {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                mController.setMqttBrokerPort(editable.toString());
+                mPresenter.setMqttBrokerPort(editable.toString());
             }
         });
     }
@@ -117,11 +117,11 @@ public class MqttConfigFragment extends Fragment implements MqttConfigView {
 
     @Override
     public void setModel(MqttConfigModel model) {
-        mController = new MqttConfigController(model, this);
+        mPresenter = new MqttConfigPresenter(model, this);
     }
 
     @Override
     public MqttConfigModel getModel() {
-        return mController.getModel();
+        return mPresenter.getModel();
     }
 }
