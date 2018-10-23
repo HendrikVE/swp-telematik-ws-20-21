@@ -10,10 +10,11 @@ import android.view.ViewGroup;
 
 import de.vanappsteer.windowalarmconfig.R;
 import de.vanappsteer.windowalarmconfig.controller.SensorConfigController;
+import de.vanappsteer.windowalarmconfig.interfaces.SensorConfigView;
 import de.vanappsteer.windowalarmconfig.models.SensorConfigModel;
 import de.vanappsteer.windowalarmconfig.util.TextChangeWatcher;
 
-public class SensorConfigFragment extends Fragment implements SensorConfigController.View {
+public class SensorConfigFragment extends Fragment implements SensorConfigView {
 
     private TextInputEditText mEditTextSensorPollInterval;
 

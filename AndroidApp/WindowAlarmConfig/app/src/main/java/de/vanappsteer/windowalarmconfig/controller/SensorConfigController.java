@@ -2,14 +2,15 @@ package de.vanappsteer.windowalarmconfig.controller;
 
 import de.vanappsteer.windowalarmconfig.interfaces.ConfigController;
 import de.vanappsteer.windowalarmconfig.interfaces.ConfigView;
+import de.vanappsteer.windowalarmconfig.interfaces.SensorConfigView;
 import de.vanappsteer.windowalarmconfig.models.SensorConfigModel;
 
 public class SensorConfigController implements ConfigController<SensorConfigModel> {
 
     private SensorConfigModel mModel;
-    private SensorConfigController.View mView;
+    private SensorConfigView mView;
 
-    public SensorConfigController(SensorConfigModel model, SensorConfigController.View view) {
+    public SensorConfigController(SensorConfigModel model, SensorConfigView view) {
         mModel = model;
         mView = view;
     }
@@ -37,10 +38,4 @@ public class SensorConfigController implements ConfigController<SensorConfigMode
         mModel.setSensorPollInterval(sensorPollInterval);
     }
     /* END SETTER */
-
-
-    public interface View extends ConfigView<SensorConfigModel> {
-
-        void updateSensorPollInterval(String pollInterval);
-    }
 }

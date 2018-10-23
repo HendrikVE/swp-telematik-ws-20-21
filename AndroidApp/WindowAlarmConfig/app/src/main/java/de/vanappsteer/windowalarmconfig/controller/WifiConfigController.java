@@ -2,14 +2,15 @@ package de.vanappsteer.windowalarmconfig.controller;
 
 import de.vanappsteer.windowalarmconfig.interfaces.ConfigController;
 import de.vanappsteer.windowalarmconfig.interfaces.ConfigView;
+import de.vanappsteer.windowalarmconfig.interfaces.WifiConfigView;
 import de.vanappsteer.windowalarmconfig.models.WifiConfigModel;
 
 public class WifiConfigController implements ConfigController<WifiConfigModel> {
 
     private WifiConfigModel mModel;
-    private WifiConfigController.View mView;
+    private WifiConfigView mView;
 
-    public WifiConfigController(WifiConfigModel model, WifiConfigController.View view) {
+    public WifiConfigController(WifiConfigModel model, WifiConfigView view) {
         mModel = model;
         mView = view;
     }
@@ -46,11 +47,4 @@ public class WifiConfigController implements ConfigController<WifiConfigModel> {
         mModel.setWifiPassword(password);
     }
     /* END SETTER */
-
-
-    public interface View extends ConfigView<WifiConfigModel> {
-
-        void updateWifiSsid(String ssid);
-        void updateWifiPassword(String password);
-    }
 }

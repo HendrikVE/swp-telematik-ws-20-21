@@ -10,10 +10,11 @@ import android.view.ViewGroup;
 
 import de.vanappsteer.windowalarmconfig.R;
 import de.vanappsteer.windowalarmconfig.controller.DeviceConfigController;
+import de.vanappsteer.windowalarmconfig.interfaces.DeviceConfigView;
 import de.vanappsteer.windowalarmconfig.models.DeviceConfigModel;
 import de.vanappsteer.windowalarmconfig.util.TextChangeWatcher;
 
-public class DeviceConfigFragment extends Fragment implements DeviceConfigController.View {
+public class DeviceConfigFragment extends Fragment implements DeviceConfigView {
 
     private TextInputEditText mEditTextDeviceRoom;
     private TextInputEditText mEditTextDeviceID;

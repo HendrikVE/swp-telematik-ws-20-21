@@ -10,10 +10,11 @@ import android.view.ViewGroup;
 
 import de.vanappsteer.windowalarmconfig.R;
 import de.vanappsteer.windowalarmconfig.controller.WifiConfigController;
+import de.vanappsteer.windowalarmconfig.interfaces.WifiConfigView;
 import de.vanappsteer.windowalarmconfig.models.WifiConfigModel;
 import de.vanappsteer.windowalarmconfig.util.TextChangeWatcher;
 
-public class WifiConfigFragment extends Fragment implements WifiConfigController.View {
+public class WifiConfigFragment extends Fragment implements WifiConfigView {
 
     private TextInputEditText mEditTextWifiSsid;
     private TextInputEditText mEditTextWifiPassword;

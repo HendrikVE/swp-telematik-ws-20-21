@@ -2,14 +2,15 @@ package de.vanappsteer.windowalarmconfig.controller;
 
 import de.vanappsteer.windowalarmconfig.interfaces.ConfigController;
 import de.vanappsteer.windowalarmconfig.interfaces.ConfigView;
+import de.vanappsteer.windowalarmconfig.interfaces.OtaConfigView;
 import de.vanappsteer.windowalarmconfig.models.OtaConfigModel;
 
 public class OtaConfigController implements ConfigController<OtaConfigModel> {
 
     private OtaConfigModel mModel;
-    private OtaConfigController.View mView;
+    private OtaConfigView mView;
 
-    public OtaConfigController(OtaConfigModel model, OtaConfigController.View view) {
+    public OtaConfigController(OtaConfigModel model, OtaConfigView view) {
         mModel = model;
         mView = view;
     }
@@ -64,13 +65,4 @@ public class OtaConfigController implements ConfigController<OtaConfigModel> {
         mModel.setOtaPassword(password);
     }
     /* END SETTER */
-
-
-    public interface View extends ConfigView<OtaConfigModel> {
-
-        void updateOtaServerAddress(String address);
-        void updateOtaFilename(String filename);
-        void updateOtaUsername(String username);
-        void updateOtaPassword(String password);
-    }
 }

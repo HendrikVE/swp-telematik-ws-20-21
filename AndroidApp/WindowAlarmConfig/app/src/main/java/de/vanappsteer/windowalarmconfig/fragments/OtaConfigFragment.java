@@ -10,10 +10,11 @@ import android.view.ViewGroup;
 
 import de.vanappsteer.windowalarmconfig.R;
 import de.vanappsteer.windowalarmconfig.controller.OtaConfigController;
+import de.vanappsteer.windowalarmconfig.interfaces.OtaConfigView;
 import de.vanappsteer.windowalarmconfig.models.OtaConfigModel;
 import de.vanappsteer.windowalarmconfig.util.TextChangeWatcher;
 
-public class OtaConfigFragment extends Fragment implements OtaConfigController.View {
+public class OtaConfigFragment extends Fragment implements OtaConfigView {
 
     private TextInputEditText mEditTextOtaServerAddress;
     private TextInputEditText mEditTextOtaFilename;

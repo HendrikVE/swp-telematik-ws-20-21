@@ -2,14 +2,15 @@ package de.vanappsteer.windowalarmconfig.controller;
 
 import de.vanappsteer.windowalarmconfig.interfaces.ConfigController;
 import de.vanappsteer.windowalarmconfig.interfaces.ConfigView;
+import de.vanappsteer.windowalarmconfig.interfaces.DeviceConfigView;
 import de.vanappsteer.windowalarmconfig.models.DeviceConfigModel;
 
 public class DeviceConfigController implements ConfigController<DeviceConfigModel> {
 
     private DeviceConfigModel mModel;
-    private DeviceConfigController.View mView;
+    private DeviceConfigView mView;
 
-    public DeviceConfigController(DeviceConfigModel model, View view) {
+    public DeviceConfigController(DeviceConfigModel model, DeviceConfigView view) {
         mModel = model;
         mView = view;
     }
@@ -46,11 +47,4 @@ public class DeviceConfigController implements ConfigController<DeviceConfigMode
         mModel.setDeviceId(id);
     }
     /* END SETTER */
-
-
-    public interface View extends ConfigView<DeviceConfigModel> {
-
-        void updateDeviceRoom(String room);
-        void updateDeviceId(String id);
-    }
 }

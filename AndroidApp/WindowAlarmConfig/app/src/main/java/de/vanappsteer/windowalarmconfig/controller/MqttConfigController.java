@@ -2,14 +2,15 @@ package de.vanappsteer.windowalarmconfig.controller;
 
 import de.vanappsteer.windowalarmconfig.interfaces.ConfigController;
 import de.vanappsteer.windowalarmconfig.interfaces.ConfigView;
+import de.vanappsteer.windowalarmconfig.interfaces.MqttConfigView;
 import de.vanappsteer.windowalarmconfig.models.MqttConfigModel;
 
 public class MqttConfigController implements ConfigController<MqttConfigModel> {
 
     private MqttConfigModel mModel;
-    private MqttConfigController.View mView;
+    private MqttConfigView mView;
 
-    public MqttConfigController(MqttConfigModel model, MqttConfigController.View view) {
+    public MqttConfigController(MqttConfigModel model, MqttConfigView view) {
         mModel = model;
         mView = view;
     }
@@ -64,13 +65,4 @@ public class MqttConfigController implements ConfigController<MqttConfigModel> {
         mModel.setMqttBrokerPort(port);
     }
     /* END SETTER */
-
-
-    public interface View extends ConfigView<MqttConfigModel> {
-
-        void updateMqttUsername(String username);
-        void updateMqttPassword(String password);
-        void updateMqttBrokerAddress(String address);
-        void updateMqttBrokerPort(String port);
-    }
 }

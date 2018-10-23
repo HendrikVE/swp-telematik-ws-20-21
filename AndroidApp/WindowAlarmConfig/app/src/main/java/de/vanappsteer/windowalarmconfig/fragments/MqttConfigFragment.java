@@ -10,10 +10,11 @@ import android.view.ViewGroup;
 
 import de.vanappsteer.windowalarmconfig.R;
 import de.vanappsteer.windowalarmconfig.controller.MqttConfigController;
+import de.vanappsteer.windowalarmconfig.interfaces.MqttConfigView;
 import de.vanappsteer.windowalarmconfig.models.MqttConfigModel;
 import de.vanappsteer.windowalarmconfig.util.TextChangeWatcher;
 
-public class MqttConfigFragment extends Fragment implements MqttConfigController.View {
+public class MqttConfigFragment extends Fragment implements MqttConfigView {
 
     private TextInputEditText mEditTextMqttUsername;
     private TextInputEditText mEditTextMqttPassword;
