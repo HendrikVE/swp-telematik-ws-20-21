@@ -15,6 +15,7 @@
 #include "Arduino.h"
 #include "ArduinoLog.h"
 #include "BLEUtils.h"
+#include "Preferences.h"
 #include "math.h"
 
 #include "hardware/WindowSensor.h"
@@ -38,6 +39,8 @@
     #define DISABLE_LOGGING
 #endif
 
+#define MAX_LENGTH_CONFIG_STRING 64
+
 #define SERVICE_UUID "2fa1dab8-3eef-40fc-8540-7fc496a10d75"
 
 #define CHARACTERISTIC_CONFIG_DEVICE_ROOM_UUID              "d3491796-683b-4b9c-aafb-f51a35459d43"
@@ -58,20 +61,34 @@
 
 #define CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID  "68011c92-854a-4f2c-a94c-5ee37dc607c3"
 
-std::vector <std::vector <const char*>> CHARACTERISTICS = {
-        {CHARACTERISTIC_CONFIG_DEVICE_ROOM_UUID, CONFIG_DEVICE_ROOM},
-        {CHARACTERISTIC_CONFIG_DEVICE_ID_UUID, CONFIG_DEVICE_ID},
-        {CHARACTERISTIC_CONFIG_OTA_HOST_UUID, CONFIG_OTA_HOST},
-        {CHARACTERISTIC_CONFIG_OTA_FILENAME_UUID, CONFIG_OTA_FILENAME},
-        {CHARACTERISTIC_CONFIG_OTA_SERVER_USERNAME_UUID, CONFIG_OTA_SERVER_USERNAME},
-        {CHARACTERISTIC_CONFIG_OTA_SERVER_PASSWORD_UUID, CONFIG_OTA_SERVER_PASSWORD},
-        {CHARACTERISTIC_CONFIG_WIFI_SSID_UUID, CONFIG_ESP_WIFI_SSID},
-        {CHARACTERISTIC_CONFIG_WIFI_PASSWORD_UUID, CONFIG_ESP_WIFI_PASSWORD},
-        {CHARACTERISTIC_CONFIG_MQTT_USER_UUID, CONFIG_MQTT_USER},
-        {CHARACTERISTIC_CONFIG_MQTT_PASSWORD_UUID, CONFIG_MQTT_PASSWORD},
-        {CHARACTERISTIC_CONFIG_MQTT_SERVER_IP_UUID, CONFIG_MQTT_SERVER_IP},
-        {CHARACTERISTIC_CONFIG_MQTT_SERVER_PORT_UUID, STR(CONFIG_MQTT_SERVER_PORT)},
-        {CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID, STR(CONFIG_SENSOR_POLL_INTERVAL_MS)}
+#define KEY_CONFIG_DEVICE_ROOM              "DEVICE_ROOM"
+#define KEY_CONFIG_DEVICE_ID                "DEVICE_ID"
+#define KEY_CONFIG_OTA_HOST                 "OTA_HOST"
+#define KEY_CONFIG_OTA_FILENAME             "OTA_FILENAME"
+#define KEY_CONFIG_OTA_SERVER_USERNAME      "OTA_USERNAME"
+#define KEY_CONFIG_OTA_SERVER_PASSWORD      "OTA_PASSWORD"
+#define KEY_CONFIG_WIFI_SSID                "WIFI_SSID"
+#define KEY_CONFIG_WIFI_PASSWORD            "WIFI_PASSWORD"
+#define KEY_CONFIG_MQTT_USER                "MQTT_USER"
+#define KEY_CONFIG_MQTT_PASSWORD            "MQTT_PASSWORD"
+#define KEY_CONFIG_MQTT_SERVER_IP           "MQTT_IP"
+#define KEY_CONFIG_MQTT_SERVER_PORT         "MQTT_PORT"
+#define KEY_CONFIG_SENSOR_POLL_INTERVAL_MS  "POLL_INTERVAL"
+
+std::map <std::string, std::string> config = {
+        {KEY_CONFIG_DEVICE_ROOM,                CONFIG_DEVICE_ROOM},
+        {KEY_CONFIG_DEVICE_ID,                  CONFIG_DEVICE_ID},
+        {KEY_CONFIG_OTA_HOST,                   CONFIG_OTA_HOST},
+        {KEY_CONFIG_OTA_FILENAME,               CONFIG_OTA_FILENAME},
+        {KEY_CONFIG_OTA_SERVER_USERNAME,        CONFIG_OTA_SERVER_USERNAME},
+        {KEY_CONFIG_OTA_SERVER_PASSWORD,        CONFIG_OTA_SERVER_PASSWORD},
+        {KEY_CONFIG_WIFI_SSID,                  CONFIG_ESP_WIFI_SSID},
+        {KEY_CONFIG_WIFI_PASSWORD,              CONFIG_ESP_WIFI_PASSWORD},
+        {KEY_CONFIG_MQTT_USER,                  CONFIG_MQTT_USER},
+        {KEY_CONFIG_MQTT_PASSWORD,              CONFIG_MQTT_PASSWORD},
+        {KEY_CONFIG_MQTT_SERVER_IP,             CONFIG_MQTT_SERVER_IP},
+        {KEY_CONFIG_MQTT_SERVER_PORT,           STR(CONFIG_MQTT_SERVER_PORT)},
+        {KEY_CONFIG_SENSOR_POLL_INTERVAL_MS,    STR(CONFIG_SENSOR_POLL_INTERVAL_MS)}
 };
 
 WindowSensor *pWindowSensor1, *pWindowSensor2;
@@ -447,6 +464,66 @@ static void printNewline(Print* _logOutput) {
     _logOutput->print("\n");
 }
 
+void loadConfig(std::map <std::string, std::string>& configMap) {
+
+    Preferences preferences;
+    preferences.begin("config", true);
+
+    for (std::map <std::string, std::string>::iterator it=configMap.begin(); it!=configMap.end(); ++it) {
+
+        char value[MAX_LENGTH_CONFIG_STRING];
+        size_t result = preferences.getString(it->first.c_str(), (char*) &value, MAX_LENGTH_CONFIG_STRING);
+
+        if (result != 0) {
+            it->second = value;
+        }
+    }
+
+    preferences.end();
+}
+
+void storeConfig(std::map <std::string, std::string>& configMap) {
+
+    Preferences preferences;
+    preferences.begin("config", false);
+
+    for (std::map <std::string, std::string>::iterator it=configMap.begin(); it!=configMap.end(); ++it) {
+        preferences.putString(it->first.c_str(), it->second.c_str());
+    }
+
+    preferences.end();
+}
+
+bool characteristicsStoredInPreferences() {
+
+    Preferences preferences;
+    preferences.begin("config", false);
+
+    char value[MAX_LENGTH_CONFIG_STRING];
+    size_t result = preferences.getString(KEY_CONFIG_DEVICE_ID, (char*) &value, MAX_LENGTH_CONFIG_STRING);
+
+    preferences.end();
+
+    return result != 0;
+}
+
+void createCharacteristicsMapFromConfig(std::map <std::string, std::string>& configMap, std::map <std::string, std::string>& characteristicMap) {
+
+    characteristicMap[CHARACTERISTIC_CONFIG_DEVICE_ROOM_UUID] = configMap[KEY_CONFIG_DEVICE_ROOM];
+    characteristicMap[CHARACTERISTIC_CONFIG_DEVICE_ID_UUID] = configMap[KEY_CONFIG_DEVICE_ID];
+    characteristicMap[CHARACTERISTIC_CONFIG_OTA_HOST_UUID] = configMap[KEY_CONFIG_OTA_HOST];
+    characteristicMap[CHARACTERISTIC_CONFIG_OTA_FILENAME_UUID] = configMap[KEY_CONFIG_OTA_FILENAME];
+    characteristicMap[CHARACTERISTIC_CONFIG_OTA_SERVER_USERNAME_UUID] = configMap[KEY_CONFIG_OTA_SERVER_USERNAME];
+    characteristicMap[CHARACTERISTIC_CONFIG_OTA_SERVER_PASSWORD_UUID] = configMap[KEY_CONFIG_OTA_SERVER_PASSWORD];
+    characteristicMap[CHARACTERISTIC_CONFIG_WIFI_SSID_UUID] = configMap[KEY_CONFIG_WIFI_SSID];
+    characteristicMap[CHARACTERISTIC_CONFIG_WIFI_PASSWORD_UUID] = configMap[KEY_CONFIG_WIFI_PASSWORD];
+    characteristicMap[CHARACTERISTIC_CONFIG_MQTT_USER_UUID] = configMap[KEY_CONFIG_MQTT_USER];
+    characteristicMap[CHARACTERISTIC_CONFIG_MQTT_PASSWORD_UUID] = configMap[KEY_CONFIG_MQTT_PASSWORD];
+    characteristicMap[CHARACTERISTIC_CONFIG_MQTT_SERVER_IP_UUID] = configMap[KEY_CONFIG_MQTT_SERVER_IP];
+    characteristicMap[CHARACTERISTIC_CONFIG_MQTT_SERVER_PORT_UUID] = configMap[KEY_CONFIG_MQTT_SERVER_PORT];
+    characteristicMap[CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID] = configMap[KEY_CONFIG_SENSOR_POLL_INTERVAL_MS];
+}
+
 // lazy setup is only necessary if handleWakeup() calls updateAll()
 void lazySetup() {
 
@@ -486,9 +563,17 @@ void setup() {
         logger.setSuffix(printNewline);
     }
 
+    if (characteristicsStoredInPreferences()) {
+        loadConfig(config);
+    }
+
     connectivityManager.begin();
 
-    connectivityManager.initBluetoothConfig(SERVICE_UUID, new MyCallbacks(), &CHARACTERISTICS);
+    std::map <std::string, std::string> characteristicMap = {};
+    createCharacteristicsMapFromConfig(config, characteristicMap);
+    characteristicMap[CHARACTERISTIC_CONFIG_DEVICE_ROOM_UUID] = config[KEY_CONFIG_DEVICE_ROOM];
+
+    connectivityManager.initBluetoothConfig(SERVICE_UUID, new MyCallbacks(), characteristicMap);
     connectivityManager.initWifi(CONFIG_ESP_WIFI_SSID, CONFIG_ESP_WIFI_PASSWORD);
     connectivityManager.initMqtt(CONFIG_MQTT_SERVER_IP, CONFIG_MQTT_SERVER_PORT, CONFIG_MQTT_USER, CONFIG_MQTT_PASSWORD, CONFIG_DEVICE_ID);
     mqttClient = *connectivityManager.getMqttClient();

@@ -111,32 +111,31 @@ MQTTClient* ConnectivityManager::getMqttClient() {
     return &mMqttClient;
 }
 
-void createCharacteristics(BLEService* bleService, BLECharacteristicCallbacks* callbacks, std::vector <std::vector <const char*>> characteristics) {
+void createCharacteristics(BLEService* bleService, BLECharacteristicCallbacks* callbacks, std::map <std::string, std::string>& characteristics) {
 
     BLECharacteristic* characteristic;
 
-    for (int i = 0; i < characteristics.size(); i++) {
-        Serial.println(characteristics[i][0]);
+    for (std::map <std::string, std::string>::iterator it=characteristics.begin(); it!=characteristics.end(); ++it) {
 
         characteristic = bleService->createCharacteristic(
-                characteristics[i][0],
+                it->first,
                 BLECharacteristic::PROPERTY_READ |
                 BLECharacteristic::PROPERTY_WRITE
         );
 
         characteristic->setCallbacks(callbacks);
-        characteristic->setValue(characteristics[i][1]);
+        characteristic->setValue(it->second);
     }
 }
 
-bool ConnectivityManager::initBluetoothConfig(const char* serviceUuid, BLECharacteristicCallbacks* callbacks, std::vector <std::vector <const char*>> *characteristics) {
+bool ConnectivityManager::initBluetoothConfig(const char* serviceUuid, BLECharacteristicCallbacks* callbacks, std::map <std::string, std::string>& characteristics) {
 
     BLEDevice::init("WindowAlertNode");
     BLEServer* bleServer = BLEDevice::createServer();
 
     BLEService* bleService = bleServer->createService(BLEUUID(serviceUuid), 30, 0);
 
-    createCharacteristics(bleService, callbacks, *characteristics);
+    createCharacteristics(bleService, callbacks, characteristics);
 
     bleService->start();
 

@@ -25,7 +25,7 @@ public:
     bool initMqtt(const char* address, int port, const char* user, const char* password, const char* clientID);
     MQTTClient* getMqttClient();
 
-    bool initBluetoothConfig(const char* serviceUuid, BLECharacteristicCallbacks* callbacks, std::vector <std::vector <const char*>> *characteristics);
+    bool initBluetoothConfig(const char* serviceUuid, BLECharacteristicCallbacks* callbacks, std::map <std::string, std::string>& characteristics);
     void turnOnBluetooth();
     void turnOffBluetooth();
 
