@@ -75,6 +75,22 @@
 #define KEY_CONFIG_MQTT_SERVER_PORT         "MQTT_PORT"
 #define KEY_CONFIG_SENSOR_POLL_INTERVAL_MS  "POLL_INTERVAL"
 
+std::map <std::string, std::string> characteristicConfigMapping = {
+        {CHARACTERISTIC_CONFIG_DEVICE_ROOM_UUID,                KEY_CONFIG_DEVICE_ROOM},
+        {CHARACTERISTIC_CONFIG_DEVICE_ID_UUID,                  KEY_CONFIG_DEVICE_ID},
+        {CHARACTERISTIC_CONFIG_OTA_HOST_UUID,                   KEY_CONFIG_OTA_HOST},
+        {CHARACTERISTIC_CONFIG_OTA_FILENAME_UUID,               KEY_CONFIG_OTA_FILENAME},
+        {CHARACTERISTIC_CONFIG_OTA_SERVER_USERNAME_UUID,        KEY_CONFIG_OTA_SERVER_USERNAME},
+        {CHARACTERISTIC_CONFIG_OTA_SERVER_PASSWORD_UUID,        KEY_CONFIG_OTA_SERVER_PASSWORD},
+        {CHARACTERISTIC_CONFIG_WIFI_SSID_UUID,                  KEY_CONFIG_WIFI_SSID},
+        {CHARACTERISTIC_CONFIG_WIFI_PASSWORD_UUID,              KEY_CONFIG_WIFI_PASSWORD},
+        {CHARACTERISTIC_CONFIG_MQTT_USER_UUID,                  KEY_CONFIG_MQTT_USER},
+        {CHARACTERISTIC_CONFIG_MQTT_PASSWORD_UUID,              KEY_CONFIG_MQTT_PASSWORD},
+        {CHARACTERISTIC_CONFIG_MQTT_SERVER_IP_UUID,             KEY_CONFIG_MQTT_SERVER_IP},
+        {CHARACTERISTIC_CONFIG_MQTT_SERVER_PORT_UUID,           KEY_CONFIG_MQTT_SERVER_PORT},
+        {CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID,    KEY_CONFIG_SENSOR_POLL_INTERVAL_MS}
+};
+
 std::map <std::string, std::string> config = {
         {KEY_CONFIG_DEVICE_ROOM,                CONFIG_DEVICE_ROOM},
         {KEY_CONFIG_DEVICE_ID,                  CONFIG_DEVICE_ID},
@@ -105,6 +121,11 @@ static boolean queuePaused = false;
 static xQueueHandle windowSensorEventQueue = NULL;
 
 void startDeviceSleep(uint64_t sleepIntervalMS);
+
+void loadConfig(std::map <std::string, std::string>& configMap);
+void storeConfigItem(std::string key, std::string value);
+void storeConfig(std::map <std::string, std::string>& configMap);
+bool characteristicsStoredInPreferences();
 
 void lazySetup();
 
@@ -440,16 +461,18 @@ void startDeviceSleep(uint64_t sleepIntervalMS) {
 
 class MyCallbacks: public BLECharacteristicCallbacks {
     void onWrite(BLECharacteristic *pCharacteristic) {
+
+        std::string uuid = pCharacteristic->getUUID().toString();
         std::string value = pCharacteristic->getValue();
 
         if (value.length() > 0) {
             Serial.println("*********");
-            Serial.print("New value: ");
-            for (int i = 0; i < value.length(); i++)
-                Serial.print(value[i]);
-
-            Serial.println();
+            Serial.println(uuid.c_str());
+            Serial.println(value.c_str());
             Serial.println("*********");
+
+            config[characteristicConfigMapping[uuid]] = value;
+            storeConfigItem(characteristicConfigMapping[uuid], value);
         }
     }
 };
@@ -478,6 +501,16 @@ void loadConfig(std::map <std::string, std::string>& configMap) {
             it->second = value;
         }
     }
+
+    preferences.end();
+}
+
+void storeConfigItem(std::string key, std::string value) {
+
+    Preferences preferences;
+    preferences.begin("config", false);
+
+    preferences.putString(key.c_str(), value.c_str());
 
     preferences.end();
 }
