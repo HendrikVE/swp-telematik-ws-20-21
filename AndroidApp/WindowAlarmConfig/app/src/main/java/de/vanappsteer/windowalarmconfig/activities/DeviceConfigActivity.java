@@ -29,6 +29,8 @@ public class DeviceConfigActivity extends AppCompatActivity {
 
     public static final String KEY_CHARACTERISTIC_HASH_MAP = "KEY_CHARACTERISTIC_HASH_MAP";
 
+    public static final UUID BLE_CHARACTERISTIC_DEVICE_RESTART_UUID = UUID.fromString("890f7b6f-cecc-4e3e-ade2-5f2907867f4b");
+
     private BluetoothDeviceConnectionService mDeviceService;
     private boolean mDeviceServiceBound = false;
 
@@ -118,6 +120,7 @@ public class DeviceConfigActivity extends AppCompatActivity {
                             LoggingUtil.debug(entry.getValue());
                         }
                     }
+                    map.put(BLE_CHARACTERISTIC_DEVICE_RESTART_UUID, "empty value");
 
                     mDeviceService.writeCharacteristics(map);
 

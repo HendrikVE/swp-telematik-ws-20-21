@@ -64,6 +64,8 @@
 
 #define CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID  "68011c92-854a-4f2c-a94c-5ee37dc607c3"
 
+#define CHARACTERISTIC_DEVICE_RESTART                       "890f7b6f-cecc-4e3e-ade2-5f2907867f4b"
+
 #define KEY_CONFIG_DEVICE_ROOM              "DEVICE_ROOM"
 #define KEY_CONFIG_DEVICE_ID                "DEVICE_ID"
 #define KEY_CONFIG_OTA_HOST                 "OTA_HOST"
@@ -461,6 +463,12 @@ class MyCallbacks: public BLECharacteristicCallbacks {
         std::string uuid = pCharacteristic->getUUID().toString();
         std::string value = pCharacteristic->getValue();
 
+        if (uuid == CHARACTERISTIC_DEVICE_RESTART) {
+            Serial.println("restart command sent");
+            ESP.restart();
+            return;
+        }
+
         if (value.length() > 0) {
             Serial.println("*********");
             Serial.println(uuid.c_str());
@@ -551,6 +559,7 @@ void createCharacteristicsMapFromConfig(std::map <std::string, std::string>& con
     characteristicMap[CHARACTERISTIC_CONFIG_MQTT_SERVER_IP_UUID] = configMap[KEY_CONFIG_MQTT_SERVER_IP];
     characteristicMap[CHARACTERISTIC_CONFIG_MQTT_SERVER_PORT_UUID] = configMap[KEY_CONFIG_MQTT_SERVER_PORT];
     characteristicMap[CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID] = configMap[KEY_CONFIG_SENSOR_POLL_INTERVAL_MS];
+    characteristicMap[CHARACTERISTIC_DEVICE_RESTART] = "write any data to this to restart the device";
 }
 
 // lazy setup is only necessary if handleWakeup() calls updateAll()
@@ -603,7 +612,6 @@ void setup() {
 
     std::map <std::string, std::string> characteristicMap = {};
     createCharacteristicsMapFromConfig(config, characteristicMap);
-    characteristicMap[CHARACTERISTIC_CONFIG_DEVICE_ROOM_UUID] = config[KEY_CONFIG_DEVICE_ROOM];
 
     connectivityManager.initBluetoothConfig(SERVICE_UUID, new MyCallbacks(), characteristicMap);
     connectivityManager.initWifi(config[KEY_CONFIG_WIFI_SSID].c_str(), config[KEY_CONFIG_WIFI_PASSWORD].c_str());

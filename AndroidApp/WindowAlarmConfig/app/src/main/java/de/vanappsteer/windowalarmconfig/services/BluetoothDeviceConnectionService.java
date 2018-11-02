@@ -147,6 +147,7 @@ public class BluetoothDeviceConnectionService extends Service {
             for (Map.Entry<UUID, String> entry : characteristicMap.entrySet()) {
 
                 BluetoothGattCharacteristic characteristic = gattService.getCharacteristic(entry.getKey());
+
                 characteristic.setValue(entry.getValue());
 
                 LoggingUtil.debug("entry.getValue() = " + entry.getValue());
