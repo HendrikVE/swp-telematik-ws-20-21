@@ -1,3 +1,6 @@
+// for std::stoi
+#define _GLIBCXX_USE_C99 1
+
 #include "MANIFEST.h"
 
 #include <stdbool.h>
@@ -129,9 +132,11 @@ bool characteristicsStoredInPreferences();
 
 void lazySetup();
 
-void buildTopic(char* output, const char* room, const char* boardID, const char* measurement) {
+std::string buildTopic(std::string room, std::string boardID, std::string measurement) {
 
-    sprintf(output, "room/%s/%s/%s", room, boardID, measurement);
+    std::string topic = "room/" + room + "/" + boardID + "/" + measurement;
+
+    return topic;
 }
 
 void IRAM_ATTR isrWindowSensor1() {
@@ -167,7 +172,7 @@ static void windowSensorTask(void* arg) {
             bool successMqtt = connectivityManager.checkMqttConnection();
 
             if (!successWiFi || !successMqtt) {
-                startDeviceSleep(CONFIG_SENSOR_POLL_INTERVAL_MS);
+                startDeviceSleep(std::stoi(config[KEY_CONFIG_SENSOR_POLL_INTERVAL_MS]));
             }
 
             windowSensor = event.windowSensor;
@@ -197,12 +202,12 @@ static void windowSensorTask(void* arg) {
             if (currentState == LOW) {
                 logger.notice("open");
                 windowSensor->setLastState(LOW);
-                mqttClient.publish(windowSensor->getMqttTopic(), "OPEN", false, 2);
+                mqttClient.publish(windowSensor->getMqttTopic().c_str(), "OPEN", false, 2);
             }
             else if (currentState == HIGH) {
                 logger.notice("closed");
                 windowSensor->setLastState(HIGH);
-                mqttClient.publish(windowSensor->getMqttTopic(), "CLOSED", false, 2);
+                mqttClient.publish(windowSensor->getMqttTopic().c_str(), "CLOSED", false, 2);
             }
 
             windowSensor->setTimestampLastInterrupt(current_time);
@@ -212,11 +217,9 @@ static void windowSensorTask(void* arg) {
 
 void configureWindowSensorSystem() {
 
-    char topic[128];
-
     #if CONFIG_SENSOR_WINDOW_1_ENABLED
 
-        buildTopic(topic, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_WINDOW_1_MQTT_TOPIC);
+        std::string topic = buildTopic(config[KEY_CONFIG_DEVICE_ROOM], config[KEY_CONFIG_DEVICE_ID], CONFIG_SENSOR_WINDOW_1_MQTT_TOPIC);
 
         pWindowSensor1 = new WindowSensor(
                 CONFIG_SENSOR_WINDOW_1_GPIO_INPUT,
@@ -229,7 +232,7 @@ void configureWindowSensorSystem() {
 
     #if CONFIG_SENSOR_WINDOW_2_ENABLED
 
-        buildTopic(topic, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_WINDOW_2_MQTT_TOPIC);
+        std::string topic = buildTopic(topic, config[KEY_CONFIG_DEVICE_ROOM], config[KEY_CONFIG_DEVICE_ID], CONFIG_SENSOR_WINDOW_2_MQTT_TOPIC);
 
         pWindowSensor2 = new WindowSensor(
                 CONFIG_SENSOR_WINDOW_2_GPIO_INPUT,
@@ -282,19 +285,13 @@ void publishEnvironmentData() {
 
     logger.notice("pressure: %s", strPressure);
 
+    std::string topicTemperature = buildTopic(config[KEY_CONFIG_DEVICE_ROOM], config[KEY_CONFIG_DEVICE_ID], CONFIG_SENSOR_MQTT_TOPIC_TEMPERATURE);
+    std::string topicHumidity = buildTopic(config[KEY_CONFIG_DEVICE_ROOM], config[KEY_CONFIG_DEVICE_ID], CONFIG_SENSOR_MQTT_TOPIC_HUMIDITY);
+    std::string topicPressure = buildTopic(config[KEY_CONFIG_DEVICE_ROOM], config[KEY_CONFIG_DEVICE_ID], CONFIG_SENSOR_MQTT_TOPIC_PRESSURE);
 
-    char topicTemperature[128];
-    buildTopic(topicTemperature, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_TEMPERATURE);
-
-    char topicHumidity[128];
-    buildTopic(topicHumidity, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_HUMIDITY);
-
-    char topicPressure[128];
-    buildTopic(topicPressure, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_PRESSURE);
-
-    mqttClient.publish(topicTemperature, strTemperature, false, 2);
-    mqttClient.publish(topicHumidity, strHumidity, false, 2);
-    mqttClient.publish(topicPressure, strPressure, false, 2);
+    mqttClient.publish(topicTemperature.c_str(), strTemperature, false, 2);
+    mqttClient.publish(topicHumidity.c_str(), strHumidity, false, 2);
+    mqttClient.publish(topicPressure.c_str(), strPressure, false, 2);
 
     #if CONFIG_SENSOR_MQTT_TOPIC_GAS
 
@@ -308,10 +305,9 @@ void publishEnvironmentData() {
 
             logger.notice("gas resistence: %s", strGasResistence);
 
-            char topicGas[128];
-            buildTopic(topicGas, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_GAS);
+            std::string topicGas = buildTopic(config[KEY_CONFIG_DEVICE_ROOM], config[KEY_CONFIG_DEVICE_ID], CONFIG_SENSOR_MQTT_TOPIC_GAS);
 
-            mqttClient.publish(topicGas, strGasResistence, false, 2);
+            mqttClient.publish(topicGas.c_str(), strGasResistence, false, 2);
         }
 
     #endif /*CONFIG_SENSOR_MQTT_TOPIC_GAS*/
@@ -563,14 +559,17 @@ void lazySetup() {
     char strVersion[128];
     sprintf(strVersion, "%s (%i)", APP_VERSION_NAME, APP_VERSION_CODE);
 
-    char topicVersion[128];
-    buildTopic(topicVersion, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, "version");
+    std::string topicVersion = buildTopic(config[KEY_CONFIG_DEVICE_ROOM], config[KEY_CONFIG_DEVICE_ID], "version");
 
-    mqttClient.publish(topicVersion, strVersion, true, 2);
+    mqttClient.publish(topicVersion.c_str(), strVersion, true, 2);
     logger.notice("device is running version: %s", strVersion);
 
     updateManager = new UpdateManager();
-    updateManager->begin(CONFIG_OTA_HOST, CONFIG_OTA_FILENAME, CONFIG_OTA_SERVER_USERNAME, CONFIG_OTA_SERVER_PASSWORD, CONFIG_DEVICE_ID);
+    updateManager->begin(config[KEY_CONFIG_OTA_HOST].c_str(),
+                         config[KEY_CONFIG_OTA_FILENAME].c_str(),
+                         config[KEY_CONFIG_OTA_SERVER_USERNAME].c_str(),
+                         config[KEY_CONFIG_OTA_SERVER_PASSWORD].c_str(),
+                         config[KEY_CONFIG_DEVICE_ID].c_str());
 
     #ifndef CONFIG_SENSOR_NONE
 
@@ -607,8 +606,12 @@ void setup() {
     characteristicMap[CHARACTERISTIC_CONFIG_DEVICE_ROOM_UUID] = config[KEY_CONFIG_DEVICE_ROOM];
 
     connectivityManager.initBluetoothConfig(SERVICE_UUID, new MyCallbacks(), characteristicMap);
-    connectivityManager.initWifi(CONFIG_ESP_WIFI_SSID, CONFIG_ESP_WIFI_PASSWORD);
-    connectivityManager.initMqtt(CONFIG_MQTT_SERVER_IP, CONFIG_MQTT_SERVER_PORT, CONFIG_MQTT_USER, CONFIG_MQTT_PASSWORD, CONFIG_DEVICE_ID);
+    connectivityManager.initWifi(config[KEY_CONFIG_WIFI_SSID].c_str(), config[KEY_CONFIG_WIFI_PASSWORD].c_str());
+    connectivityManager.initMqtt(config[KEY_CONFIG_MQTT_SERVER_IP].c_str(),
+                                 std::stoi(config[KEY_CONFIG_MQTT_SERVER_PORT]),
+                                 config[KEY_CONFIG_MQTT_USER].c_str(),
+                                 config[KEY_CONFIG_MQTT_PASSWORD].c_str(),
+                                 config[KEY_CONFIG_DEVICE_ID].c_str());
     mqttClient = *connectivityManager.getMqttClient();
 
     initWindowSensorSystem();
@@ -625,7 +628,7 @@ void loop() {
     bool successMqtt = connectivityManager.checkMqttConnection();
 
     if (!successWiFi || !successMqtt) {
-        startDeviceSleep(CONFIG_SENSOR_POLL_INTERVAL_MS);
+        startDeviceSleep(std::stoi(config[KEY_CONFIG_SENSOR_POLL_INTERVAL_MS]));
     }
 
     handleWakeup();
@@ -637,5 +640,5 @@ void loop() {
     queuePaused = true;
 
     logger.notice("go to sleep");
-    startDeviceSleep(CONFIG_SENSOR_POLL_INTERVAL_MS);
+    startDeviceSleep(std::stoi(config[KEY_CONFIG_SENSOR_POLL_INTERVAL_MS]));
 }

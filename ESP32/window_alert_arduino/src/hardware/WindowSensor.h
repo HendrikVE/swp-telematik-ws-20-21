@@ -2,7 +2,7 @@
 #define WINDOW_SENSOR_H
 
 #include <stdbool.h>
-#include <string.h>
+#include <string>
 
 #include "Arduino.h"
 
@@ -10,7 +10,7 @@ class WindowSensor {
 
 public:
 
-    WindowSensor(int gpioInput, int gpioOutput, int interruptDebounce, char* mqttTopic);
+    WindowSensor(int gpioInput, int gpioOutput, int interruptDebounce, std::string mqttTopic);
 
     void initGpio(void (*isr)());
 
@@ -33,7 +33,7 @@ public:
 
     char getLastState();
 
-    char* getMqttTopic();
+    std::string getMqttTopic();
 
 
     /* SETTER */
@@ -50,7 +50,7 @@ private:
     int mGpioInput;
     int mGpioOutput;
     int mInterruptDebounce;
-    char mMqttTopic[128];
+    std::string mMqttTopic;
     unsigned long mTimestampLastInterrupt = 0;
     char mLastState;
 

@@ -1,5 +1,5 @@
 #include <stdbool.h>
-#include <string.h>
+#include <string>
 
 #include "driver/rtc_io.h"
 
@@ -9,7 +9,7 @@
 
 int WindowSensor::msInstanceID = -1;
 
-WindowSensor::WindowSensor(int gpioInput, int gpioOutput, int interruptDebounce, char* mqttTopic) {
+WindowSensor::WindowSensor(int gpioInput, int gpioOutput, int interruptDebounce, std::string mqttTopic) {
 
     this->msInstanceID++;
     this->mId = msInstanceID;
@@ -17,7 +17,7 @@ WindowSensor::WindowSensor(int gpioInput, int gpioOutput, int interruptDebounce,
     this->mGpioInput = gpioInput;
     this->mGpioOutput = gpioOutput;
     this->mInterruptDebounce = interruptDebounce;
-    strcpy(this->mMqttTopic, mqttTopic);
+    this->mMqttTopic = mqttTopic;
 }
 
 void WindowSensor::initGpio(void (*isr)()) {
@@ -84,7 +84,7 @@ char WindowSensor::getLastState() {
     return this->mLastState;
 }
 
-char* WindowSensor::getMqttTopic() {
+std::string WindowSensor::getMqttTopic() {
     return this->mMqttTopic;
 }
 
