@@ -190,7 +190,7 @@ public class DeviceScanActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent dataIntent) {
 
         if (requestCode == ACTIVITY_RESULT_ENABLE_BLUETOOTH) {
             if (resultCode == RESULT_OK) {
@@ -205,8 +205,15 @@ public class DeviceScanActivity extends AppCompatActivity {
         }
         else if (requestCode == ACTIVITY_RESULT_CONFIGURE_DEVICE) {
             if (resultCode != RESULT_OK) {
-                Message message = mUiHandler.obtainMessage(COMMAND_SHOW_DEVICE_WRITE_ERROR_DIALOG, null);
-                message.sendToTarget();
+
+                if (dataIntent != null) {
+                    DeviceConfigActivity.Result returnValue = (DeviceConfigActivity.Result) dataIntent.getSerializableExtra(DeviceConfigActivity.ACTIVITY_RESULT_KEY_RESULT);
+
+                    if (returnValue != DeviceConfigActivity.Result.CANCELLED) {
+                        Message message = mUiHandler.obtainMessage(COMMAND_SHOW_DEVICE_WRITE_ERROR_DIALOG, null);
+                        message.sendToTarget();
+                    }
+                }
             }
 
             if (mDeviceServiceBound) {

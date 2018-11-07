@@ -56,11 +56,11 @@ public class BluetoothDeviceConnectionService extends Service {
         public static final int DEVICE_CONNECTION_ERROR_READ = 3;
         public static final int DEVICE_CONNECTION_ERROR_WRITE = 4;
 
-        public void onDeviceConnected() {};
-        public void onDeviceDisconnected() {};
-        public void onAllCharacteristicsRead(Map<UUID, String> characteristicMap) {};
-        public void onAllCharacteristicsWrote() {};
-        public void onDeviceConnectionError(int errorCode) {};
+        public void onDeviceConnected() {}
+        public void onDeviceDisconnected() {}
+        public void onAllCharacteristicsRead(Map<UUID, String> characteristicMap) {}
+        public void onAllCharacteristicsWrote() {}
+        public void onDeviceConnectionError(int errorCode) {}
     }
 
     @Override

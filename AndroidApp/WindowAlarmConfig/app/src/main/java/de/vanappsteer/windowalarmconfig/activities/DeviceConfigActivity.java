@@ -27,6 +27,14 @@ import de.vanappsteer.windowalarmconfig.util.LoggingUtil;
 
 public class DeviceConfigActivity extends AppCompatActivity {
 
+    public enum Result {
+        CANCELLED,
+        FAILED,
+        SUCCESS
+    }
+
+    public static String ACTIVITY_RESULT_KEY_RESULT = "ACTIVITY_RESULT_KEY_RESULT";
+
     public static final String KEY_CHARACTERISTIC_HASH_MAP = "KEY_CHARACTERISTIC_HASH_MAP";
 
     public static final UUID BLE_CHARACTERISTIC_DEVICE_RESTART_UUID = UUID.fromString("890f7b6f-cecc-4e3e-ade2-5f2907867f4b");
@@ -127,8 +135,7 @@ public class DeviceConfigActivity extends AppCompatActivity {
                 }
                 else {
                     // TODO: keep config activity instead and retry?
-                    setResult(RESULT_CANCELED);
-                    DeviceConfigActivity.this.finish();
+                    finishWithIntent(Result.FAILED);
                 }
             }
         });
@@ -136,9 +143,24 @@ public class DeviceConfigActivity extends AppCompatActivity {
         buttonCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DeviceConfigActivity.this.finish();
+                finishWithIntent(Result.CANCELLED);
             }
         });
+    }
+
+    private void finishWithIntent(Result result) {
+
+        Intent resultIntent = new Intent();
+        resultIntent.putExtra(ACTIVITY_RESULT_KEY_RESULT, result);
+
+        if (result == Result.SUCCESS) {
+            setResult(RESULT_OK, resultIntent);
+        }
+        else {
+            setResult(RESULT_CANCELED, resultIntent);
+        }
+
+        DeviceConfigActivity.this.finish();
     }
 
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -161,14 +183,12 @@ public class DeviceConfigActivity extends AppCompatActivity {
 
         @Override
         public void onAllCharacteristicsWrote() {
-            setResult(RESULT_OK);
-            DeviceConfigActivity.this.finish();
+            finishWithIntent(Result.SUCCESS);
         }
 
         @Override
         public void onDeviceConnectionError(int errorCode) {
-            setResult(RESULT_CANCELED);
-            DeviceConfigActivity.this.finish();
+            finishWithIntent(Result.FAILED);
         }
     };
 }
