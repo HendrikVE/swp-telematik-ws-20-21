@@ -222,6 +222,7 @@ public class DeviceScanActivity extends AppCompatActivity {
 
                 if (mDeviceServiceBound) {
                     mDeviceService.disconnectDevice();
+                    mDeviceService.removeDeviceConnectionListener(mDeviceConnectionListener);
                 }
                 break;
 
@@ -377,6 +378,7 @@ public class DeviceScanActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialogInterface, int i) {
                         if (mDeviceServiceBound) {
                             mDeviceService.disconnectDevice();
+                            mDeviceService.removeDeviceConnectionListener(mDeviceConnectionListener);
                         }
                     }
                 });
