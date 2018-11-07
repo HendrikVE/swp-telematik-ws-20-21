@@ -645,23 +645,23 @@ public class DeviceScanActivity extends AppCompatActivity {
             Message message = null;
             switch (errorCode) {
 
-                case DeviceConnectionListener.DEVICE_DISCONNECTED:
+                case DEVICE_DISCONNECTED:
                     message = mUiHandler.obtainMessage(COMMAND_SHOW_DISCONNECTED, null);
                     break;
 
-                case DeviceConnectionListener.DEVICE_CONNECTION_ERROR_GENERIC:
+                case DEVICE_CONNECTION_ERROR_GENERIC:
                     message = mUiHandler.obtainMessage(COMMAND_SHOW_CONNECTION_ERROR_DIALOG, null);
                     break;
 
-                case DeviceConnectionListener.DEVICE_CONNECTION_ERROR_UNSUPPORTED:
+                case DEVICE_CONNECTION_ERROR_UNSUPPORTED:
                     message = mUiHandler.obtainMessage(COMMAND_SHOW_DEVICE_UNSUPPORTED_DIALOG, null);
                     break;
 
-                case DeviceConnectionListener.DEVICE_CONNECTION_ERROR_READ:
+                case DEVICE_CONNECTION_ERROR_READ:
                     message = mUiHandler.obtainMessage(COMMAND_SHOW_DEVICE_READ_ERROR_DIALOG, null);
                     break;
 
-                case DeviceConnectionListener.DEVICE_CONNECTION_ERROR_WRITE:
+                case DEVICE_CONNECTION_ERROR_WRITE:
                     message = mUiHandler.obtainMessage(COMMAND_SHOW_DEVICE_WRITE_ERROR_DIALOG, null);
                     break;
 
