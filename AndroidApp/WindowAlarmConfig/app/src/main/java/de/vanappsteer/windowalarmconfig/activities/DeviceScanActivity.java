@@ -364,6 +364,7 @@ public class DeviceScanActivity extends AppCompatActivity {
 
                 if (mDeviceServiceBound) {
                     mDeviceService.connectDevice(device);
+                    mDeviceService.addDeviceConnectionListener(mDeviceConnectionListener);
                 }
                 else {
                     Message message = mUiHandler.obtainMessage(COMMAND_SHOW_CONNECTION_ERROR_DIALOG, null);
@@ -624,7 +625,6 @@ public class DeviceScanActivity extends AppCompatActivity {
         public void onServiceConnected(ComponentName className, IBinder service) {
             BluetoothDeviceConnectionService.LocalBinder binder = (BluetoothDeviceConnectionService.LocalBinder) service;
             mDeviceService = binder.getService();
-            mDeviceService.addDeviceConnectionListener(mDeviceConnectionListener);
             mDeviceServiceBound = true;
         }
 
