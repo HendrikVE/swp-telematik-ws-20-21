@@ -101,12 +101,12 @@ public class DeviceConfigActivity extends AppCompatActivity {
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
-
+                // not implemented
             }
 
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
-
+                // not implemented
             }
         });
 

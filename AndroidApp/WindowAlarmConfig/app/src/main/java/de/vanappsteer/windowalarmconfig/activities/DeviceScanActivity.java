@@ -192,33 +192,42 @@ public class DeviceScanActivity extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent dataIntent) {
 
-        if (requestCode == ACTIVITY_RESULT_ENABLE_BLUETOOTH) {
-            if (resultCode == RESULT_OK) {
+        switch (requestCode) {
+
+            case ACTIVITY_RESULT_ENABLE_BLUETOOTH:
+                if (resultCode == RESULT_OK) {
+                    checkPermissions();
+                }
+                else {
+                    mScanSwitch.setChecked(false);
+                }
+                break;
+
+            case ACTIVITY_RESULT_ENABLE_LOCATION_PERMISSION:
                 checkPermissions();
-            }
-            else {
-                mScanSwitch.setChecked(false);
-            }
-        }
-        else if (requestCode == ACTIVITY_RESULT_ENABLE_LOCATION_PERMISSION) {
-            checkPermissions();
-        }
-        else if (requestCode == ACTIVITY_RESULT_CONFIGURE_DEVICE) {
-            if (resultCode != RESULT_OK) {
+                break;
 
-                if (dataIntent != null) {
-                    DeviceConfigActivity.Result returnValue = (DeviceConfigActivity.Result) dataIntent.getSerializableExtra(DeviceConfigActivity.ACTIVITY_RESULT_KEY_RESULT);
+            case ACTIVITY_RESULT_CONFIGURE_DEVICE:
+                if (resultCode != RESULT_OK) {
 
-                    if (returnValue != DeviceConfigActivity.Result.CANCELLED) {
-                        Message message = mUiHandler.obtainMessage(COMMAND_SHOW_DEVICE_WRITE_ERROR_DIALOG, null);
-                        message.sendToTarget();
+                    if (dataIntent != null) {
+                        DeviceConfigActivity.Result returnValue = (DeviceConfigActivity.Result) dataIntent.getSerializableExtra(DeviceConfigActivity.ACTIVITY_RESULT_KEY_RESULT);
+
+                        if (returnValue != DeviceConfigActivity.Result.CANCELLED) {
+                            Message message = mUiHandler.obtainMessage(COMMAND_SHOW_DEVICE_WRITE_ERROR_DIALOG, null);
+                            message.sendToTarget();
+                        }
                     }
                 }
-            }
 
-            if (mDeviceServiceBound) {
-                mDeviceService.disconnectDevice();
-            }
+                if (mDeviceServiceBound) {
+                    mDeviceService.disconnectDevice();
+                }
+                break;
+
+            default:
+                LoggingUtil.warning("unhandled request code: " + requestCode);
+
         }
     }
 
@@ -227,7 +236,7 @@ public class DeviceScanActivity extends AppCompatActivity {
 
         switch (requestCode) {
 
-            case REQUEST_PERMISSION_COARSE_LOCATION: {
+            case REQUEST_PERMISSION_COARSE_LOCATION:
 
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     checkBluetooth();
@@ -237,7 +246,6 @@ public class DeviceScanActivity extends AppCompatActivity {
                 }
 
                 break;
-            }
 
             default:
                 LoggingUtil.warning("unhandled request code: " + requestCode);
