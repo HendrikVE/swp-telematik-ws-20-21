@@ -50,11 +50,11 @@ public class BluetoothDeviceConnectionService extends Service {
 
     public static class DeviceConnectionListener {
 
-        public static final int DEVICE_DISCONNECTED = 0;
-        public static final int DEVICE_CONNECTION_ERROR_GENERIC = 1;
-        public static final int DEVICE_CONNECTION_ERROR_UNSUPPORTED = 2;
-        public static final int DEVICE_CONNECTION_ERROR_READ = 3;
-        public static final int DEVICE_CONNECTION_ERROR_WRITE = 4;
+        protected static final int DEVICE_DISCONNECTED = 0;
+        protected static final int DEVICE_CONNECTION_ERROR_GENERIC = 1;
+        protected static final int DEVICE_CONNECTION_ERROR_UNSUPPORTED = 2;
+        protected static final int DEVICE_CONNECTION_ERROR_READ = 3;
+        protected static final int DEVICE_CONNECTION_ERROR_WRITE = 4;
 
         public void onDeviceConnected() {}
         public void onDeviceDisconnected() {}

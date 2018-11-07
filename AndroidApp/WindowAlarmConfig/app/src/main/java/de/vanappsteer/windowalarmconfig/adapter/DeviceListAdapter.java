@@ -1,6 +1,7 @@
 package de.vanappsteer.windowalarmconfig.adapter;
 
 import android.bluetooth.BluetoothDevice;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,14 +48,13 @@ public class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.My
         mDevices = myDataset;
     }
 
+    @NonNull
     @Override
-    public DeviceListAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public DeviceListAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
         View rootView = LayoutInflater.from(parent.getContext()).inflate(R.layout.device_list_item, parent, false);
 
-        MyViewHolder vh = new MyViewHolder(rootView);
-
-        return vh;
+        return new MyViewHolder(rootView);
     }
 
     @Override

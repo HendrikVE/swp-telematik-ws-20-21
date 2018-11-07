@@ -170,10 +170,10 @@ public class DeviceScanActivity extends AppCompatActivity {
         stopScan();
     }
 
-    @Override
+    /*@Override
     protected void onStop() {
         super.onStop();
-    }
+    }*/
 
     @Override
     protected void onDestroy() {
@@ -520,7 +520,7 @@ public class DeviceScanActivity extends AppCompatActivity {
         startActivityForResult(intent, ACTIVITY_RESULT_CONFIGURE_DEVICE);
     }
 
-    Handler mUiHandler = new Handler(Looper.getMainLooper()) {
+    private Handler mUiHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message message) {
 
@@ -632,7 +632,7 @@ public class DeviceScanActivity extends AppCompatActivity {
         }
     };
 
-    DeviceConnectionListener mDeviceConnectionListener = new DeviceConnectionListener() {
+    private DeviceConnectionListener mDeviceConnectionListener = new DeviceConnectionListener() {
 
         @Override
         public void onDeviceConnected() {

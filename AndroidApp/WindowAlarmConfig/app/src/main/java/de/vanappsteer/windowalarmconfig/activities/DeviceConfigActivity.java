@@ -33,7 +33,7 @@ public class DeviceConfigActivity extends AppCompatActivity {
         SUCCESS
     }
 
-    public static String ACTIVITY_RESULT_KEY_RESULT = "ACTIVITY_RESULT_KEY_RESULT";
+    public static final String ACTIVITY_RESULT_KEY_RESULT = "ACTIVITY_RESULT_KEY_RESULT";
 
     public static final String KEY_CHARACTERISTIC_HASH_MAP = "KEY_CHARACTERISTIC_HASH_MAP";
 
@@ -57,6 +57,7 @@ public class DeviceConfigActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
 
+        @SuppressWarnings("unchecked")
         HashMap<UUID, String> characteristicHashMap = (HashMap<UUID, String>) intent.getSerializableExtra(KEY_CHARACTERISTIC_HASH_MAP);
         if (characteristicHashMap == null) {
             characteristicHashMap = new HashMap<>();
