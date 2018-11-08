@@ -23,6 +23,7 @@ import de.vanappsteer.windowalarmconfig.interfaces.ConfigView;
 import de.vanappsteer.windowalarmconfig.models.ConfigModel;
 import de.vanappsteer.windowalarmconfig.services.BluetoothDeviceConnectionService;
 import de.vanappsteer.windowalarmconfig.services.BluetoothDeviceConnectionService.DeviceConnectionListener;
+import de.vanappsteer.windowalarmconfig.util.BleConfigurationProfile;
 import de.vanappsteer.windowalarmconfig.util.LoggingUtil;
 
 public class DeviceConfigActivity extends AppCompatActivity {
@@ -38,8 +39,6 @@ public class DeviceConfigActivity extends AppCompatActivity {
     public static final String ACTIVITY_RESULT_KEY_RESULT = "ACTIVITY_RESULT_KEY_RESULT";
 
     public static final String KEY_CHARACTERISTIC_HASH_MAP = "KEY_CHARACTERISTIC_HASH_MAP";
-
-    public static final UUID BLE_CHARACTERISTIC_DEVICE_RESTART_UUID = UUID.fromString("890f7b6f-cecc-4e3e-ade2-5f2907867f4b");
 
     private BluetoothDeviceConnectionService mDeviceService;
     private boolean mDeviceServiceBound = false;
@@ -192,7 +191,7 @@ public class DeviceConfigActivity extends AppCompatActivity {
 
                 // send restart command
                 Map<UUID, String> map = new HashMap<>();
-                map.put(BLE_CHARACTERISTIC_DEVICE_RESTART_UUID, "empty value");
+                map.put(BleConfigurationProfile.CHARACTERISTIC_DEVICE_RESTART_UUID, "empty value");
                 mDeviceService.writeCharacteristics(map);
             }
             else {

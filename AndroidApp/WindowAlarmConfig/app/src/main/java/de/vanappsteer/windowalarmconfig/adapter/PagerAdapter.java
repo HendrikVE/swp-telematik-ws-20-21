@@ -17,6 +17,7 @@ import de.vanappsteer.windowalarmconfig.models.MqttConfigModel;
 import de.vanappsteer.windowalarmconfig.models.OtaConfigModel;
 import de.vanappsteer.windowalarmconfig.models.SensorConfigModel;
 import de.vanappsteer.windowalarmconfig.models.WifiConfigModel;
+import de.vanappsteer.windowalarmconfig.util.BleConfigurationProfile;
 import de.vanappsteer.windowalarmconfig.util.LoggingUtil;
 
 public class PagerAdapter extends FragmentStatePagerAdapter {
@@ -35,40 +36,40 @@ public class PagerAdapter extends FragmentStatePagerAdapter {
         this.mNumerOfTabs = numberOfTabs;
 
         DeviceConfigModel deviceConfigModel = new DeviceConfigModel(
-                characteristicHashMap.get(DeviceConfigModel.BLE_CHARACTERISTIC_CONFIG_DEVICE_ROOM_UUID),
-                characteristicHashMap.get(DeviceConfigModel.BLE_CHARACTERISTIC_CONFIG_DEVICE_ID_UUID)
+                characteristicHashMap.get(BleConfigurationProfile.CHARACTERISTIC_DEVICE_ROOM_UUID),
+                characteristicHashMap.get(BleConfigurationProfile.CHARACTERISTIC_DEVICE_ID_UUID)
         );
         mDeviceConfigFragment = new DeviceConfigFragment();
         mDeviceConfigFragment.setModel(deviceConfigModel);
 
         OtaConfigModel otaConfigModel = new OtaConfigModel(
-                characteristicHashMap.get(OtaConfigModel.BLE_CHARACTERISTIC_CONFIG_OTA_HOST_UUID),
-                characteristicHashMap.get(OtaConfigModel.BLE_CHARACTERISTIC_CONFIG_OTA_FILENAME_UUID),
-                characteristicHashMap.get(OtaConfigModel.BLE_CHARACTERISTIC_CONFIG_OTA_SERVER_USERNAME_UUID),
-                characteristicHashMap.get(OtaConfigModel.BLE_CHARACTERISTIC_CONFIG_OTA_SERVER_PASSWORD_UUID)
+                characteristicHashMap.get(BleConfigurationProfile.CHARACTERISTIC_OTA_HOST_UUID),
+                characteristicHashMap.get(BleConfigurationProfile.CHARACTERISTIC_OTA_FILENAME_UUID),
+                characteristicHashMap.get(BleConfigurationProfile.CHARACTERISTIC_OTA_SERVER_USERNAME_UUID),
+                characteristicHashMap.get(BleConfigurationProfile.CHARACTERISTIC_OTA_SERVER_PASSWORD_UUID)
         );
         mOtaConfigFragment = new OtaConfigFragment();
         mOtaConfigFragment.setModel(otaConfigModel);
 
 
         WifiConfigModel wifiConfigModel = new WifiConfigModel(
-                characteristicHashMap.get(WifiConfigModel.BLE_CHARACTERISTIC_CONFIG_WIFI_SSID_UUID),
-                characteristicHashMap.get(WifiConfigModel.BLE_CHARACTERISTIC_CONFIG_WIFI_PASSWORD_UUID)
+                characteristicHashMap.get(BleConfigurationProfile.CHARACTERISTIC_WIFI_SSID_UUID),
+                characteristicHashMap.get(BleConfigurationProfile.CHARACTERISTIC_WIFI_PASSWORD_UUID)
         );
         mWifiConfigFragment = new WifiConfigFragment();
         mWifiConfigFragment.setModel(wifiConfigModel);
 
         MqttConfigModel mqttConfigModel = new MqttConfigModel(
-                characteristicHashMap.get(MqttConfigModel.BLE_CHARACTERISTIC_CONFIG_MQTT_USER_UUID),
-                characteristicHashMap.get(MqttConfigModel.BLE_CHARACTERISTIC_CONFIG_MQTT_PASSWORD_UUID),
-                characteristicHashMap.get(MqttConfigModel.BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_IP_UUID),
-                characteristicHashMap.get(MqttConfigModel.BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_PORT_UUID)
+                characteristicHashMap.get(BleConfigurationProfile.CHARACTERISTIC_MQTT_USER_UUID),
+                characteristicHashMap.get(BleConfigurationProfile.CHARACTERISTIC_MQTT_PASSWORD_UUID),
+                characteristicHashMap.get(BleConfigurationProfile.CHARACTERISTIC_MQTT_SERVER_IP_UUID),
+                characteristicHashMap.get(BleConfigurationProfile.CHARACTERISTIC_MQTT_SERVER_PORT_UUID)
         );
         mMqttConfigFragment = new MqttConfigFragment();
         mMqttConfigFragment.setModel(mqttConfigModel);
 
         SensorConfigModel sensorConfigModel = new SensorConfigModel(
-                characteristicHashMap.get(SensorConfigModel.BLE_CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID)
+                characteristicHashMap.get(BleConfigurationProfile.CHARACTERISTIC_SENSOR_POLL_INTERVAL_MS_UUID)
         );
         mSensorConfigFragment = new SensorConfigFragment();
         mSensorConfigFragment.setModel(sensorConfigModel);

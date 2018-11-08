@@ -4,10 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class DeviceConfigModel extends ConfigModel {
+import de.vanappsteer.windowalarmconfig.util.BleConfigurationProfile;
 
-    public static final UUID BLE_CHARACTERISTIC_CONFIG_DEVICE_ROOM_UUID = UUID.fromString("d3491796-683b-4b9c-aafb-f51a35459d43");
-    public static final UUID BLE_CHARACTERISTIC_CONFIG_DEVICE_ID_UUID = UUID.fromString("4745e11f-b403-4cfb-83bb-710d46897875");
+public class DeviceConfigModel extends ConfigModel {
 
     private String mDeviceRoom;
     private String mDeviceID;
@@ -21,8 +20,8 @@ public class DeviceConfigModel extends ConfigModel {
     public Map<UUID, String> getDataMap() {
 
         Map<UUID, String> map = new HashMap<>();
-        map.put(BLE_CHARACTERISTIC_CONFIG_DEVICE_ROOM_UUID, mDeviceRoom);
-        map.put(BLE_CHARACTERISTIC_CONFIG_DEVICE_ID_UUID, mDeviceID);
+        map.put(BleConfigurationProfile.CHARACTERISTIC_DEVICE_ROOM_UUID, mDeviceRoom);
+        map.put(BleConfigurationProfile.CHARACTERISTIC_DEVICE_ID_UUID, mDeviceID);
 
         return map;
     }

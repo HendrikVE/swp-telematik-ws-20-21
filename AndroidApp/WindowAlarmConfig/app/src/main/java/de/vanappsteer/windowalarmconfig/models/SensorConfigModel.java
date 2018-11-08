@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class SensorConfigModel extends ConfigModel {
+import de.vanappsteer.windowalarmconfig.util.BleConfigurationProfile;
 
-    public static final UUID BLE_CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID = UUID.fromString("68011c92-854a-4f2c-a94c-5ee37dc607c3");
+public class SensorConfigModel extends ConfigModel {
 
     private String mSensorPollInterval;
 
@@ -18,7 +18,7 @@ public class SensorConfigModel extends ConfigModel {
     public Map<UUID, String> getDataMap() {
 
         Map<UUID, String> map = new HashMap<>();
-        map.put(BLE_CHARACTERISTIC_CONFIG_SENSOR_POLL_INTERVAL_MS_UUID, mSensorPollInterval);
+        map.put(BleConfigurationProfile.CHARACTERISTIC_SENSOR_POLL_INTERVAL_MS_UUID, mSensorPollInterval);
 
         return map;
     }

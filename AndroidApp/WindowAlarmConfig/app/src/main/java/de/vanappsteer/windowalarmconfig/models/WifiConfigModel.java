@@ -4,10 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class WifiConfigModel extends ConfigModel {
+import de.vanappsteer.windowalarmconfig.util.BleConfigurationProfile;
 
-    public static final UUID BLE_CHARACTERISTIC_CONFIG_WIFI_SSID_UUID = UUID.fromString("8ca0bf1d-bb5d-4a66-9191-341fd805e288");
-    public static final UUID BLE_CHARACTERISTIC_CONFIG_WIFI_PASSWORD_UUID = UUID.fromString("fa41c195-ae99-422e-8f1f-0730702b3fc5");
+public class WifiConfigModel extends ConfigModel {
 
     private String mWifiSsid;
     private String mWifiPassword;
@@ -21,8 +20,8 @@ public class WifiConfigModel extends ConfigModel {
     public Map<UUID, String> getDataMap() {
 
         Map<UUID, String> map = new HashMap<>();
-        map.put(BLE_CHARACTERISTIC_CONFIG_WIFI_SSID_UUID, mWifiSsid);
-        map.put(BLE_CHARACTERISTIC_CONFIG_WIFI_PASSWORD_UUID, mWifiPassword);
+        map.put(BleConfigurationProfile.CHARACTERISTIC_WIFI_SSID_UUID, mWifiSsid);
+        map.put(BleConfigurationProfile.CHARACTERISTIC_WIFI_PASSWORD_UUID, mWifiPassword);
 
         return map;
     }

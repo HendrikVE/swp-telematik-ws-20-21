@@ -4,12 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class MqttConfigModel extends ConfigModel {
+import de.vanappsteer.windowalarmconfig.util.BleConfigurationProfile;
 
-    public static final UUID BLE_CHARACTERISTIC_CONFIG_MQTT_USER_UUID = UUID.fromString("69150609-18f8-4523-a41f-6d9a01d2e08d");
-    public static final UUID BLE_CHARACTERISTIC_CONFIG_MQTT_PASSWORD_UUID = UUID.fromString("8bebec77-ea21-4c14-9d64-dbec1fd5267c");
-    public static final UUID BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_IP_UUID = UUID.fromString("e3b150fb-90a2-4cd3-80c5-b1189e110ef1");
-    public static final UUID BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_PORT_UUID = UUID.fromString("4eeff953-0f5e-43ee-b1be-1783a8190b0d");
+public class MqttConfigModel extends ConfigModel {
 
     private String mMqttUsername;
     private String mMqttPassword;
@@ -27,10 +24,10 @@ public class MqttConfigModel extends ConfigModel {
     public Map<UUID, String> getDataMap() {
 
         Map<java.util.UUID, java.lang.String> map = new HashMap<>();
-        map.put(BLE_CHARACTERISTIC_CONFIG_MQTT_USER_UUID, mMqttUsername);
-        map.put(BLE_CHARACTERISTIC_CONFIG_MQTT_PASSWORD_UUID, mMqttPassword);
-        map.put(BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_IP_UUID, mMqttBrokerAddress);
-        map.put(BLE_CHARACTERISTIC_CONFIG_MQTT_SERVER_PORT_UUID, mMqttBrokerPort);
+        map.put(BleConfigurationProfile.CHARACTERISTIC_MQTT_USER_UUID, mMqttUsername);
+        map.put(BleConfigurationProfile.CHARACTERISTIC_MQTT_PASSWORD_UUID, mMqttPassword);
+        map.put(BleConfigurationProfile.CHARACTERISTIC_MQTT_SERVER_IP_UUID, mMqttBrokerAddress);
+        map.put(BleConfigurationProfile.CHARACTERISTIC_MQTT_SERVER_PORT_UUID, mMqttBrokerPort);
 
         return map;
     }
