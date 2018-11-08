@@ -270,6 +270,10 @@ public class BluetoothDeviceConnectionService extends Service {
                     for (DeviceConnectionListener listener : mDeviceConnectionListenerSet) {
                         listener.onAllCharacteristicsRead(mCharacteristicHashMap);
                     }
+
+                    if (mDisconnectPending) {
+                        disconnectDevice();
+                    }
                 }
             }
         }
@@ -281,23 +285,26 @@ public class BluetoothDeviceConnectionService extends Service {
             LoggingUtil.debug("uuid: " + characteristic.getUuid());
             LoggingUtil.debug("value: " + characteristic.getStringValue(0));
 
+            LoggingUtil.debug("pending queue size: " + mWriteCharacteristicsOperationsQueue.size());
+
             synchronized (mWriteCharacteristicsOperationsQueue) {
 
                 if (mWriteCharacteristicsOperationsQueue.size() > 0) {
                     boolean success = gatt.writeCharacteristic(mWriteCharacteristicsOperationsQueue.poll());
-                    if (success) {
-                        for (DeviceConnectionListener listener : mDeviceConnectionListenerSet) {
-                            listener.onAllCharacteristicsWrote();
-                        }
-                    }
-                    else {
+                    if (! success) {
                         for (DeviceConnectionListener listener : mDeviceConnectionListenerSet) {
                             listener.onDeviceConnectionError(DeviceConnectionListener.DEVICE_CONNECTION_ERROR_WRITE);
                         }
                     }
                 }
-                else if (mDisconnectPending) {
-                    disconnectDevice();
+                else {
+                    for (DeviceConnectionListener listener : mDeviceConnectionListenerSet) {
+                        listener.onAllCharacteristicsWrote();
+                    }
+
+                    if (mDisconnectPending) {
+                        disconnectDevice();
+                    }
                 }
             }
         }

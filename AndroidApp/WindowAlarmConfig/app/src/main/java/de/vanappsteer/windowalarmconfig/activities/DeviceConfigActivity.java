@@ -33,6 +33,8 @@ public class DeviceConfigActivity extends AppCompatActivity {
         SUCCESS
     }
 
+    private boolean mRestartCommandSent = false;
+
     public static final String ACTIVITY_RESULT_KEY_RESULT = "ACTIVITY_RESULT_KEY_RESULT";
 
     public static final String KEY_CHARACTERISTIC_HASH_MAP = "KEY_CHARACTERISTIC_HASH_MAP";
@@ -129,7 +131,6 @@ public class DeviceConfigActivity extends AppCompatActivity {
                             LoggingUtil.debug(entry.getValue());
                         }
                     }
-                    map.put(BLE_CHARACTERISTIC_DEVICE_RESTART_UUID, "empty value");
 
                     mDeviceService.writeCharacteristics(map);
 
@@ -167,7 +168,7 @@ public class DeviceConfigActivity extends AppCompatActivity {
     private ServiceConnection mConnection = new ServiceConnection() {
 
         @Override
-        public void onServiceConnected(ComponentName className, IBinder service) {
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
             BluetoothDeviceConnectionService.LocalBinder binder = (BluetoothDeviceConnectionService.LocalBinder) service;
             mDeviceService = binder.getService();
             mDeviceService.addDeviceConnectionListener(mDeviceConnectionListener);
@@ -175,16 +176,28 @@ public class DeviceConfigActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onServiceDisconnected(ComponentName arg0) {
+        public void onServiceDisconnected(ComponentName componentName) {
             mDeviceServiceBound = false;
         }
     };
 
-    DeviceConnectionListener mDeviceConnectionListener = new DeviceConnectionListener() {
+    private DeviceConnectionListener mDeviceConnectionListener = new DeviceConnectionListener() {
 
         @Override
         public void onAllCharacteristicsWrote() {
-            finishWithIntent(Result.SUCCESS);
+
+            if (! mRestartCommandSent) {
+
+                mRestartCommandSent = true;
+
+                // send restart command
+                Map<UUID, String> map = new HashMap<>();
+                map.put(BLE_CHARACTERISTIC_DEVICE_RESTART_UUID, "empty value");
+                mDeviceService.writeCharacteristics(map);
+            }
+            else {
+                finishWithIntent(Result.SUCCESS);
+            }
         }
 
         @Override
