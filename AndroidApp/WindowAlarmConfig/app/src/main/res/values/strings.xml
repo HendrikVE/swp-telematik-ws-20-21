@@ -1,6 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <string name="app_name">Window Alarm Config</string>
+    <string name="app_author_name">Hendrik van Essen</string>
+    <string name="app_author_country">Germany</string>
+    <string name="app_github_project_link">https://github.com/HendrikVE/smarthome2/</string>
 
     <!-- begin activity titles -->
     <string name="title_activity_device_scan">Device scan</string>
@@ -8,10 +11,13 @@
     <string name="title_activity_about_app">About this app</string>
     <!-- end activity titles -->
 
-    <!-- begin buttons -->
-    <string name="button_ok">OK</string>
-    <string name="button_cancel">Cancel</string>
-    <!-- end buttons -->
+    <!-- begin actions -->
+    <string name="action_ok">OK</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_save">Save</string>
+    <string name="action_connect">Connect</string>
+    <string name="action_scan">Scan</string>
+    <!-- end actions -->
 
     <!-- begin dialogs -->
     <string name="dialog_request_coarse_location_title">Access to location not granted</string>
@@ -34,7 +40,6 @@
     <!-- end dialogs -->
 
     <string name="github_project_link_text">\u0040github</string>
-    <string name="github_project_link">https://github.com/HendrikVE/smarthome2/</string>
 
     <string name="license_title">License</string>
     <string name="license_text" tools:ignore="TypographyOther">
@@ -62,4 +67,30 @@
             THE SOFTWARE.
         ]]>
     </string>
+
+    <!-- begin (generic) texts -->
+    <string name="text_version">Version</string>
+    <string name="text_license">License</string>
+    <string name="text_author">Author</string>
+    <string name="text_device">Device</string>
+    <string name="text_ota">OTA</string>
+    <string name="text_wifi">WiFi</string>
+    <string name="text_mqtt">MQTT</string>
+    <string name="text_sensor">Sensor</string>
+    <string name="text_enable_bluetooth">Enable bluetooth to scan for devices</string>
+    <string name="text_devices_room">Device\'s room</string>
+    <string name="text_device_id">Device ID</string>
+    <string name="text_mqtt_username">MQTT username</string>
+    <string name="text_mqtt_password">MQTT password</string>
+    <string name="text_mqtt_broker_address">MQTT broker address</string>
+    <string name="text_mqtt_broker_port">MQTT broker port</string>
+    <string name="text_ota_server_address">OTA server address</string>
+    <string name="text_ota_filename">OTA filename</string>
+    <string name="text_ota_username">OTA username</string>
+    <string name="text_ota_password">OTA password</string>
+    <string name="text_wifi_pasword">WiFi pasword</string>
+    <string name="text_wifi_ssid">WiFi SSID</string>
+    <string name="text_sensor_poll_interval">Sensor poll interval</string>
+    <!-- end (generic) texts -->
+
 </resources>

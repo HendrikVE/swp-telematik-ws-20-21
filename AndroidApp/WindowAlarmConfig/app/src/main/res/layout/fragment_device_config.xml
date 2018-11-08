@@ -23,7 +23,7 @@
                     android:id="@+id/editTextDeviceRoom"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Device's room"/>
+                    android:hint="@string/text_devices_room"/>
 
             </android.support.design.widget.TextInputLayout>
 
@@ -35,7 +35,7 @@
                     android:id="@+id/editTextDeviceID"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Device ID"/>
+                    android:hint="@string/text_device_id"/>
 
             </android.support.design.widget.TextInputLayout>
 

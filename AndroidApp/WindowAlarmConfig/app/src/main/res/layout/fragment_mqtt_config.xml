@@ -23,7 +23,7 @@
                     android:id="@+id/editTextMqttUsername"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="MQTT username"/>
+                    android:hint="@string/text_mqtt_username"/>
 
             </android.support.design.widget.TextInputLayout>
 
@@ -35,7 +35,7 @@
                     android:id="@+id/editTextMqttPassword"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="MQTT password"/>
+                    android:hint="@string/text_mqtt_password"/>
 
             </android.support.design.widget.TextInputLayout>
 
@@ -47,7 +47,7 @@
                     android:id="@+id/editTextMqttBrokerAddress"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="MQTT broker address"/>
+                    android:hint="@string/text_mqtt_broker_address"/>
 
             </android.support.design.widget.TextInputLayout>
 
@@ -59,7 +59,7 @@
                     android:id="@+id/editTextMqttBrokerPort"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="MQTT broker port"/>
+                    android:hint="@string/text_mqtt_broker_port"/>
 
             </android.support.design.widget.TextInputLayout>
 

@@ -23,7 +23,7 @@
                     android:id="@+id/editTextWifiSsid"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="WiFi SSID"/>
+                    android:hint="@string/text_wifi_ssid"/>
 
             </android.support.design.widget.TextInputLayout>
 
@@ -35,7 +35,7 @@
                     android:id="@+id/editTextWifiPassword"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="WiFi pasword"/>
+                    android:hint="@string/text_wifi_pasword"/>
 
             </android.support.design.widget.TextInputLayout>
 

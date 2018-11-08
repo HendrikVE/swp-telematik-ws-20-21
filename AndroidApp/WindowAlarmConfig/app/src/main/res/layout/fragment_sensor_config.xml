@@ -23,7 +23,7 @@
                     android:id="@+id/editTextSensorPollInterval"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Sensor poll interval"/>
+                    android:hint="@string/text_sensor_poll_interval"/>
 
             </android.support.design.widget.TextInputLayout>
 

@@ -43,7 +43,7 @@ public class AboutApp extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(AboutApp.this);
-                builder.setPositiveButton(R.string.button_ok, null);
+                builder.setPositiveButton(R.string.action_ok, null);
                 builder.setTitle(R.string.license_title);
 
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
@@ -62,7 +62,7 @@ public class AboutApp extends AppCompatActivity {
         textViewProjectPage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String url = getString(R.string.github_project_link);
+                String url = getString(R.string.app_github_project_link);
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setData(Uri.parse(url));
                 startActivity(intent);

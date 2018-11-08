@@ -27,29 +27,29 @@
                 <android.support.design.widget.TabItem
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Device"/>
+                    android:text="@string/text_device"/>
 
                 <android.support.design.widget.TabItem
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="OTA"/>
+                    android:text="@string/text_ota"/>
 
                 <android.support.design.widget.TabItem
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="WiFi"/>
+                    android:text="@string/text_wifi"/>
 
                 <android.support.design.widget.TabItem
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="MQTT">
+                    android:text="@string/text_mqtt">
 
                 </android.support.design.widget.TabItem>
 
                 <android.support.design.widget.TabItem
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Sensor"/>
+                    android:text="@string/text_sensor"/>
 
             </android.support.design.widget.TabLayout>
 
@@ -77,7 +77,7 @@
                 android:textColor="?android:textColorPrimary"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Cancel"/>
+                android:text="@string/action_cancel"/>
 
             <Button
                 style="@style/Widget.AppCompat.Button.Colored"
@@ -85,7 +85,7 @@
                 android:textColor="?android:textColorPrimary"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Save"/>
+                android:text="@string/action_save"/>
 
         </LinearLayout>
 

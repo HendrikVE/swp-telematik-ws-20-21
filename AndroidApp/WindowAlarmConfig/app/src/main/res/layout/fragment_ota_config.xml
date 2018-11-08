@@ -23,7 +23,7 @@
                     android:id="@+id/editTextOtaServerAddress"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="OTA server address"/>
+                    android:hint="@string/text_ota_server_address"/>
 
             </android.support.design.widget.TextInputLayout>
 
@@ -35,7 +35,7 @@
                     android:id="@+id/editTextOtaFilename"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="OTA filename"/>
+                    android:hint="@string/text_ota_filename"/>
 
             </android.support.design.widget.TextInputLayout>
 
@@ -47,7 +47,7 @@
                     android:id="@+id/editTextOtaUsername"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="OTA username"/>
+                    android:hint="@string/text_ota_username"/>
 
             </android.support.design.widget.TextInputLayout>
 
@@ -59,7 +59,7 @@
                     android:id="@+id/editTextOtaPassword"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="OTA password"/>
+                    android:hint="@string/text_ota_password"/>
 
             </android.support.design.widget.TextInputLayout>
 

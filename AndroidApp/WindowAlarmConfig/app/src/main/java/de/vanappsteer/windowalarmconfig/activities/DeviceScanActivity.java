@@ -374,7 +374,7 @@ public class DeviceScanActivity extends AppCompatActivity {
                 AlertDialog.Builder builder = new AlertDialog.Builder(DeviceScanActivity.this);
                 builder.setTitle(R.string.dialog_bluetooth_device_connecting_title);
                 builder.setView(R.layout.progress_infinite);
-                builder.setNegativeButton(R.string.button_cancel, new DialogInterface.OnClickListener() {
+                builder.setNegativeButton(R.string.action_cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         if (mDeviceServiceBound) {
@@ -438,7 +438,7 @@ public class DeviceScanActivity extends AppCompatActivity {
 
         if (neverAskAgain) {
             builder.setMessage(R.string.dialog_coarse_location_permitted_message).setTitle(R.string.dialog_coarse_location_permitted_title);
-            builder.setPositiveButton(R.string.button_ok, new DialogInterface.OnClickListener() {
+            builder.setPositiveButton(R.string.action_ok, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     Intent intent = new Intent();
@@ -451,7 +451,7 @@ public class DeviceScanActivity extends AppCompatActivity {
         }
         else {
             builder.setMessage(R.string.dialog_request_coarse_location_message).setTitle(R.string.dialog_request_coarse_location_title);
-            builder.setPositiveButton(R.string.button_ok, new DialogInterface.OnClickListener() {
+            builder.setPositiveButton(R.string.action_ok, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     ActivityCompat.requestPermissions(DeviceScanActivity.this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_PERMISSION_COARSE_LOCATION);
@@ -540,7 +540,7 @@ public class DeviceScanActivity extends AppCompatActivity {
                     }
                     builder.setTitle(R.string.dialog_bluetooth_device_disconnected_title);
                     builder.setMessage(R.string.dialog_bluetooth_device_disconnected_message);
-                    builder.setPositiveButton(R.string.button_ok, null);
+                    builder.setPositiveButton(R.string.action_ok, null);
                     builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
                         @Override
                         public void onDismiss(DialogInterface dialogInterface) {
@@ -555,7 +555,7 @@ public class DeviceScanActivity extends AppCompatActivity {
                     }
                     builder.setTitle(R.string.dialog_bluetooth_device_connection_error_title);
                     builder.setMessage(R.string.dialog_bluetooth_device_connection_error_message);
-                    builder.setPositiveButton(R.string.button_ok, null);
+                    builder.setPositiveButton(R.string.action_ok, null);
                     builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
                         @Override
                         public void onDismiss(DialogInterface dialogInterface) {
@@ -570,7 +570,7 @@ public class DeviceScanActivity extends AppCompatActivity {
                     }
                     builder.setTitle(R.string.dialog_bluetooth_device_not_supported_title);
                     builder.setMessage(R.string.dialog_bluetooth_device_not_supported_message);
-                    builder.setPositiveButton(R.string.button_ok, null);
+                    builder.setPositiveButton(R.string.action_ok, null);
                     builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
                         @Override
                         public void onDismiss(DialogInterface dialogInterface) {
@@ -585,7 +585,7 @@ public class DeviceScanActivity extends AppCompatActivity {
                     }
                     builder.setTitle(R.string.dialog_bluetooth_device_read_error_title);
                     builder.setMessage(R.string.dialog_bluetooth_device_read_error_message);
-                    builder.setPositiveButton(R.string.button_ok, null);
+                    builder.setPositiveButton(R.string.action_ok, null);
                     builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
                         @Override
                         public void onDismiss(DialogInterface dialogInterface) {
@@ -600,7 +600,7 @@ public class DeviceScanActivity extends AppCompatActivity {
                     }
                     builder.setTitle(R.string.dialog_bluetooth_device_write_error_title);
                     builder.setMessage(R.string.dialog_bluetooth_device_write_error_message);
-                    builder.setPositiveButton(R.string.button_ok, null);
+                    builder.setPositiveButton(R.string.action_ok, null);
                     builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
                         @Override
                         public void onDismiss(DialogInterface dialogInterface) {

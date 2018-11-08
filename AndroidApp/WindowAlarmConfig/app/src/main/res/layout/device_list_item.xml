@@ -44,7 +44,7 @@
                 android:textColor="?android:textColorPrimary"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Connect"/>
+                android:text="@string/action_connect"/>
 
         </LinearLayout>
 
