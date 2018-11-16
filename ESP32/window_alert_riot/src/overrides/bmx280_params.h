@@ -1,0 +1,1 @@
+#define BMX280_PARAM_I2C_ADDR 0x76

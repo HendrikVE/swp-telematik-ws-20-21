@@ -1,0 +1,2 @@
+#define I2C0_SCL GPIO27
+#define I2C0_SDA GPIO23
