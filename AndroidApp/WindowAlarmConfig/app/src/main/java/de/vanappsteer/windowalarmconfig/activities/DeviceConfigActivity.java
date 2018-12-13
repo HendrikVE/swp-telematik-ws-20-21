@@ -193,7 +193,10 @@ public class DeviceConfigActivity extends AppCompatActivity {
 
         @Override
         public void onDeviceConnectionError(int errorCode) {
-            finishWithIntent(Result.FAILED);
+
+            if (! mRestartCommandSent) {
+                finishWithIntent(Result.FAILED);
+            }
         }
     };
 }

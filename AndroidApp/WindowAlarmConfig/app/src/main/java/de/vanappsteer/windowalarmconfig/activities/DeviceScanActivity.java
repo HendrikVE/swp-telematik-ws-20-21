@@ -180,8 +180,8 @@ public class DeviceScanActivity extends AppCompatActivity {
         super.onDestroy();
 
         if (mDeviceServiceBound) {
-            mDeviceService.disconnectDevice();
             mDeviceService.removeDeviceConnectionListener(mDeviceConnectionListener);
+            mDeviceService.disconnectDevice();
             unbindService(mConnection);
             mDeviceServiceBound = false;
         }
@@ -221,8 +221,8 @@ public class DeviceScanActivity extends AppCompatActivity {
                 }
 
                 if (mDeviceServiceBound) {
-                    mDeviceService.disconnectDevice();
                     mDeviceService.removeDeviceConnectionListener(mDeviceConnectionListener);
+                    mDeviceService.disconnectDevice();
                 }
                 break;
 
@@ -363,8 +363,8 @@ public class DeviceScanActivity extends AppCompatActivity {
             public void onDeviceSelected(BluetoothDevice device) {
 
                 if (mDeviceServiceBound) {
-                    mDeviceService.connectDevice(device);
                     mDeviceService.addDeviceConnectionListener(mDeviceConnectionListener);
+                    mDeviceService.connectDevice(device);
                 }
                 else {
                     Message message = mUiHandler.obtainMessage(COMMAND_SHOW_CONNECTION_ERROR_DIALOG, null);
@@ -376,8 +376,8 @@ public class DeviceScanActivity extends AppCompatActivity {
                 builder.setView(R.layout.progress_infinite);
                 builder.setNegativeButton(R.string.action_cancel, (dialogInterface, i) -> {
                     if (mDeviceServiceBound) {
-                        mDeviceService.disconnectDevice();
                         mDeviceService.removeDeviceConnectionListener(mDeviceConnectionListener);
+                        mDeviceService.disconnectDevice();
                     }
                 });
                 builder.setCancelable(false);
@@ -611,6 +611,7 @@ public class DeviceScanActivity extends AppCompatActivity {
         public void onAllCharacteristicsRead(Map<UUID, String> characteristicMap) {
             mDialogConnectDevice.dismiss();
             openDeviceConfigActivity((HashMap<UUID, String>) characteristicMap);
+            mDeviceService.removeDeviceConnectionListener(this);
         }
 
         @Override
