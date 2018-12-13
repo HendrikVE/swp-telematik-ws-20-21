@@ -22,6 +22,12 @@ import java.util.UUID;
 
 import de.vanappsteer.windowalarmconfig.util.LoggingUtil;
 
+import static de.vanappsteer.windowalarmconfig.services.BluetoothDeviceConnectionService.DeviceConnectionListener.DEVICE_CONNECTION_ERROR_GENERIC;
+import static de.vanappsteer.windowalarmconfig.services.BluetoothDeviceConnectionService.DeviceConnectionListener.DEVICE_CONNECTION_ERROR_READ;
+import static de.vanappsteer.windowalarmconfig.services.BluetoothDeviceConnectionService.DeviceConnectionListener.DEVICE_CONNECTION_ERROR_UNSUPPORTED;
+import static de.vanappsteer.windowalarmconfig.services.BluetoothDeviceConnectionService.DeviceConnectionListener.DEVICE_CONNECTION_ERROR_WRITE;
+import static de.vanappsteer.windowalarmconfig.services.BluetoothDeviceConnectionService.DeviceConnectionListener.DEVICE_DISCONNECTED;
+
 public class BluetoothDeviceConnectionService extends Service {
 
     private final UUID BLE_SERVICE_UUID = UUID.fromString("2fa1dab8-3eef-40fc-8540-7fc496a10d75");
@@ -108,9 +114,7 @@ public class BluetoothDeviceConnectionService extends Service {
     public void readCharacteristics() {
 
         if (isDisconnected()) {
-            for (DeviceConnectionListener listener : mDeviceConnectionListenerSet) {
-                listener.onDeviceConnectionError(DeviceConnectionListener.DEVICE_DISCONNECTED);
-            }
+            mDeviceConnectionListenerSet.forEach(l -> l.onDeviceConnectionError(DEVICE_DISCONNECTED));
 
             return;
         }
@@ -123,18 +127,14 @@ public class BluetoothDeviceConnectionService extends Service {
         // initial call of readCharacteristic, further calls are done within onCharacteristicRead afterwards
         boolean success = mBluetoothGatt.readCharacteristic(mReadCharacteristicsOperationsQueue.poll());
         if (! success) {
-            for (DeviceConnectionListener listener : mDeviceConnectionListenerSet) {
-                listener.onDeviceConnectionError(DeviceConnectionListener.DEVICE_CONNECTION_ERROR_READ);
-            }
+            mDeviceConnectionListenerSet.forEach(l -> l.onDeviceConnectionError(DEVICE_CONNECTION_ERROR_READ));
         }
     }
 
     public void writeCharacteristics(Map<UUID, String> characteristicMap) {
 
         if (isDisconnected()) {
-            for (DeviceConnectionListener listener : mDeviceConnectionListenerSet) {
-                listener.onDeviceConnectionError(DeviceConnectionListener.DEVICE_DISCONNECTED);
-            }
+            mDeviceConnectionListenerSet.forEach(l -> l.onDeviceConnectionError(DEVICE_DISCONNECTED));
 
             return;
         }
@@ -148,7 +148,6 @@ public class BluetoothDeviceConnectionService extends Service {
             for (Map.Entry<UUID, String> entry : characteristicMap.entrySet()) {
 
                 BluetoothGattCharacteristic characteristic = gattService.getCharacteristic(entry.getKey());
-
                 characteristic.setValue(entry.getValue());
 
                 LoggingUtil.debug("entry.getValue() = " + entry.getValue());
@@ -161,9 +160,7 @@ public class BluetoothDeviceConnectionService extends Service {
                 // initial call of writeCharacteristic, further calls are done within onCharacteristicWrite afterwards
                 boolean success = mBluetoothGatt.writeCharacteristic(mWriteCharacteristicsOperationsQueue.poll());
                 if (! success) {
-                    for (DeviceConnectionListener listener : mDeviceConnectionListenerSet) {
-                        listener.onDeviceConnectionError(DeviceConnectionListener.DEVICE_CONNECTION_ERROR_WRITE);
-                    }
+                    mDeviceConnectionListenerSet.forEach(l -> l.onDeviceConnectionError(DEVICE_CONNECTION_ERROR_WRITE));
                 }
             }
         }
@@ -199,9 +196,7 @@ public class BluetoothDeviceConnectionService extends Service {
                         gatt.close();
                         mBluetoothGatt = null;
                         mBluetoothGattService = null;
-                        for (DeviceConnectionListener listener : mDeviceConnectionListenerSet) {
-                            listener.onDeviceDisconnected();
-                        }
+                        mDeviceConnectionListenerSet.forEach(l -> l.onDeviceDisconnected());
                         break;
 
                     default:
@@ -209,9 +204,7 @@ public class BluetoothDeviceConnectionService extends Service {
                 }
             }
             else {
-                for (DeviceConnectionListener listener : mDeviceConnectionListenerSet) {
-                    listener.onDeviceConnectionError(DeviceConnectionListener.DEVICE_CONNECTION_ERROR_GENERIC);
-                }
+                mDeviceConnectionListenerSet.forEach(l -> l.onDeviceConnectionError(DEVICE_CONNECTION_ERROR_GENERIC));
             }
         }
 
@@ -223,9 +216,7 @@ public class BluetoothDeviceConnectionService extends Service {
             if (status != BluetoothGatt.GATT_SUCCESS) {
                 LoggingUtil.error("status != BluetoothGatt.GATT_SUCCESS");
 
-                for (DeviceConnectionListener listener : mDeviceConnectionListenerSet) {
-                    listener.onDeviceConnectionError(DeviceConnectionListener.DEVICE_CONNECTION_ERROR_GENERIC);
-                }
+                mDeviceConnectionListenerSet.forEach(l -> l.onDeviceConnectionError(DEVICE_CONNECTION_ERROR_GENERIC));
 
                 return;
             }
@@ -235,16 +226,12 @@ public class BluetoothDeviceConnectionService extends Service {
 
                 gatt.disconnect();
 
-                for (DeviceConnectionListener listener : mDeviceConnectionListenerSet) {
-                    listener.onDeviceConnectionError(DeviceConnectionListener.DEVICE_CONNECTION_ERROR_UNSUPPORTED);
-                }
+                mDeviceConnectionListenerSet.forEach(l -> l.onDeviceConnectionError(DEVICE_CONNECTION_ERROR_UNSUPPORTED));
 
                 return;
             }
 
-            for (DeviceConnectionListener listener : mDeviceConnectionListenerSet) {
-                listener.onDeviceConnected();
-            }
+            mDeviceConnectionListenerSet.forEach(l -> l.onDeviceConnected());
         }
 
         @Override
@@ -261,15 +248,11 @@ public class BluetoothDeviceConnectionService extends Service {
                 if (mReadCharacteristicsOperationsQueue.size() > 0) {
                     boolean success = gatt.readCharacteristic(mReadCharacteristicsOperationsQueue.poll());
                     if (! success) {
-                        for (DeviceConnectionListener listener : mDeviceConnectionListenerSet) {
-                            listener.onDeviceConnectionError(DeviceConnectionListener.DEVICE_CONNECTION_ERROR_READ);
-                        }
+                        mDeviceConnectionListenerSet.forEach(l -> l.onDeviceConnectionError(DEVICE_CONNECTION_ERROR_READ));
                     }
                 }
                 else {
-                    for (DeviceConnectionListener listener : mDeviceConnectionListenerSet) {
-                        listener.onAllCharacteristicsRead(mCharacteristicHashMap);
-                    }
+                    mDeviceConnectionListenerSet.forEach(l -> l.onAllCharacteristicsRead(mCharacteristicHashMap));
 
                     if (mDisconnectPending) {
                         disconnectDevice();
@@ -292,15 +275,11 @@ public class BluetoothDeviceConnectionService extends Service {
                 if (mWriteCharacteristicsOperationsQueue.size() > 0) {
                     boolean success = gatt.writeCharacteristic(mWriteCharacteristicsOperationsQueue.poll());
                     if (! success) {
-                        for (DeviceConnectionListener listener : mDeviceConnectionListenerSet) {
-                            listener.onDeviceConnectionError(DeviceConnectionListener.DEVICE_CONNECTION_ERROR_WRITE);
-                        }
+                        mDeviceConnectionListenerSet.forEach(l -> l.onDeviceConnectionError(DEVICE_CONNECTION_ERROR_WRITE));
                     }
                 }
                 else {
-                    for (DeviceConnectionListener listener : mDeviceConnectionListenerSet) {
-                        listener.onAllCharacteristicsWrote();
-                    }
+                    mDeviceConnectionListenerSet.forEach(l -> l.onAllCharacteristicsWrote());
 
                     if (mDisconnectPending) {
                         disconnectDevice();

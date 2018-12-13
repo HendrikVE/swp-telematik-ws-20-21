@@ -374,13 +374,10 @@ public class DeviceScanActivity extends AppCompatActivity {
                 AlertDialog.Builder builder = new AlertDialog.Builder(DeviceScanActivity.this);
                 builder.setTitle(R.string.dialog_bluetooth_device_connecting_title);
                 builder.setView(R.layout.progress_infinite);
-                builder.setNegativeButton(R.string.action_cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        if (mDeviceServiceBound) {
-                            mDeviceService.disconnectDevice();
-                            mDeviceService.removeDeviceConnectionListener(mDeviceConnectionListener);
-                        }
+                builder.setNegativeButton(R.string.action_cancel, (dialogInterface, i) -> {
+                    if (mDeviceServiceBound) {
+                        mDeviceService.disconnectDevice();
+                        mDeviceService.removeDeviceConnectionListener(mDeviceConnectionListener);
                     }
                 });
                 builder.setCancelable(false);
@@ -438,25 +435,22 @@ public class DeviceScanActivity extends AppCompatActivity {
 
         if (neverAskAgain) {
             builder.setMessage(R.string.dialog_coarse_location_permitted_message).setTitle(R.string.dialog_coarse_location_permitted_title);
-            builder.setPositiveButton(R.string.action_ok, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    Intent intent = new Intent();
-                    intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                    Uri uri = Uri.fromParts("package", getPackageName(), null);
-                    intent.setData(uri);
-                    startActivityForResult(intent, ACTIVITY_RESULT_ENABLE_LOCATION_PERMISSION);
-                }
+            builder.setPositiveButton(R.string.action_ok, (dialogInterface, i) -> {
+                Intent intent = new Intent();
+                intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                Uri uri = Uri.fromParts("package", getPackageName(), null);
+                intent.setData(uri);
+                startActivityForResult(intent, ACTIVITY_RESULT_ENABLE_LOCATION_PERMISSION);
             });
         }
         else {
             builder.setMessage(R.string.dialog_request_coarse_location_message).setTitle(R.string.dialog_request_coarse_location_title);
-            builder.setPositiveButton(R.string.action_ok, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    ActivityCompat.requestPermissions(DeviceScanActivity.this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_PERMISSION_COARSE_LOCATION);
-                }
-            });
+            builder.setPositiveButton(
+                    R.string.action_ok,
+                    (dialogInterface, i) -> ActivityCompat.requestPermissions(
+                            DeviceScanActivity.this,
+                            new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_PERMISSION_COARSE_LOCATION)
+            );
         }
 
         builder.setCancelable(false);
@@ -470,36 +464,33 @@ public class DeviceScanActivity extends AppCompatActivity {
         @Override
         public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
 
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
+            runOnUiThread(() -> {
 
-                    if (! mIsScanning) {
-                        return;
-                    }
+                if (! mIsScanning) {
+                    return;
+                }
 
-                    boolean added = false;
+                boolean added = false;
 
-                    // update device in set if a name was found after address was already discovered
-                    BluetoothDevice deviceFound = getDeviceByBleAddress(bleDeviceSet, device.getAddress());
+                // update device in set if a name was found after address was already discovered
+                BluetoothDevice deviceFound = getDeviceByBleAddress(bleDeviceSet, device.getAddress());
 
-                    if (device.getName() == null) {
-                        // ignore devices without a name
-                        return;
-                    }
+                if (device.getName() == null) {
+                    // ignore devices without a name
+                    return;
+                }
 
-                    if (deviceFound != null && deviceFound.getName() == null && device.getName() != null) {
-                        bleDeviceSet.remove(deviceFound);
-                        added = bleDeviceSet.add(device);
-                    }
-                    else if(deviceFound == null) {
-                        added = bleDeviceSet.add(device);
-                    }
+                if (deviceFound != null && deviceFound.getName() == null && device.getName() != null) {
+                    bleDeviceSet.remove(deviceFound);
+                    added = bleDeviceSet.add(device);
+                }
+                else if(deviceFound == null) {
+                    added = bleDeviceSet.add(device);
+                }
 
-                    if (added) {
-                        mAdapter.setDevices(bleDeviceSet);
-                        mAdapter.notifyDataSetChanged();
-                    }
+                if (added) {
+                    mAdapter.setDevices(bleDeviceSet);
+                    mAdapter.notifyDataSetChanged();
                 }
             });
         }
@@ -541,12 +532,7 @@ public class DeviceScanActivity extends AppCompatActivity {
                     builder.setTitle(R.string.dialog_bluetooth_device_disconnected_title);
                     builder.setMessage(R.string.dialog_bluetooth_device_disconnected_message);
                     builder.setPositiveButton(R.string.action_ok, null);
-                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                        @Override
-                        public void onDismiss(DialogInterface dialogInterface) {
-                            mDialogDisconnectedShown = false;
-                        }
-                    });
+                    builder.setOnDismissListener(dialogInterface -> mDialogDisconnectedShown = false);
                     break;
 
                 case COMMAND_SHOW_CONNECTION_ERROR_DIALOG:
@@ -556,12 +542,7 @@ public class DeviceScanActivity extends AppCompatActivity {
                     builder.setTitle(R.string.dialog_bluetooth_device_connection_error_title);
                     builder.setMessage(R.string.dialog_bluetooth_device_connection_error_message);
                     builder.setPositiveButton(R.string.action_ok, null);
-                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                        @Override
-                        public void onDismiss(DialogInterface dialogInterface) {
-                            mDialogConnectionErrorShown = false;
-                        }
-                    });
+                    builder.setOnDismissListener(dialogInterface -> mDialogConnectionErrorShown = false);
                     break;
 
                 case COMMAND_SHOW_DEVICE_UNSUPPORTED_DIALOG:
@@ -571,12 +552,7 @@ public class DeviceScanActivity extends AppCompatActivity {
                     builder.setTitle(R.string.dialog_bluetooth_device_not_supported_title);
                     builder.setMessage(R.string.dialog_bluetooth_device_not_supported_message);
                     builder.setPositiveButton(R.string.action_ok, null);
-                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                        @Override
-                        public void onDismiss(DialogInterface dialogInterface) {
-                            mDialogUnsupportedErrorShown = false;
-                        }
-                    });
+                    builder.setOnDismissListener(dialogInterface -> mDialogUnsupportedErrorShown = false);
                     break;
 
                 case COMMAND_SHOW_DEVICE_READ_ERROR_DIALOG:
@@ -586,12 +562,7 @@ public class DeviceScanActivity extends AppCompatActivity {
                     builder.setTitle(R.string.dialog_bluetooth_device_read_error_title);
                     builder.setMessage(R.string.dialog_bluetooth_device_read_error_message);
                     builder.setPositiveButton(R.string.action_ok, null);
-                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                        @Override
-                        public void onDismiss(DialogInterface dialogInterface) {
-                            mDialogReadErrorShown = false;
-                        }
-                    });
+                    builder.setOnDismissListener(dialogInterface -> mDialogReadErrorShown = false);
                     break;
 
                 case COMMAND_SHOW_DEVICE_WRITE_ERROR_DIALOG:
@@ -601,12 +572,7 @@ public class DeviceScanActivity extends AppCompatActivity {
                     builder.setTitle(R.string.dialog_bluetooth_device_write_error_title);
                     builder.setMessage(R.string.dialog_bluetooth_device_write_error_message);
                     builder.setPositiveButton(R.string.action_ok, null);
-                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                        @Override
-                        public void onDismiss(DialogInterface dialogInterface) {
-                            mDialogWriteErrorShown = false;
-                        }
-                    });
+                    builder.setOnDismissListener(dialogInterface -> mDialogWriteErrorShown = false);
                     break;
 
                 default:

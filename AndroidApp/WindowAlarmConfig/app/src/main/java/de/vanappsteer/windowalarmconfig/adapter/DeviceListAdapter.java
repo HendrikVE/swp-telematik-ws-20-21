@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -60,12 +61,8 @@ public class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.My
     @Override
     public void onBindViewHolder(final MyViewHolder holder, int position) {
 
-        holder.getRootView().findViewById(R.id.connectButton).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mOnDeviceSelectionListener.onDeviceSelected(mDevices.get(holder.getAdapterPosition()));
-            }
-        });
+        Button connectButton = holder.getRootView().findViewById(R.id.connectButton);
+        connectButton.setOnClickListener(view -> mOnDeviceSelectionListener.onDeviceSelected(mDevices.get(holder.getAdapterPosition())));
 
         String deviceName = mDevices.get(position).getName();
         if (deviceName == null) {

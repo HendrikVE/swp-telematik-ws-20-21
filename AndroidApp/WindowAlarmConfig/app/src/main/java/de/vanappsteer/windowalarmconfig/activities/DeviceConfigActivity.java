@@ -113,40 +113,32 @@ public class DeviceConfigActivity extends AppCompatActivity {
         });
 
         Button buttonSave = findViewById(R.id.buttonSave);
-        buttonSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        buttonSave.setOnClickListener(view -> {
 
-                if (mDeviceServiceBound) {
-                    Map<UUID, String> map = new HashMap<>();
+            if (mDeviceServiceBound) {
+                Map<UUID, String> map = new HashMap<>();
 
-                    for (int i = 0; i < adapter.getCount(); i++) {
-                        ConfigView configView = (ConfigView) adapter.getItem(i);
-                        ConfigModel configModel = configView.getModel();
-                        map.putAll(configModel.getDataMap());
+                for (int i = 0; i < adapter.getCount(); i++) {
+                    ConfigView configView = (ConfigView) adapter.getItem(i);
+                    ConfigModel configModel = configView.getModel();
+                    map.putAll(configModel.getDataMap());
 
-                        for (Map.Entry<UUID, String> entry : configModel.getDataMap().entrySet()) {
-                            LoggingUtil.debug(entry.getKey().toString());
-                            LoggingUtil.debug(entry.getValue());
-                        }
+                    for (Map.Entry<UUID, String> entry : configModel.getDataMap().entrySet()) {
+                        LoggingUtil.debug(entry.getKey().toString());
+                        LoggingUtil.debug(entry.getValue());
                     }
-
-                    mDeviceService.writeCharacteristics(map);
-
                 }
-                else {
-                    // TODO: keep config activity instead and retry?
-                    finishWithIntent(Result.FAILED);
-                }
+
+                mDeviceService.writeCharacteristics(map);
+
+            }
+            else {
+                // TODO: keep config activity instead and retry?
+                finishWithIntent(Result.FAILED);
             }
         });
         Button buttonCancel = findViewById(R.id.buttonCancel);
-        buttonCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finishWithIntent(Result.CANCELLED);
-            }
-        });
+        buttonCancel.setOnClickListener(view -> finishWithIntent(Result.CANCELLED));
     }
 
     private void finishWithIntent(Result result) {

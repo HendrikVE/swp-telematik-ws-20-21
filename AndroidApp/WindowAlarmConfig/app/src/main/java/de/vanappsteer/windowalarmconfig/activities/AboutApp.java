@@ -59,14 +59,11 @@ public class AboutApp extends AppCompatActivity {
         });
 
         TextView textViewProjectPage = findViewById(R.id.textViewProjectPage);
-        textViewProjectPage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String url = getString(R.string.app_github_project_link);
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse(url));
-                startActivity(intent);
-            }
+        textViewProjectPage.setOnClickListener(view -> {
+            String url = getString(R.string.app_github_project_link);
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(url));
+            startActivity(intent);
         });
     }
 
