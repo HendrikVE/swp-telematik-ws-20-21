@@ -8,9 +8,10 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 
 import java.util.HashMap;
@@ -42,6 +43,8 @@ public class DeviceConfigActivity extends AppCompatActivity {
 
     private BluetoothDeviceConnectionService mDeviceService;
     private boolean mDeviceServiceBound = false;
+
+    private AlertDialog mDialogWriteToDevice;
 
     private HashMap<UUID, String> mConfigDescriptionHashMap = new HashMap<>();
 
@@ -115,6 +118,11 @@ public class DeviceConfigActivity extends AppCompatActivity {
         Button buttonSave = findViewById(R.id.buttonSave);
         buttonSave.setOnClickListener(view -> {
 
+            InputMethodManager imm = (InputMethodManager) DeviceConfigActivity.this.getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            }
+
             if (mDeviceServiceBound) {
                 Map<UUID, String> map = new HashMap<>();
 
@@ -129,8 +137,15 @@ public class DeviceConfigActivity extends AppCompatActivity {
                     }
                 }
 
-                mDeviceService.writeCharacteristics(map);
+                AlertDialog.Builder builder = new AlertDialog.Builder(DeviceConfigActivity.this);
+                builder.setTitle(R.string.dialog_bluetooth_device_writing_title);
+                builder.setView(R.layout.progress_infinite);
+                builder.setCancelable(false);
 
+                mDialogWriteToDevice = builder.create();
+                mDialogWriteToDevice.show();
+
+                mDeviceService.writeCharacteristics(map);
             }
             else {
                 // TODO: keep config activity instead and retry?

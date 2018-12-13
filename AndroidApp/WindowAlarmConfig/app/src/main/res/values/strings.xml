@@ -27,6 +27,7 @@
     <string name="dialog_coarse_location_permitted_message">Please allow access to location, otherwise your device is not able to scan for BLE devices. You need to enable it manually in the app\'s settings page.</string>
 
     <string name="dialog_bluetooth_device_connecting_title">Connecting to device…</string>
+    <string name="dialog_bluetooth_device_writing_title">Write config to device…</string>
     <string name="dialog_bluetooth_device_connection_error_title">Could not connect to device</string>
     <string name="dialog_bluetooth_device_connection_error_message">An error occurred while making the connection. Please try again.</string>
     <string name="dialog_bluetooth_device_not_supported_title">Device not supported</string>
