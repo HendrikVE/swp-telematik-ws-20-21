@@ -11,9 +11,7 @@ struct window_sensor {
     int id;
     int gpio_input;
     int gpio_output;
-    int interrupt_debounce;
     char mqtt_topic[128];
-    uint64_t timestamp_last_interrupt;
     char last_state;
 };
 

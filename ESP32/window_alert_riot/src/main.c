@@ -23,10 +23,14 @@
 
 extern int _gnrc_netif_config(int argc, char **argv);
 
-#define RCV_QUEUE_SIZE  16
-
 #define EMCUTE_PRIO         (THREAD_PRIORITY_MAIN - 2)
 #define WINDOW_SENSOR_PRIO  (THREAD_PRIORITY_MAIN - 1)
+
+#define FLAG_IRQ_WINDOW_SENSOR_1 1
+#define FLAG_IRQ_WINDOW_SENSOR_2 2
+
+#define BITMASK_FLAG_IRQ_WINDOW_SENSOR_1 (0x1 << FLAG_IRQ_WINDOW_SENSOR_1)
+#define BITMASK_FLAG_IRQ_WINDOW_SENSOR_2 (0x1 << FLAG_IRQ_WINDOW_SENSOR_2)
 
 static mutex_t emcute_lock;
 
@@ -34,7 +38,6 @@ struct window_sensor window_sensor_1 = {}, window_sensor_2 = {};
 
 static kernel_pid_t window_sensor_task_pid;
 static char rcv_stack[THREAD_STACKSIZE_DEFAULT + THREAD_EXTRA_STACKSIZE_PRINTF];
-static msg_t rcv_queue[RCV_QUEUE_SIZE];
 
 static char mqtt_stack[THREAD_STACKSIZE_DEFAULT];
 
@@ -110,52 +113,33 @@ void publish_environment_data(void) {
 
 static void* window_sensor_task(void *arg) {
 
-    msg_t message;
-
-    msg_init_queue(rcv_queue, RCV_QUEUE_SIZE);
+    thread_flags_t flags;
 
     struct window_sensor *window_sensor;
-    uint32_t sensor_num;
+    uint32_t sensor_num = -1;
 
     bool currentState;
-
-    uint64_t current_time;
-    uint64_t time_diff;
 
     const char* window_state;
 
     while (true) {
 
-        msg_receive(&message);
-        sensor_num = message.content.value;
+        flags = thread_flags_wait_one(BITMASK_FLAG_IRQ_WINDOW_SENSOR_1 | BITMASK_FLAG_IRQ_WINDOW_SENSOR_2);
 
-        if (sensor_num == 1) {
+        if ((flags & BITMASK_FLAG_IRQ_WINDOW_SENSOR_1) == BITMASK_FLAG_IRQ_WINDOW_SENSOR_1) {
+            sensor_num = 1;
+
             window_sensor = &window_sensor_1;
             currentState = gpio_read(window_sensor_1.gpio_input);
         }
-        else if (sensor_num == 2){
+        else if ((flags & BITMASK_FLAG_IRQ_WINDOW_SENSOR_2) == BITMASK_FLAG_IRQ_WINDOW_SENSOR_2) {
+            sensor_num = 2;
+
             window_sensor = &window_sensor_2;
             currentState = gpio_read(window_sensor_2.gpio_input);
         }
         else {
             printf("invalid sensor_num: %d", sensor_num);
-            continue;
-        }
-
-        current_time = xtimer_now_usec64() / 1000;
-
-        time_diff = 0;
-
-        if (current_time < window_sensor->timestamp_last_interrupt) {
-            // catch overflow
-            time_diff = window_sensor->interrupt_debounce + 1;
-        }
-        else {
-            time_diff = current_time - window_sensor->timestamp_last_interrupt;
-        }
-
-        if (time_diff <= (uint64_t) window_sensor->interrupt_debounce) {
-            // not within debounce time -> ignore interrupt
             continue;
         }
 
@@ -174,28 +158,41 @@ static void* window_sensor_task(void *arg) {
 
         publish_mqtt(window_sensor->mqtt_topic, (char*) window_state);
 
-        window_sensor->timestamp_last_interrupt = current_time;
+        if (sensor_num == 1) {
+            gpio_irq_enable(window_sensor_1.gpio_input);
+        }
+        else if (sensor_num == 2) {
+            gpio_irq_enable(window_sensor_2.gpio_input);
+        }
     }
 
     return NULL;
 }
 
-void message_window_sensor(uint32_t sensor_num) {
+void message_window_sensor(thread_flags_t flags) {
 
-    msg_t message;
+    //thread_t *thread = (thread_t*) thread_get(window_sensor_task_pid);
+    thread_t *thread = (thread_t*) sched_threads[window_sensor_task_pid];
 
-    message.content.value = sensor_num;
-    if (msg_try_send(&message, window_sensor_task_pid) == 0) {
-        printf("receiver queue full.\n");
-    }
+    thread_flags_set(thread, flags);
 }
 
 void isr_window_sensor_1(void *arg) {
-    message_window_sensor(1);
+
+    puts("isr_window_sensor_1");
+
+    gpio_irq_disable(window_sensor_1.gpio_input);
+
+    message_window_sensor(BITMASK_FLAG_IRQ_WINDOW_SENSOR_1);
 }
 
 void isr_window_sensor_2(void *arg) {
-    message_window_sensor(2);
+
+    puts("isr_window_sensor_2");
+
+    gpio_irq_disable(window_sensor_2.gpio_input);
+
+    message_window_sensor(BITMASK_FLAG_IRQ_WINDOW_SENSOR_2);
 }
 
 void configure_window_sensor_system(void) {
@@ -211,7 +208,6 @@ void configure_window_sensor_system(void) {
         window_sensor_1.id = 1;
         window_sensor_1.gpio_input = CONFIG_SENSOR_WINDOW_1_GPIO_INPUT;
         window_sensor_1.gpio_output = CONFIG_SENSOR_WINDOW_1_GPIO_OUTPUT;
-        window_sensor_1.interrupt_debounce = CONFIG_SENSOR_WINDOW_1_INTERRUPT_DEBOUNCE_MS;
         strncpy(window_sensor_1.mqtt_topic, topic, sizeof(window_sensor_1.mqtt_topic));
 
         window_sensor_init_gpio(&isr_window_sensor_1, &window_sensor_1);
@@ -225,7 +221,6 @@ void configure_window_sensor_system(void) {
         window_sensor_2.id = 2;
         window_sensor_2.gpio_input = CONFIG_SENSOR_WINDOW_2_GPIO_INPUT;
         window_sensor_2.gpio_output = CONFIG_SENSOR_WINDOW_2_GPIO_OUTPUT;
-        window_sensor_2.interrupt_debounce = CONFIG_SENSOR_WINDOW_2_INTERRUPT_DEBOUNCE_MS;
         strncpy(window_sensor_2.mqtt_topic, topic, sizeof(window_sensor_2.mqtt_topic));
 
         window_sensor_init_gpio(&isr_window_sensor_2, &window_sensor_2);
@@ -242,10 +237,10 @@ static void* emcute_thread(void* arg) {
 
 void init_window_sensor_system(void) {
 
-    configure_window_sensor_system();
-
     printf("init task queue for window sensors\n");
     window_sensor_task_pid = thread_create(rcv_stack, sizeof(rcv_stack), WINDOW_SENSOR_PRIO, 0, window_sensor_task, NULL, "window_sensor_task");
+
+    configure_window_sensor_system();
 }
 
 void init_mqtt(void) {
@@ -296,9 +291,6 @@ int main(void) {
     if (!success) {
         return false;
     }
-
-    message_window_sensor(1);
-    message_window_sensor(2);
 
     while (true) {
         publish_environment_data();
