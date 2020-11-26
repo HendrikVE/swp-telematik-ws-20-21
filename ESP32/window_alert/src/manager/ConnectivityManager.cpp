@@ -13,18 +13,14 @@ ConnectivityManager::ConnectivityManager() {
     mMqttMutex = xSemaphoreCreateMutex();
 }
 
-void ConnectivityManager::begin() {
-    logger.begin(LOG_LEVEL_VERBOSE, &Serial);
-    logger.setPrefix(printTag);
-    logger.setSuffix(printNewline);
-}
+void ConnectivityManager::begin() { }
 
 bool ConnectivityManager::checkWifiConnection() {
 
     if (xSemaphoreTake(mWifiMutex, (TickType_t) 10 ) == pdTRUE) {
 
         if (WiFi.status() != WL_CONNECTED) {
-            logger.notice("Connect to WiFi...");
+            Log.notice("Connect to WiFi...");
 
             int attempts = 0;
             while (WiFi.status() != WL_CONNECTED) {
@@ -36,7 +32,7 @@ bool ConnectivityManager::checkWifiConnection() {
 
                 delay(500);
             }
-            logger.notice("Connected");
+            Log.notice("Connected");
         }
 
         xSemaphoreGive(mWifiMutex);
@@ -66,7 +62,7 @@ bool ConnectivityManager::checkMqttConnection() {
     if (xSemaphoreTake(mMqttMutex, (TickType_t) 10 ) == pdTRUE) {
 
         if (!mMqttClient.connected()) {
-            logger.notice("Connect to MQTT broker...");
+            Log.notice("Connect to MQTT broker...");
 
             int attempts = 0;
             while (!mMqttClient.connect(this->mMqttClientID, this->mMqttUser, this->mMqttPassword)) {
@@ -77,7 +73,7 @@ bool ConnectivityManager::checkMqttConnection() {
                     return false;
                 }
             }
-            logger.notice("Connected");
+            Log.notice("Connected");
         }
 
         xSemaphoreGive(mMqttMutex);

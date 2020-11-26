@@ -39,8 +39,6 @@ private:
     const char* mMqttPassword;
     const char* mMqttClientID;
 
-    Logging logger;
-
     SemaphoreHandle_t mWifiMutex = NULL;
     SemaphoreHandle_t mMqttMutex = NULL;
 
@@ -72,17 +70,6 @@ private:
                 break;
         }
     }
-
-    static void printTag(Print* _logOutput) {
-        char c[12];
-        sprintf(c, "%s ", "[ConnectivityManager] ");
-        _logOutput->print(c);
-    }
-
-    static void printNewline(Print* _logOutput) {
-        _logOutput->print("\n");
-    }
-
 };
 
 #endif /*CONNECTIVITY_MANAGER_H*/

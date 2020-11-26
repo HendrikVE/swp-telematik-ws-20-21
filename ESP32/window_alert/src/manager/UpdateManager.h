@@ -22,19 +22,6 @@ private:
     const char* mUser;
     const char* mPassword;
     const char* mDeviceID;
-
-    Logging logger;
-
-    static void printTag(Print* _logOutput) {
-        char c[12];
-        sprintf(c, "%s ", "[UpdateManager] ");
-        _logOutput->print(c);
-    }
-
-    static void printNewline(Print* _logOutput) {
-        _logOutput->print("\n");
-    }
-
 };
 
 #endif /*UPDATE_MANAGER_H*/

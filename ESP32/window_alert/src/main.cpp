@@ -26,11 +26,7 @@
     EnvironmentSensor* pEnvironmentSensor;
 #endif /*CONFIG_SENSOR_NONE*/
 
-#ifdef CONFIG_BUILD_DEBUG
-    #define DEBUG true
-#endif
 #ifndef CONFIG_BUILD_DEBUG
-    #define DEBUG false
     #define DISABLE_LOGGING
 #endif
 
@@ -39,8 +35,6 @@ WindowSensor *pWindowSensor1, *pWindowSensor2;
 ConnectivityManager connectivityManager;
 UpdateManager* updateManager;
 MQTTClient mqttClient;
-
-Logging logger;
 
 RTC_DATA_ATTR int bootCount = 0;
 
@@ -114,15 +108,15 @@ static void windowSensorTask(void* arg) {
 
             char output[128];
             sprintf(output, "window sensor #%i: ", windowSensor->getId());
-            logger.notice(output);
+            Log.notice(output);
 
             if (currentState == LOW) {
-                logger.notice("open");
+                Log.notice("open");
                 windowSensor->setLastState(LOW);
                 mqttClient.publish(windowSensor->getMqttTopic(), "OPEN", false, 2);
             }
             else if (currentState == HIGH) {
-                logger.notice("closed");
+                Log.notice("closed");
                 windowSensor->setLastState(HIGH);
                 mqttClient.publish(windowSensor->getMqttTopic(), "CLOSED", false, 2);
             }
@@ -165,7 +159,7 @@ void configureWindowSensorSystem() {
 
 void initWindowSensorSystem() {
 
-    logger.notice("init task queue");
+    Log.notice("init task queue");
     windowSensorEventQueue = xQueueCreate(10, sizeof(struct WindowSensorEvent));
     xTaskCreate(windowSensorTask, "windowSensorTask", 2048, NULL, 10, NULL);
 
@@ -176,7 +170,7 @@ void initWindowSensorSystem() {
 void publishEnvironmentData() {
 
     if (!pEnvironmentSensor->isInitialized()) {
-        logger.notice("Environment sensor is not initialized. Skip");
+        Log.notice("Environment sensor is not initialized. Skip");
         return;
     }
 
@@ -191,18 +185,18 @@ void publishEnvironmentData() {
     char strTemperature[32];
     sprintf(strTemperature, "%.1f", round(temperature * 10.0) / 10.0);
 
-    logger.notice("temperature: %s", strTemperature);
+    Log.notice("temperature: %s", strTemperature);
 
     char strHumidity[32];
     sprintf(strHumidity, "%d", (int) round(humidity));
 
-    logger.notice("humidity: %s", strHumidity);
+    Log.notice("humidity: %s", strHumidity);
 
 
     char strPressure[32];
     sprintf(strPressure, "%d", (int) round(pressure));
 
-    logger.notice("pressure: %s", strPressure);
+    Log.notice("pressure: %s", strPressure);
 
 
     char topicTemperature[128];
@@ -228,7 +222,7 @@ void publishEnvironmentData() {
             char strGasResistence[32];
             sprintf(strGasResistence, "%d", (int) round(gasResistance));
 
-            logger.notice("gas resistence: %s", strGasResistence);
+            Log.notice("gas resistence: %s", strGasResistence);
 
             char topicGas[128];
             buildTopic(topicGas, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_GAS);
@@ -271,30 +265,30 @@ void handleWakeup(){
     switch(wakeupReason) {
 
         case 1:
-            logger.notice("Wakeup caused by external signal using RTC_IO");
+            Log.notice("Wakeup caused by external signal using RTC_IO");
             updateWindowState();
             break;
 
         case 2:
-            logger.notice("Wakeup caused by external signal using RTC_CNTL");
+            Log.notice("Wakeup caused by external signal using RTC_CNTL");
             updateWindowState();
             break;
 
         case 3:
-            logger.notice("Wakeup caused by timer");
+            Log.notice("Wakeup caused by timer");
             updateAll();
             break;
 
         case 4:
-            logger.notice("Wakeup caused by touchpad");
+            Log.notice("Wakeup caused by touchpad");
             break;
 
         case 5:
-            logger.notice("Wakeup caused by ULP program");
+            Log.notice("Wakeup caused by ULP program");
             break;
 
         default:
-            logger.notice("Wakeup was not caused by deep sleep");
+            Log.notice("Wakeup was not caused by deep sleep");
             updateAll();
             break;
     }
@@ -358,7 +352,7 @@ void startDeviceSleep(uint64_t sleepIntervalMS) {
         esp_light_sleep_start();
     #endif /*LIGHT_SLEEP*/
 
-    logger.notice("woke up");
+    Log.notice("woke up");
 
     connectivityManager.turnOnWifi();
 
@@ -396,7 +390,7 @@ void lazySetup() {
     buildTopic(topicVersion, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, "version");
 
     mqttClient.publish(topicVersion, strVersion, true, 2);
-    logger.notice("device is running version: %s", strVersion);
+    Log.notice("device is running version: %s", strVersion);
 
     updateManager = new UpdateManager();
     updateManager->begin(CONFIG_OTA_HOST, CONFIG_OTA_FILENAME, CONFIG_OTA_SERVER_USERNAME, CONFIG_OTA_SERVER_PASSWORD, CONFIG_DEVICE_ID);
@@ -418,11 +412,11 @@ void lazySetup() {
 
 void setup() {
 
-    if (DEBUG) {
+    if (CONFIG_BUILD_DEBUG) {
         Serial.begin(115200);
-        logger.begin(LOG_LEVEL_VERBOSE, &Serial);
-        logger.setPrefix(printTag);
-        logger.setSuffix(printNewline);
+        Log.begin(LOG_LEVEL_VERBOSE, &Serial);
+        Log.setPrefix(printTag);
+        Log.setSuffix(printNewline);
     }
 
     connectivityManager.begin();
@@ -455,6 +449,6 @@ void loop() {
     }
     queuePaused = true;
 
-    logger.notice("go to sleep");
+    Log.notice("go to sleep");
     startDeviceSleep(CONFIG_SENSOR_POLL_INTERVAL_MS);
 }

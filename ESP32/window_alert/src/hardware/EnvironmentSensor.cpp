@@ -28,17 +28,13 @@ bool EnvironmentSensor::supportingGasResistance() {
 
 bool EnvironmentSensor::begin(int sdaPin, int sclPin) {
 
-    logger.begin(LOG_LEVEL_VERBOSE, &Serial);
-    logger.setPrefix(printTag);
-    logger.setSuffix(printNewline);
-
     Wire.begin(sdaPin, sclPin);
 
     if (mSensor == Sensor::BME280) {
 
         int attempts = 0;
         while(!mpBme280->begin(BME_280_I2C_ADDRESS)) {
-            logger.notice("Could not find BME280 sensor!");
+            Log.notice("Could not find BME280 sensor!");
 
             attempts++;
             if (attempts >= 10) {
@@ -59,7 +55,7 @@ bool EnvironmentSensor::begin(int sdaPin, int sclPin) {
 
         int attempts = 0;
         while(!mpBme680->begin(BME_680_I2C_ADDRESS)) {
-            logger.notice("Could not find BME680 sensor!");
+            Log.notice("Could not find BME680 sensor!");
 
             attempts++;
             if (attempts >= 10) {
@@ -144,7 +140,7 @@ bool EnvironmentSensor::prepareMeasurements() {
 
     if (mSensor == Sensor::BME680) {
         if (!mpBme680->performReading()) {
-            logger.notice("Failed to perform reading");
+            Log.notice("Failed to perform reading");
             return false;
         }
 
