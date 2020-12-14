@@ -1,48 +1,40 @@
 #!/bin/bash
-# script was designed for Ubuntu
-# based on https://esp-idf.readthedocs.io/en/v2.0/linux-setup.html
+# script was designed for Ubuntu 20.04
+# based on https://docs.espressif.com/projects/esp-idf/en/v3.3.3/get-started/linux-setup.html
 
 set -e
 
 printf "\nget necessary software\n"
-sudo apt-get install git wget make libncurses-dev flex bison gperf python python-serial
+sudo apt update
+sudo apt-get install gcc git wget make libncurses-dev flex bison gperf libffi-dev libssl-dev \
+     python python3-pip python-setuptools python3-serial python-cryptography python3-future python-pyparsing
 
 printf "\nsetup working directory\n"
-dir_name=esp32
-wd=~/$dir_name
+toolchain_dir_name=esp32
+wd=~/$toolchain_dir_name
 
 mkdir $wd
 
 cd $wd
 
-printf "\ndownload correct file corresponding to system architecture\n"
-arch=$(uname -m)
+printf "\ndownload toolchain\n"
+xtensa_file="xtensa-esp32-elf-linux64-1.22.0-96-g2852398-5.2.0.tar.gz"
+wget "https://dl.espressif.com/dl/$xtensa_file"
 
-if [ $arch == "x86_64" ]
-then
-    file=xtensa-esp32-elf-linux64-1.22.0-80-g6c4433a-5.2.0.tar.gz
-
-elif [ $arch == "i686" ] || [ $arch == "i386" ]
-then
-    file=xtensa-esp32-elf-linux32-1.22.0-80-g6c4433a-5.2.0.tar.gz
-
-else
-    >&2 printf "system not supported\n"
-    exit 1
-fi
-
-wget "https://dl.espressif.com/dl/$file"
-
-tar -xzf $file && rm $file
+tar -xzf "$xtensa_file" && rm "$xtensa_file"
 
 printf "\nsetup esp-idf\n"
 git clone https://github.com/espressif/esp-idf.git
-git -C esp-idf checkout v3.1
+git -C esp-idf checkout d3e562907 # dependency given by used arduino-esp32 repository
 git -C esp-idf submodule update --init --recursive
 
 printf "\nupdate ~/.profile\n"
-echo "# ESP32" >> ~/.profile
-echo "export PATH=\"\$PATH:\$HOME/$dir_name/xtensa-esp32-elf/bin\"" >> ~/.profile
-echo "export IDF_PATH=\"\$HOME/$dir_name/esp-idf\"" >> ~/.profile
+file_profile="$HOME/.profile"
+{
+  printf "\n# ESP32"
+  echo "export PATH=\"\$PATH:\$HOME/$toolchain_dir_name/xtensa-esp32-elf/bin\""
+  echo "export IDF_PATH=\"\$HOME/$toolchain_dir_name/esp-idf\""
+} >> "$file_profile"
 
-source ~/.profile
+# shellcheck disable=SC1090
+source "$file_profile"
