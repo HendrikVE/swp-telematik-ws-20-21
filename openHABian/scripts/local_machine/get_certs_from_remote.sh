@@ -18,3 +18,5 @@ scp "openhabian_pi:$REMOTE_CA_DIR/esp32-1.key" "$cert_dir/esp32-1.key"
 # get certificates for second esp32 (esp32-2)
 scp "openhabian_pi:$REMOTE_CA_DIR/esp32-2.crt" "$cert_dir/esp32-2.crt"
 scp "openhabian_pi:$REMOTE_CA_DIR/esp32-2.key" "$cert_dir/esp32-2.key"
+
+echo "Finished downloading certificates to 'certs_for_window_alert'. Copy them as needed to 'ESP32/window_alert/src/storage/certs'"

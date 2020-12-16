@@ -1,8 +1,5 @@
 #!/bin/bash
 
-printf "\nsetup SSH\n"
-# source setup_ssh.sh
-
 printf "\nsetup CA\n"
 source setup_ca.sh
 
