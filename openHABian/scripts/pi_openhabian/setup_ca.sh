@@ -13,12 +13,11 @@ client_name_2="esp32-2"
 
 res_dir="../res/CA"
 
-ca_dir="$HOME/CA_test"
-mkdir -p "$ca_dir"
-chmod 700 "$ca_dir"
+mkdir -p "$CA_DIR"
+chmod 700 "$CA_DIR"
 
-cp "$res_dir/generate-CA.sh" "$res_dir/setup-CA.sh" "$ca_dir"
-cd "$ca_dir"
+cp "$res_dir/generate-CA.sh" "$res_dir/setup-CA.sh" "$CA_DIR"
+cd "$CA_DIR"
 
 # create ca cert and server cert + key
 IPLIST="$HOST_IPV4" HOSTLIST="$HOST_IPV4" ./generate-CA.sh

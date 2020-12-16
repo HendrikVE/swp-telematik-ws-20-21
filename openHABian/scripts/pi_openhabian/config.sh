@@ -5,3 +5,5 @@ HOST_NAME=$(hostname)
 export HOST_IPV4 HOST_NAME
 
 export RES_DIR="~/setup/res"
+
+export CA_DIR="$HOME/CA_test"

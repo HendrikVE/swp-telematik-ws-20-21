@@ -10,8 +10,8 @@ if ! grep -Fxq "Host openhabian_pi" "$HOME/.ssh/config"
 then
     # get missing config information from user
     printf "\nadd host entry for openhabian to local ssh config\n"
-    read -r -p 'IP of openhabian: ' ssh_config_ip
-    read -r -p 'Path to private key: ' ssh_config_keyfile
+    read -r -p "IP of openhabian: " ssh_config_ip
+    read -r -p "Path to private key: " ssh_config_keyfile
 
     # write local config
     {
@@ -37,4 +37,5 @@ scp -r "$LOCAL_RES_DIR"/* openhabian_pi:"$REMOTE_RES_DIR"
 scp -r "$LOCAL_SCRIPT_DIR"/* openhabian_pi:"$REMOTE_SCRIPT_DIR"
 
 # execute setup on remote side
-ssh openhabian_pi "cd $REMOTE_SCRIPT_DIR && ./setup_all.sh"
+# -t flag is needed for visual menus and sudo password prompts
+ssh -t openhabian_pi "cd $REMOTE_SCRIPT_DIR && ./setup_all.sh"
