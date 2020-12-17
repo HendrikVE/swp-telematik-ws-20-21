@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e -o xtrace
+set -e
 
 # load config
 source config.sh

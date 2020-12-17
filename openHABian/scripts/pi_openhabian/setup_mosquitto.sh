@@ -1,12 +1,13 @@
 #!/bin/bash
 
-set -e -o xtrace
+set -e
 
 # load config
 source config.sh
 
 echo "Installation of the Mosquitto MQTT Broker is done through the 'openhab-config' tool."
 echo "In the following menu please navigate to 'Optional Components -> Mosquitto'"
+echo "PLEASE PROVIDE A PASSWORD IN THE COMING DIALOG"
 read -r -p "Press enter to continue..."
 
 sudo openhabian-config
@@ -38,3 +39,5 @@ require_certificate true" "$HOST_IPV4" "$HOST_IPV4"
 } | sudo tee -a /etc/mosquitto/mosquitto.conf
 
 sudo service mosquitto restart
+
+# TODO: install mqtt binding for openhab

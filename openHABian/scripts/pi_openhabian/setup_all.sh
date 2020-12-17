@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# TODO: passwd openhabian
+
 printf "\nsetup CA\n"
 source setup_ca.sh
 

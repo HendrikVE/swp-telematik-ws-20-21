@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e -o xtrace
+set -e
 
 # load config
 source config.sh
@@ -17,7 +17,7 @@ mkdir -p "$CA_DIR"
 chmod 700 "$CA_DIR"
 
 cp "$res_dir/generate-CA.sh" "$res_dir/setup-CA.sh" "$CA_DIR"
-cd "$CA_DIR"
+pushd "$CA_DIR"
 
 # create ca cert and server cert + key
 IPLIST="$HOST_IPV4" HOSTLIST="$HOST_IPV4" ./generate-CA.sh
@@ -32,3 +32,5 @@ IPLIST="$HOST_IPV4" HOSTLIST="$HOST_IPV4" ./generate-CA.sh client "$client_name_
 
 # create client cert + key for esp32-2
 IPLIST="$HOST_IPV4" HOSTLIST="$HOST_IPV4" ./generate-CA.sh client "$client_name_2"
+
+popd
