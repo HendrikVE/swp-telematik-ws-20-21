@@ -47,13 +47,14 @@ void UpdateManager::checkForOTAUpdate() {
     }
 */
 
-    Log.notice("before creation");
     WiFiClientSecure client;
     client.setCACert( (char*) ca_crt_start  );
     client.setCertificate( (char*) client_crt_start  );
     client.setPrivateKey( (char*) client_key_start  );
     char request[256];
-    sprintf(request,"https://%s:4443/%s",this->mHost,this->mFilename);
+    //the APP_VERSION_CODE is from Manifest.h so that the ESP doesnt update itself forever, always looks
+    //for code in folder one version higher 
+    sprintf(request,"https://%s:4443/%s/%s",this->mHost,String(APP_VERSION_CODE+1).c_str(),this->mFilename);
     if(!mHttpClient.begin(client,request))
     {
         Log.notice("Unable to connect");
@@ -64,7 +65,11 @@ void UpdateManager::checkForOTAUpdate() {
     int httpCode = mHttpClient.GET();
     if (httpCode != HTTP_CODE_OK) 
     {
-        Log.notice("HTTP GET... failed in ota, error: %d", httpCode);
+        Log.notice("HTTP GET... failed in ota. error: %d", httpCode);
+        if(httpCode == 404)
+        {
+            Log.notice("Probably there are no new updates.");
+        }
         Log.notice("Exiting OTA Update");
         mHttpClient.end();
         return;
