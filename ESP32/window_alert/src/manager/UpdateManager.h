@@ -11,7 +11,7 @@ public:
 
     void begin(const char* host, const char* filename, const char* user, const char* password, const char* deviceID);
 
-    void checkForOTAUpdate();
+    int checkForOTAUpdate();
 
 private:
 

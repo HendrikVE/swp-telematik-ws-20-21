@@ -255,7 +255,8 @@ void updateAll() {
         publishEnvironmentData();
     #endif /*CONFIG_SENSOR_NONE*/
 
-    updateManager->checkForOTAUpdate();
+    int errorCode = updateManager->checkForOTAUpdate();
+    mqttClient.publish("ota",String(errorCode).c_str(),false,2);
 }
 
 void handleWakeup(){
