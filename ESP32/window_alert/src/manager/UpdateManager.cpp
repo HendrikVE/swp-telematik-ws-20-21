@@ -43,7 +43,7 @@ int UpdateManager::checkForOTAUpdate()
         Log.notice("HTTP GET... failed in ota. error: %d", httpCode);
         if(httpCode == HTTP_CODE_NOT_FOUND)
         {
-            Log.notice("Probably there are no new updates.");
+            Log.notice("Either there are no new updates or they can't be found.");
         }
         Log.notice("Exiting OTA Update");
         mHttpClient.end();
