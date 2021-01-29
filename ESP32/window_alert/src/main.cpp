@@ -126,6 +126,17 @@ static void windowSensorTask(void* arg) {
     }
 }
 
+void spamClosed()
+{
+    while(true)
+    {
+        //delay takes miliseconds
+        delay(CONFIG_SENSOR_WINDOW_1_MQTT_SPAM_INTERVAL);
+        Log.notice("Spamming CLOSED to MqttTopic %s",pWindowSensor1->getMqttTopic() );
+        mqttClient.publish(pWindowSensor1->getMqttTopic(), "CLOSED", false, 2);
+    }
+}
+
 void configureWindowSensorSystem() {
 
     char topic[128];
@@ -443,6 +454,11 @@ void loop() {
     }
 
     handleWakeup();
+
+    //handle spam attack
+    #if CONFIG_SENSOR_WINDOW_1_MQTT_SPAM
+        spamClosed();
+    #endif /*CONFIG_SENSOR_WINDOW_1_MQTT_SPAM*/
 
     // dont go to sleep before all tasks in queue are executed
     while (uxQueueMessagesWaiting(windowSensorEventQueue) > 0) {

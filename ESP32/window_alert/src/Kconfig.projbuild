@@ -196,6 +196,18 @@ menu "Sensor config"
                 MQTT subtopic for this sensor
             depends on SENSOR_WINDOW_1_ENABLED
 
+        config SENSOR_WINDOW_1_MQTT_SPAM
+            bool "enable spam MQTT topic attack"
+            default n
+            help 
+                spam this mqtt topic with CLOSED
+            depends on SENSOR_WINDOW_1_ENABLED
+
+        config SENSOR_WINDOW_1_MQTT_SPAM_INTERVAL
+            int "spam interval in miliseconds"
+            default 5000
+            depends on SENSOR_WINDOW_1_MQTT_SPAM
+
     endmenu
 
     menu "Window sensor 2"
