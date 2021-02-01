@@ -5,8 +5,8 @@
 printf "\nsetup CA\n"
 source setup_ca.sh
 
-printf "\nsetup openhab2 project config\n"
-# source setup_openhab2_config.sh
+printf "\nsetup openhab project config\n"
+source setup_openhab_config.sh
 
 printf "\nsetup mosquitto\n"
 source setup_mosquitto.sh
