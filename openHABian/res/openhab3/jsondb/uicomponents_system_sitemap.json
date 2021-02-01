@@ -1,0 +1,266 @@
+{
+  "OTA_UPDATE": {
+    "class": "org.openhab.core.ui.components.RootUIComponent",
+    "value": {
+      "uid": "OTA_UPDATE",
+      "timestamp": "Jan 26, 2021, 1:06:05 AM",
+      "component": "Sitemap",
+      "config": {
+        "label": "OTA Update"
+      },
+      "slots": {
+        "widgets": [
+          {
+            "component": "Frame",
+            "config": {
+              "label": "Security Alerts"
+            },
+            "slots": {
+              "widgets": [
+                {
+                  "component": "Switch",
+                  "config": {
+                    "icon": "switch",
+                    "label": "Security System",
+                    "item": "SecuritySystem"
+                  }
+                },
+                {
+                  "component": "Switch",
+                  "config": {
+                    "icon": "siren",
+                    "label": "Security status",
+                    "mappings": [
+                      "ON\u003dAlarm",
+                      "OFF\u003dIdle"
+                    ],
+                    "item": "SecuritySystem_ActiveAlarm"
+                  }
+                },
+                {
+                  "component": "Text",
+                  "config": {
+                    "icon": "receiver",
+                    "label": "Unit: ESP32-1"
+                  }
+                },
+                {
+                  "component": "Text",
+                  "config": {
+                    "label": "Reason: Unsigned OTA detected",
+                    "icon": "text"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "component": "Frame",
+            "config": {
+              "label": "ESP32-1"
+            },
+            "slots": {
+              "widgets": [
+                {
+                  "component": "Text",
+                  "config": {
+                    "icon": "cellar",
+                    "label": "Location",
+                    "item": "ESP32_1_Location"
+                  }
+                },
+                {
+                  "component": "Text",
+                  "config": {
+                    "icon": "batterylevel",
+                    "label": "Battery",
+                    "item": "ESP32_1_Battery"
+                  }
+                },
+                {
+                  "component": "Text",
+                  "config": {
+                    "icon": "shield-1",
+                    "label": "Protection level",
+                    "item": "ESP32_1_Protection"
+                  }
+                },
+                {
+                  "component": "Text",
+                  "config": {
+                    "icon": "keyring",
+                    "label": "Firmware version",
+                    "item": "ESP32_1_Version"
+                  }
+                },
+                {
+                  "component": "Text",
+                  "config": {
+                    "icon": "contact",
+                    "label": "Window 1",
+                    "item": "ESP32_1_WindowSensor1"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "component": "Frame",
+            "config": {
+              "label": "ESP32-2"
+            },
+            "slots": {
+              "widgets": [
+                {
+                  "component": "Text",
+                  "config": {
+                    "icon": "groundfloor",
+                    "label": "Location",
+                    "item": "ESP32_2_Location"
+                  }
+                },
+                {
+                  "component": "Text",
+                  "config": {
+                    "icon": "batterylevel",
+                    "label": "Battery",
+                    "item": "ESP32_2_Battery"
+                  }
+                },
+                {
+                  "component": "Text",
+                  "config": {
+                    "icon": "shield-0",
+                    "label": "Protection level",
+                    "item": "ESP32_2_Protection"
+                  }
+                },
+                {
+                  "component": "Text",
+                  "config": {
+                    "icon": "keyring",
+                    "label": "Firmware version",
+                    "item": "ESP32_2_Version"
+                  }
+                },
+                {
+                  "component": "Text",
+                  "config": {
+                    "icon": "contact",
+                    "label": "Window 1",
+                    "item": "ESP32_2_WindowSensor1"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "WIFI_ATTACK": {
+    "class": "org.openhab.core.ui.components.RootUIComponent",
+    "value": {
+      "uid": "WIFI_ATTACK",
+      "timestamp": "Jan 19, 2021, 2:12:00 AM",
+      "component": "Sitemap",
+      "config": {
+        "label": "Wifi Attack"
+      },
+      "slots": {
+        "widgets": [
+          {
+            "component": "Frame",
+            "config": {
+              "label": "Security Alerts"
+            },
+            "slots": {
+              "widgets": [
+                {
+                  "component": "Switch",
+                  "config": {
+                    "icon": "switch",
+                    "label": "Security System",
+                    "item": "SecuritySystem"
+                  }
+                },
+                {
+                  "component": "Text",
+                  "config": {
+                    "icon": "siren",
+                    "label": "Status: ALERT"
+                  }
+                },
+                {
+                  "component": "Text",
+                  "config": {
+                    "icon": "receiver",
+                    "label": "Unit: ESP32-3"
+                  }
+                },
+                {
+                  "component": "Text",
+                  "config": {
+                    "label": "Reason: Unsigned OTA detected",
+                    "icon": "text"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "component": "Frame",
+            "config": {
+              "label": "ESP32-3",
+              "icon": ""
+            },
+            "slots": {
+              "widgets": [
+                {
+                  "component": "Text",
+                  "config": {
+                    "icon": "firstfloor",
+                    "label": "Location",
+                    "item": "ESP32_3_Location"
+                  }
+                },
+                {
+                  "component": "Text",
+                  "config": {
+                    "icon": "batterylevel",
+                    "label": "Battery",
+                    "item": "ESP32_3_Battery"
+                  }
+                },
+                {
+                  "component": "Text",
+                  "config": {
+                    "icon": "keyring",
+                    "label": "Firmware version",
+                    "item": "ESP32_3_Version"
+                  }
+                },
+                {
+                  "component": "Text",
+                  "config": {
+                    "icon": "contact",
+                    "label": "Window 1",
+                    "item": "ESP32_3_WindowSensor1"
+                  }
+                },
+                {
+                  "component": "Text",
+                  "config": {
+                    "icon": "time",
+                    "item": "ESP32_3_Last_Contact",
+                    "label": "Last contact"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}

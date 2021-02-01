@@ -1,0 +1,80 @@
+{
+  "binding:SecuritySystem_ActiveAlarm": {
+    "class": "org.openhab.core.items.Metadata",
+    "value": {
+      "key": {
+        "segments": [
+          "binding",
+          "SecuritySystem_ActiveAlarm"
+        ],
+        "uid": "binding:SecuritySystem_ActiveAlarm"
+      },
+      "value": "xxx",
+      "configuration": {}
+    }
+  },
+  "stateDescription:ESP32_3_Last_Contact": {
+    "class": "org.openhab.core.items.Metadata",
+    "value": {
+      "key": {
+        "segments": [
+          "stateDescription",
+          "ESP32_3_Last_Contact"
+        ],
+        "uid": "stateDescription:ESP32_3_Last_Contact"
+      },
+      "value": " ",
+      "configuration": {
+        "pattern": "%1$td.%1$tm.%1$tY %1$tH:%1$tM"
+      }
+    }
+  },
+  "stateDescription:ESP32_1_Battery": {
+    "class": "org.openhab.core.items.Metadata",
+    "value": {
+      "key": {
+        "segments": [
+          "stateDescription",
+          "ESP32_1_Battery"
+        ],
+        "uid": "stateDescription:ESP32_1_Battery"
+      },
+      "value": " ",
+      "configuration": {
+        "pattern": "%s %%"
+      }
+    }
+  },
+  "stateDescription:ESP32_2_Battery": {
+    "class": "org.openhab.core.items.Metadata",
+    "value": {
+      "key": {
+        "segments": [
+          "stateDescription",
+          "ESP32_2_Battery"
+        ],
+        "uid": "stateDescription:ESP32_2_Battery"
+      },
+      "value": " ",
+      "configuration": {
+        "pattern": "%d %%"
+      }
+    }
+  },
+  "stateDescription:ESP32_3_Battery": {
+    "class": "org.openhab.core.items.Metadata",
+    "value": {
+      "key": {
+        "segments": [
+          "stateDescription",
+          "ESP32_3_Battery"
+        ],
+        "uid": "stateDescription:ESP32_3_Battery"
+      },
+      "value": " ",
+      "configuration": {
+        "pattern": "%d %%"
+      }
+    }
+  }
+}

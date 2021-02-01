@@ -1,0 +1,284 @@
+{
+  "ESP32_3_Last_Contact -\u003e mqtt:topic:eeb76e85d3:ESP32-3_WindowSensor1": {
+    "class": "org.openhab.core.thing.link.ItemChannelLink",
+    "value": {
+      "channelUID": {
+        "segments": [
+          "mqtt",
+          "topic",
+          "eeb76e85d3",
+          "ESP32-3_WindowSensor1"
+        ],
+        "uid": "mqtt:topic:eeb76e85d3:ESP32-3_WindowSensor1"
+      },
+      "configuration": {
+        "properties": {
+          "profile": "system:timestamp-update"
+        }
+      },
+      "itemName": "ESP32_3_Last_Contact"
+    }
+  },
+  "ESP32_3_Version -\u003e mqtt:topic:eeb76e85d3:ESP32-3_Version": {
+    "class": "org.openhab.core.thing.link.ItemChannelLink",
+    "value": {
+      "channelUID": {
+        "segments": [
+          "mqtt",
+          "topic",
+          "eeb76e85d3",
+          "ESP32-3_Version"
+        ],
+        "uid": "mqtt:topic:eeb76e85d3:ESP32-3_Version"
+      },
+      "configuration": {
+        "properties": {}
+      },
+      "itemName": "ESP32_3_Version"
+    }
+  },
+  "ESP32_1_Location -\u003e mqtt:topic:ca04ade4c4:d93e3638c2:ESP32-1_Location": {
+    "class": "org.openhab.core.thing.link.ItemChannelLink",
+    "value": {
+      "channelUID": {
+        "segments": [
+          "mqtt",
+          "topic",
+          "ca04ade4c4",
+          "d93e3638c2",
+          "ESP32-1_Location"
+        ],
+        "uid": "mqtt:topic:ca04ade4c4:d93e3638c2:ESP32-1_Location"
+      },
+      "configuration": {
+        "properties": {}
+      },
+      "itemName": "ESP32_1_Location"
+    }
+  },
+  "ESP32_3_Location -\u003e mqtt:topic:eeb76e85d3:ESP32-3_Location": {
+    "class": "org.openhab.core.thing.link.ItemChannelLink",
+    "value": {
+      "channelUID": {
+        "segments": [
+          "mqtt",
+          "topic",
+          "eeb76e85d3",
+          "ESP32-3_Location"
+        ],
+        "uid": "mqtt:topic:eeb76e85d3:ESP32-3_Location"
+      },
+      "configuration": {
+        "properties": {}
+      },
+      "itemName": "ESP32_3_Location"
+    }
+  },
+  "ESP32_2_Battery -\u003e mqtt:topic:ca04ade4c4:e5c45b67bd:ESP32-2_Battery": {
+    "class": "org.openhab.core.thing.link.ItemChannelLink",
+    "value": {
+      "channelUID": {
+        "segments": [
+          "mqtt",
+          "topic",
+          "ca04ade4c4",
+          "e5c45b67bd",
+          "ESP32-2_Battery"
+        ],
+        "uid": "mqtt:topic:ca04ade4c4:e5c45b67bd:ESP32-2_Battery"
+      },
+      "configuration": {
+        "properties": {}
+      },
+      "itemName": "ESP32_2_Battery"
+    }
+  },
+  "ESP32_2_Version -\u003e mqtt:topic:ca04ade4c4:e5c45b67bd:ESP32-2_Version": {
+    "class": "org.openhab.core.thing.link.ItemChannelLink",
+    "value": {
+      "channelUID": {
+        "segments": [
+          "mqtt",
+          "topic",
+          "ca04ade4c4",
+          "e5c45b67bd",
+          "ESP32-2_Version"
+        ],
+        "uid": "mqtt:topic:ca04ade4c4:e5c45b67bd:ESP32-2_Version"
+      },
+      "configuration": {
+        "properties": {}
+      },
+      "itemName": "ESP32_2_Version"
+    }
+  },
+  "ESP32_1_Version -\u003e mqtt:topic:ca04ade4c4:d93e3638c2:ESP32-1_Version": {
+    "class": "org.openhab.core.thing.link.ItemChannelLink",
+    "value": {
+      "channelUID": {
+        "segments": [
+          "mqtt",
+          "topic",
+          "ca04ade4c4",
+          "d93e3638c2",
+          "ESP32-1_Version"
+        ],
+        "uid": "mqtt:topic:ca04ade4c4:d93e3638c2:ESP32-1_Version"
+      },
+      "configuration": {
+        "properties": {}
+      },
+      "itemName": "ESP32_1_Version"
+    }
+  },
+  "ESP32_3_WindowSensor1 -\u003e mqtt:topic:eeb76e85d3:ESP32-3_WindowSensor1": {
+    "class": "org.openhab.core.thing.link.ItemChannelLink",
+    "value": {
+      "channelUID": {
+        "segments": [
+          "mqtt",
+          "topic",
+          "eeb76e85d3",
+          "ESP32-3_WindowSensor1"
+        ],
+        "uid": "mqtt:topic:eeb76e85d3:ESP32-3_WindowSensor1"
+      },
+      "configuration": {
+        "properties": {}
+      },
+      "itemName": "ESP32_3_WindowSensor1"
+    }
+  },
+  "ESP32_2_Location -\u003e mqtt:topic:ca04ade4c4:e5c45b67bd:ESP32-2_Location": {
+    "class": "org.openhab.core.thing.link.ItemChannelLink",
+    "value": {
+      "channelUID": {
+        "segments": [
+          "mqtt",
+          "topic",
+          "ca04ade4c4",
+          "e5c45b67bd",
+          "ESP32-2_Location"
+        ],
+        "uid": "mqtt:topic:ca04ade4c4:e5c45b67bd:ESP32-2_Location"
+      },
+      "configuration": {
+        "properties": {}
+      },
+      "itemName": "ESP32_2_Location"
+    }
+  },
+  "ESP32_2_Protection -\u003e mqtt:topic:ca04ade4c4:e5c45b67bd:ESP32-2_Protection": {
+    "class": "org.openhab.core.thing.link.ItemChannelLink",
+    "value": {
+      "channelUID": {
+        "segments": [
+          "mqtt",
+          "topic",
+          "ca04ade4c4",
+          "e5c45b67bd",
+          "ESP32-2_Protection"
+        ],
+        "uid": "mqtt:topic:ca04ade4c4:e5c45b67bd:ESP32-2_Protection"
+      },
+      "configuration": {
+        "properties": {}
+      },
+      "itemName": "ESP32_2_Protection"
+    }
+  },
+  "ESP32_1_Battery -\u003e mqtt:topic:ca04ade4c4:d93e3638c2:ESP32-1_Battery": {
+    "class": "org.openhab.core.thing.link.ItemChannelLink",
+    "value": {
+      "channelUID": {
+        "segments": [
+          "mqtt",
+          "topic",
+          "ca04ade4c4",
+          "d93e3638c2",
+          "ESP32-1_Battery"
+        ],
+        "uid": "mqtt:topic:ca04ade4c4:d93e3638c2:ESP32-1_Battery"
+      },
+      "configuration": {
+        "properties": {}
+      },
+      "itemName": "ESP32_1_Battery"
+    }
+  },
+  "ESP32_1_Protection -\u003e mqtt:topic:ca04ade4c4:d93e3638c2:ESP32-1_Protection": {
+    "class": "org.openhab.core.thing.link.ItemChannelLink",
+    "value": {
+      "channelUID": {
+        "segments": [
+          "mqtt",
+          "topic",
+          "ca04ade4c4",
+          "d93e3638c2",
+          "ESP32-1_Protection"
+        ],
+        "uid": "mqtt:topic:ca04ade4c4:d93e3638c2:ESP32-1_Protection"
+      },
+      "configuration": {
+        "properties": {}
+      },
+      "itemName": "ESP32_1_Protection"
+    }
+  },
+  "ESP32_3_Battery -\u003e mqtt:topic:eeb76e85d3:ESP32-3_Battery": {
+    "class": "org.openhab.core.thing.link.ItemChannelLink",
+    "value": {
+      "channelUID": {
+        "segments": [
+          "mqtt",
+          "topic",
+          "eeb76e85d3",
+          "ESP32-3_Battery"
+        ],
+        "uid": "mqtt:topic:eeb76e85d3:ESP32-3_Battery"
+      },
+      "configuration": {
+        "properties": {}
+      },
+      "itemName": "ESP32_3_Battery"
+    }
+  },
+  "ESP32_1_WindowSensor1 -\u003e mqtt:topic:ca04ade4c4:d93e3638c2:ESP32-1_WindowSensor1": {
+    "class": "org.openhab.core.thing.link.ItemChannelLink",
+    "value": {
+      "channelUID": {
+        "segments": [
+          "mqtt",
+          "topic",
+          "ca04ade4c4",
+          "d93e3638c2",
+          "ESP32-1_WindowSensor1"
+        ],
+        "uid": "mqtt:topic:ca04ade4c4:d93e3638c2:ESP32-1_WindowSensor1"
+      },
+      "configuration": {
+        "properties": {}
+      },
+      "itemName": "ESP32_1_WindowSensor1"
+    }
+  },
+  "ESP32_2_WindowSensor1 -\u003e mqtt:topic:ca04ade4c4:e5c45b67bd:ESP32-2_WindowSensor1": {
+    "class": "org.openhab.core.thing.link.ItemChannelLink",
+    "value": {
+      "channelUID": {
+        "segments": [
+          "mqtt",
+          "topic",
+          "ca04ade4c4",
+          "e5c45b67bd",
+          "ESP32-2_WindowSensor1"
+        ],
+        "uid": "mqtt:topic:ca04ade4c4:e5c45b67bd:ESP32-2_WindowSensor1"
+      },
+      "configuration": {
+        "properties": {}
+      },
+      "itemName": "ESP32_2_WindowSensor1"
+    }
+  }
+}
