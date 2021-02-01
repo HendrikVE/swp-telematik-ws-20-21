@@ -1,5 +1,11 @@
+#!/bin/bash
 
-#install nginx
+set -e
+
+# load config
+source config.sh
+
+# install nginx
 sudo apt install nginx
 #replace SERVER_IP in ota.conf with IP address, the certs are alredy in the resource dir
 sed -i -e "s/SERVER_IP/$HOST_IPV4/g" "$RES_DIR/nginx/conf.d/ota.conf"
