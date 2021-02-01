@@ -45,9 +45,9 @@ void startDeviceSleep(uint64_t sleepIntervalMS);
 
 void lazySetup();
 
-void buildTopic(char* output, const char* room, const char* boardID, const char* measurement) {
+void buildTopic(char* output, const char* boardID, const char* measurement) {
 
-    sprintf(output, "room/%s/%s/%s", room, boardID, measurement);
+    sprintf(output, "myhome/%s/%s", boardID, measurement);
 }
 
 void IRAM_ATTR isrWindowSensor1() {
@@ -145,7 +145,7 @@ void configureWindowSensorSystem() {
 
     #if CONFIG_SENSOR_WINDOW_1_ENABLED
 
-        buildTopic(topic, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_WINDOW_1_MQTT_TOPIC);
+        buildTopic(topic, CONFIG_DEVICE_ID, CONFIG_SENSOR_WINDOW_1_MQTT_TOPIC);
 
         pWindowSensor1 = new WindowSensor(
                 CONFIG_SENSOR_WINDOW_1_GPIO_INPUT,
@@ -158,7 +158,7 @@ void configureWindowSensorSystem() {
 
     #if CONFIG_SENSOR_WINDOW_2_ENABLED
 
-        buildTopic(topic, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_WINDOW_2_MQTT_TOPIC);
+        buildTopic(topic, CONFIG_DEVICE_ID, CONFIG_SENSOR_WINDOW_2_MQTT_TOPIC);
 
         pWindowSensor2 = new WindowSensor(
                 CONFIG_SENSOR_WINDOW_2_GPIO_INPUT,
@@ -213,13 +213,13 @@ void publishEnvironmentData() {
 
 
     char topicTemperature[128];
-    buildTopic(topicTemperature, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_TEMPERATURE);
+    buildTopic(topicTemperature, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_TEMPERATURE);
 
     char topicHumidity[128];
-    buildTopic(topicHumidity, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_HUMIDITY);
+    buildTopic(topicHumidity, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_HUMIDITY);
 
     char topicPressure[128];
-    buildTopic(topicPressure, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_PRESSURE);
+    buildTopic(topicPressure, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_PRESSURE);
 
     mqttClient.publish(topicTemperature, strTemperature, false, 2);
     mqttClient.publish(topicHumidity, strHumidity, false, 2);
@@ -238,7 +238,7 @@ void publishEnvironmentData() {
             Log.notice("gas resistence: %s", strGasResistence);
 
             char topicGas[128];
-            buildTopic(topicGas, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_GAS);
+            buildTopic(topicGas, CONFIG_DEVICE_ID, CONFIG_SENSOR_MQTT_TOPIC_GAS);
 
             mqttClient.publish(topicGas, strGasResistence, false, 2);
         }
@@ -401,7 +401,7 @@ void lazySetup() {
     sprintf(strVersion, "%s (%i)", APP_VERSION_NAME, APP_VERSION_CODE);
 
     char topicVersion[128];
-    buildTopic(topicVersion, CONFIG_DEVICE_ROOM, CONFIG_DEVICE_ID, "version");
+    buildTopic(topicVersion, CONFIG_DEVICE_ID, "version");
 
     mqttClient.publish(topicVersion, strVersion, true, 2);
     Log.notice("device is running version: %s", strVersion);

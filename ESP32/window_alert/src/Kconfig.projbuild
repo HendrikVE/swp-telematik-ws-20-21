@@ -191,7 +191,7 @@ menu "Sensor config"
 
         config SENSOR_WINDOW_1_MQTT_TOPIC
             string "MQTT topic"
-            default "WindowSensor1"
+            default "window-sensor-1"
             help
                 MQTT subtopic for this sensor
             depends on SENSOR_WINDOW_1_ENABLED
@@ -241,7 +241,7 @@ menu "Sensor config"
 
         config SENSOR_WINDOW_2_MQTT_TOPIC
             string "MQTT topic"
-            default "WindowSensor2"
+            default "window-sensor-2"
             help
                 MQTT subtopic for this sensor
             depends on SENSOR_WINDOW_2_ENABLED
