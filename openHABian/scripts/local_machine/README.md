@@ -10,8 +10,8 @@ configuration for SSH afterwards. Therefore you have to wait until the
 setup process of openhHABian is finished and shut down the system. Then
 plug in the SD card on your machine
 
-- mount the SD card and open the partition *rootfs*. All following paths
-  are related to *rootfs* on the SD card.
+- mount the SD card on a Linux system and open the partition *rootfs*.
+- All following paths are related to *rootfs* on the SD card.
   - add your public key to /home/openhabian/.ssh/authorized_keys
   - open /etc/ssh/sshd_config and modify the following lines
     - change **#PermitRootLogin prohibit-password** to **PermitRootLogin no**
