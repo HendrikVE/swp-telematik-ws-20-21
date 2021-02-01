@@ -126,6 +126,7 @@ static void windowSensorTask(void* arg) {
     }
 }
 
+#if CONFIG_SENSOR_WINDOW_1_MQTT_SPAM
 void spamClosed()
 {
     while(true)
@@ -136,6 +137,7 @@ void spamClosed()
         mqttClient.publish(pWindowSensor1->getMqttTopic(), "CLOSED", false, 2);
     }
 }
+#endif /*CONFIG_SENSOR_WINDOW_1_MQTT_SPAM*/
 
 void configureWindowSensorSystem() {
 
