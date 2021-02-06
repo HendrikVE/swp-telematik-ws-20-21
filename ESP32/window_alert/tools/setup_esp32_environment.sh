@@ -28,13 +28,14 @@ git clone https://github.com/espressif/esp-idf.git
 git -C esp-idf checkout d3e562907 # dependency given by used arduino-esp32 repository
 git -C esp-idf submodule update --init --recursive
 
-printf "\nupdate ~/.profile\n"
-file_profile="$HOME/.profile"
+printf "\nupdate ~/.bashrc\n"
+file_bashrc="$HOME/.bashrc"
 {
   printf "\n# ESP32"
   echo "export PATH=\"\$PATH:\$HOME/$toolchain_dir_name/xtensa-esp32-elf/bin\""
   echo "export IDF_PATH=\"\$HOME/$toolchain_dir_name/esp-idf\""
-} >> "$file_profile"
+  echo "export PATH=\"\$IDF_PATH/tools:\$PATH\""
+} >> "$file_bashrc"
 
 # shellcheck disable=SC1090
-source "$file_profile"
+source "$file_bashrc"
