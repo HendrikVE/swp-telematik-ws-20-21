@@ -196,18 +196,6 @@ menu "Sensor config"
                 MQTT subtopic for this sensor
             depends on SENSOR_WINDOW_1_ENABLED
 
-        config SENSOR_WINDOW_1_MQTT_SPAM
-            bool "enable spam MQTT topic attack"
-            default n
-            help 
-                spam this mqtt topic with CLOSED
-            depends on SENSOR_WINDOW_1_ENABLED
-
-        config SENSOR_WINDOW_1_MQTT_SPAM_INTERVAL
-            int "spam interval in miliseconds"
-            default 5000
-            depends on SENSOR_WINDOW_1_MQTT_SPAM
-
     endmenu
 
     menu "Window sensor 2"
@@ -248,4 +236,45 @@ menu "Sensor config"
 
     endmenu
 
+endmenu
+
+menu "Spam Attack"
+
+        config MQTT_SPAM
+            bool "enable spam MQTT topic attack"
+            default n
+            help 
+                this enables spam attack
+
+        config MQTT_SPAM_DEVICE_ID
+            string "Device ID of ESP to spam"
+            default "esp32-1"
+            help
+                chose which esp to spam
+            depends on MQTT_SPAM
+
+        config MQTT_SPAM_TOPIC
+            string "MQTT subtopic to spam"
+            default "window-sensor-1"
+            help
+                chose which subtopic to spam
+            depends on MQTT_SPAM     
+
+        config MQTT_SPAM_INTERVAL
+            int "spam interval (in ms)"
+            default 5000
+            depends on MQTT_SPAM
+
+        choice MQTT_SPAM_TYPE
+            prompt "spam type"
+            default SPAM_CLOSED
+            depends on MQTT_SPAM
+
+            config MQTT_SPAM_CLOSED
+                bool "spam CLOSED"
+            config MQTT_SPAM_OPEN
+                bool "spam OPEN"
+            config MQTT_SPAM_TROLL
+                bool "spam OPEN or CLOSED randomly"
+        endchoice
 endmenu

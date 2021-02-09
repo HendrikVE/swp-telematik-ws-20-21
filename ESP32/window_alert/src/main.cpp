@@ -126,18 +126,37 @@ static void windowSensorTask(void* arg) {
     }
 }
 
-#if CONFIG_SENSOR_WINDOW_1_MQTT_SPAM
-void spamClosed()
+#if CONFIG_MQTT_SPAM
+void spam(const char* message)
 {
+    char topic[128];
+    buildTopic(topic,CONFIG_MQTT_SPAM_DEVICE_ID,CONFIG_MQTT_SPAM_TOPIC);
+    #if CONFIG_MQTT_SPAM_TROLL
+        char msg[10];
+        srand(time(0));
+    #endif /*CONFIG_MQTT_SPAM_TROLL*/
     while(true)
     {
         //delay takes miliseconds
-        delay(CONFIG_SENSOR_WINDOW_1_MQTT_SPAM_INTERVAL);
-        Log.notice("Spamming CLOSED to MqttTopic %s",pWindowSensor1->getMqttTopic() );
-        mqttClient.publish(pWindowSensor1->getMqttTopic(), "CLOSED", false, 2);
+        delay(CONFIG_MQTT_SPAM_INTERVAL);
+        #if CONFIG_MQTT_SPAM_TROLL
+            if(rand()%100<50)
+            {
+                sprintf(msg,"OPEN");
+            }
+            else{
+                sprintf(msg,"CLOSED");
+            }    
+            Log.notice("Spamming %s to MqttTopic %s",msg,topic );
+            mqttClient.publish(topic,msg, false, 2);
+        #else
+            Log.notice("Spamming %s to MqttTopic %s",message,topic );
+            mqttClient.publish(topic,message, false, 2);
+        #endif
     }
 }
-#endif /*CONFIG_SENSOR_WINDOW_1_MQTT_SPAM*/
+
+#endif /*CONFIG_MQTT_SPAM*/
 
 void configureWindowSensorSystem() {
 
@@ -458,9 +477,18 @@ void loop() {
     handleWakeup();
 
     //handle spam attack
-    #if CONFIG_SENSOR_WINDOW_1_MQTT_SPAM
-        spamClosed();
-    #endif /*CONFIG_SENSOR_WINDOW_1_MQTT_SPAM*/
+    #if CONFIG_MQTT_SPAM
+        #if CONFIG_MQTT_SPAM_CLOSED
+            spam("CLOSED");
+        #endif /*MQTT_CONFIG_SPAM_CLOSED*/
+        #if CONFIG_MQTT_SPAM_OPEN
+            spam("OPEN");
+        #endif /*MQTT_CONFIG_SPAM_OPEN*/
+        #if CONFIG_MQTT_SPAM_TROLL
+            //parameter doesnt matter in this case
+            spam("OPEN");
+        #endif /*MQTT_CONFIG_SPAM_TROLL*/
+    #endif /*CONFIG_MQTT_SPAM*/
 
     // dont go to sleep before all tasks in queue are executed
     while (uxQueueMessagesWaiting(windowSensorEventQueue) > 0) {
