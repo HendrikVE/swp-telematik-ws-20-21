@@ -1,4 +1,31 @@
 {
+  "48c07b9346": {
+    "class": "org.openhab.core.automation.dto.RuleDTO",
+    "value": {
+      "triggers": [],
+      "conditions": [],
+      "actions": [
+        {
+          "inputs": {},
+          "id": "script",
+          "configuration": {
+            "type": "application/vnd.openhab.dsl.rule",
+            "script": "if (SecuritySystem_ActiveAlarm.state \u003d\u003d ON) {\n  executeCommandLine(\"/etc/openhab/scripts/start_alarm.sh\")\n}\nelse if (SecuritySystem_ActiveAlarm.state \u003d\u003d OFF) {\n  executeCommandLine(\"/etc/openhab/scripts/stop_alarm.sh\")\n}\n"
+          },
+          "type": "script.ScriptAction"
+        }
+      ],
+      "configuration": {},
+      "configDescriptions": [],
+      "uid": "48c07b9346",
+      "name": "Alarm",
+      "tags": [
+        "Script"
+      ],
+      "visibility": "VISIBLE",
+      "description": ""
+    }
+  },
   "ca75cb7d3f": {
     "class": "org.openhab.core.automation.dto.RuleDTO",
     "value": {
@@ -6,8 +33,7 @@
         {
           "id": "1",
           "configuration": {
-            "itemName": "SecuritySystem_ActiveAlarm",
-            "state": "ON"
+            "itemName": "SecuritySystem_ActiveAlarm"
           },
           "type": "core.ItemStateChangeTrigger"
         }
@@ -20,7 +46,7 @@
           "configuration": {
             "considerConditions": true,
             "ruleUIDs": [
-              "c27ba22039"
+              "48c07b9346"
             ]
           },
           "type": "core.RunRuleAction"
@@ -29,7 +55,7 @@
       "configuration": {},
       "configDescriptions": [],
       "uid": "ca75cb7d3f",
-      "name": "Security System: Alarm trigger changed to ON",
+      "name": "Security System: Alarm trigger changed",
       "tags": [],
       "visibility": "VISIBLE"
     }
@@ -76,33 +102,6 @@
       "name": "Security System: Window opened while security system is armed",
       "tags": [],
       "visibility": "VISIBLE"
-    }
-  },
-  "c27ba22039": {
-    "class": "org.openhab.core.automation.dto.RuleDTO",
-    "value": {
-      "triggers": [],
-      "conditions": [],
-      "actions": [
-        {
-          "inputs": {},
-          "id": "script",
-          "configuration": {
-            "type": "application/vnd.openhab.dsl.rule",
-            "script": "while (SecuritySystem_ActiveAlarm.state \u003d\u003d ON) {\n  playSound(\"alarm.mp3\", new PercentType(100))\n  Thread::sleep(14000)\n}"
-          },
-          "type": "script.ScriptAction"
-        }
-      ],
-      "configuration": {},
-      "configDescriptions": [],
-      "uid": "c27ba22039",
-      "name": "Alarm",
-      "tags": [
-        "Script"
-      ],
-      "visibility": "VISIBLE",
-      "description": ""
     }
   }
 }
