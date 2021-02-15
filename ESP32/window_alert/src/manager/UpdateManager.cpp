@@ -18,8 +18,10 @@ void UpdateManager::begin(const char* host, const char* filename, const char* us
     this->mDeviceID = deviceID;
 }
 
-int UpdateManager::checkForOTAUpdate() 
-{
+int UpdateManager::checkForOTAUpdate() {
+
+    int rc = UPDATE_ERROR_OK;
+
     WiFiClientSecure client;
     client.setCACert( (char*) ca_crt_start  );
     client.setCertificate( (char*) client_crt_start  );
@@ -30,79 +32,76 @@ int UpdateManager::checkForOTAUpdate()
     //for code in folder one version higher 
     sprintf(request, "https://%s:4443/%s/%s", this->mHost, String(APP_VERSION_CODE+1).c_str(), this->mFilename);
 
-    if(!mHttpClient.begin(client,request))
-    {
+    if(!mHttpClient.begin(client, request)) {
         Log.notice("Unable to connect");
         mHttpClient.end();
-        return -100;
+        return -UPDATE_ERROR_ABORT;
     }
 
     mHttpClient.setAuthorization(this->mUser, this->mPassword);
     int httpCode = mHttpClient.GET();
-    if (httpCode != HTTP_CODE_OK) 
-    {
-        Log.notice("HTTP GET... failed in ota. error: %d", httpCode);
-        if(httpCode == HTTP_CODE_NOT_FOUND)
-        {
+    if (httpCode != HTTP_CODE_OK) {
+
+        Log.notice("HTTP GET... failed in UpdateManager. error: %d", httpCode);
+
+        if (httpCode == HTTP_CODE_NOT_FOUND) {
             Log.notice("Either there are no new updates or they can't be found.");
+            rc = UPDATE_ERROR_OK;
         }
+        else {
+            rc = -UPDATE_ERROR_ABORT;
+        }
+
         Log.notice("Exiting OTA Update");
         mHttpClient.end();
-        return httpCode;
+
+        return rc;
     }
 
     int contentLength = mHttpClient.getSize();
     Log.notice("Got %d bytes from server", contentLength);
 
-    int errorCode = UPDATE_ERROR_OK;
-    if (contentLength) 
-    {
+    if (contentLength) {
+
         bool canBegin = Update.begin(contentLength);
-        if (canBegin) 
-        {
+        if (canBegin) {
             Log.notice("Begin OTA. This may take 2 - 5 mins to complete. Things might be quite for a while.. Patience!");
             size_t written = Update.writeStream(*mHttpClient.getStreamPtr());
 
-            if (written == contentLength) 
-            {
+            if (written == contentLength) {
                 Log.notice("Written : %d successfully", written);
             }
-            else 
-            {
+            else {
                 Log.notice("Written only : %d/%d. Retry?", written, contentLength);
             }
 
-            if (Update.end()) 
-            {
+            if (Update.end()) {
                 Log.notice("OTA done!");
 
-                if (Update.isFinished()) 
-                {
+                if (Update.isFinished()) {
                     Log.notice("Update successfully completed. Rebooting.");
                     ESP.restart();
                 }
-                else 
-                {
-                    errorCode = Update.getError();
+                else {
+                    rc = -Update.getError();
                     Log.notice("Update not finished? Something went wrong!");
                 }
             }
-            else 
-            {
-                errorCode = Update.getError();
-                Log.notice("Error Occurred. Error #: %d", errorCode);
+            else {
+                rc = -Update.getError();
+                Log.notice("Error Occurred. Error #: %d", rc);
             }
         }
-        else 
-        {
-            errorCode = Update.getError();
+        else {
+            rc = -Update.getError();
             Log.notice("Not enough space to begin OTA");
         }
     }
-    else 
-    {
+    else {
         Log.notice("There was no content in the response");
     }
+
     mHttpClient.end();
-    return errorCode;
+
+    return rc;
 }

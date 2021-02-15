@@ -289,8 +289,15 @@ void updateAll() {
         publishEnvironmentData();
     #endif /*CONFIG_SENSOR_NONE*/
 
-    int errorCode = updateManager->checkForOTAUpdate();
-    mqttClient.publish("ota",String(errorCode).c_str(),false,2);
+    int rc = updateManager->checkForOTAUpdate();
+    if (rc < 0) {
+        char topicError[128];
+        buildTopic(topicError, CONFIG_DEVICE_ID, "error");
+
+        if (rc == -UPDATE_ERROR_ACTIVATE) {
+            mqttClient.publish(topicError, "(Warning) Unsigned OTA update denied", false, 2);
+        }
+    }
 }
 
 void handleWakeup(){
