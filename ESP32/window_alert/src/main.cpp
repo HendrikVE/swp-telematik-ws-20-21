@@ -83,6 +83,7 @@ static void windowSensorTask(void* arg) {
             bool successMqtt = connectivityManager.checkMqttConnection();
 
             if (!successWiFi || !successMqtt) {
+                Log.notice("Could not establish connection, back to sleep.");
                 startDeviceSleep(CONFIG_SENSOR_POLL_INTERVAL_MS);
             }
 
