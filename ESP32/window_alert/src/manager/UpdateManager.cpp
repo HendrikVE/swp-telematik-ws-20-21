@@ -11,7 +11,6 @@
 
 void UpdateManager::begin(const char* host, const char* filename, const char* user, const char* password, const char* deviceID) 
 {
-
     this->mHost = host;
     this->mFilename = filename;
     this->mUser = user;
@@ -21,21 +20,23 @@ void UpdateManager::begin(const char* host, const char* filename, const char* us
 
 int UpdateManager::checkForOTAUpdate() 
 {
-
     WiFiClientSecure client;
     client.setCACert( (char*) ca_crt_start  );
     client.setCertificate( (char*) client_crt_start  );
     client.setPrivateKey( (char*) client_key_start  );
+
     char request[256];
     //the APP_VERSION_CODE is from Manifest.h so that the ESP doesnt update itself forever, always looks
     //for code in folder one version higher 
-    sprintf(request,"https://%s:4443/%s/%s",this->mHost,String(APP_VERSION_CODE+1).c_str(),this->mFilename);
+    sprintf(request, "https://%s:4443/%s/%s", this->mHost, String(APP_VERSION_CODE+1).c_str(), this->mFilename);
+
     if(!mHttpClient.begin(client,request))
     {
         Log.notice("Unable to connect");
         mHttpClient.end();
-        return -69;
+        return -100;
     }
+
     mHttpClient.setAuthorization(this->mUser, this->mPassword);
     int httpCode = mHttpClient.GET();
     if (httpCode != HTTP_CODE_OK) 
@@ -49,8 +50,6 @@ int UpdateManager::checkForOTAUpdate()
         mHttpClient.end();
         return httpCode;
     }
-
-
 
     int contentLength = mHttpClient.getSize();
     Log.notice("Got %d bytes from server", contentLength);

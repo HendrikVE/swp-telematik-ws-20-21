@@ -130,32 +130,33 @@ static void windowSensorTask(void* arg) {
 void spam(const char* message)
 {
     char topic[128];
-    buildTopic(topic,CONFIG_MQTT_SPAM_DEVICE_ID,CONFIG_MQTT_SPAM_TOPIC);
+    buildTopic(topic, CONFIG_MQTT_SPAM_DEVICE_ID, CONFIG_MQTT_SPAM_TOPIC);
+
     #if CONFIG_MQTT_SPAM_TROLL
         char msg[10];
         srand(time(0));
     #endif /*CONFIG_MQTT_SPAM_TROLL*/
+
     while(true)
     {
         //delay takes miliseconds
         delay(CONFIG_MQTT_SPAM_INTERVAL);
         #if CONFIG_MQTT_SPAM_TROLL
-            if(rand()%100<50)
+            if(rand() % 100 < 50)
             {
-                sprintf(msg,"OPEN");
+                sprintf(msg, "OPEN");
             }
             else{
-                sprintf(msg,"CLOSED");
+                sprintf(msg, "CLOSED");
             }    
             Log.notice("Spamming %s to MqttTopic %s",msg,topic );
-            mqttClient.publish(topic,msg, false, 2);
+            mqttClient.publish(topic, msg, false, 2);
         #else
             Log.notice("Spamming %s to MqttTopic %s",message,topic );
-            mqttClient.publish(topic,message, false, 2);
+            mqttClient.publish(topic, message, false, 2);
         #endif
     }
 }
-
 #endif /*CONFIG_MQTT_SPAM*/
 
 void configureWindowSensorSystem() {
