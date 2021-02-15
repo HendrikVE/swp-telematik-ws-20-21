@@ -92,7 +92,10 @@ bool ConnectivityManager::initMqtt(const char* address, int port, const char* us
     this->mMqttPassword = password;
     this->mMqttClientID = clientID;
 
-    mMqttClient.setOptions(10, true, 500);
+    int keep_alive_ms = 5 * 60 * 1000; // keep connection alive while doing OTA updates
+    int timeout_ms = 60 * 1000;
+
+    mMqttClient.setOptions(keep_alive_ms, true, timeout_ms);
     mMqttClient.begin(address, port, mWifiClientSecure);
 
     return checkMqttConnection();
