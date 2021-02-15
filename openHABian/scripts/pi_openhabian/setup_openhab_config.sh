@@ -8,7 +8,7 @@ source config.sh
 BACKUP_DIR=/var/lib/openhab/jsondb/manual_backup
 
 # make backups of existing config files
-for file in "$RES_DIR"/var/lib/openhab/jsondb/*
+for file in "$RES_DIR"/openhab3/var/lib/openhab/jsondb/*
 do
   BASE_FILE=$(basename "$file")
   TIMESTAMP=$(date +%s)
