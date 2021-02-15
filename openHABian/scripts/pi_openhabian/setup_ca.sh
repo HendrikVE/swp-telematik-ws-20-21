@@ -11,7 +11,7 @@ source config.sh
 client_name_1="esp32-1"
 client_name_2="esp32-2"
 
-res_dir="../../res/CA"
+res_dir="../res/CA"
 
 mkdir -p "$CA_DIR"
 chmod 700 "$CA_DIR"
