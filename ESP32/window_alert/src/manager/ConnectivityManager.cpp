@@ -42,8 +42,12 @@ bool ConnectivityManager::checkWifiConnection() {
 }
 
 bool ConnectivityManager::initWifi(const char* ssid, const char* password) {
-    //WiFi.onEvent(wifiEvent);
+    // WiFi.onEvent(wifiEvent);
     WiFi.begin(ssid, password);
+
+    mWifiClientSecure.setCACert((char*) ca_crt_start);
+    mWifiClientSecure.setCertificate((char*) client_crt_start);
+    mWifiClientSecure.setPrivateKey((char*) client_key_start);
 
     return checkWifiConnection();
 }
@@ -66,7 +70,7 @@ bool ConnectivityManager::checkMqttConnection() {
 
             int attempts = 0;
             while (!mMqttClient.connect(this->mMqttClientID, this->mMqttUser, this->mMqttPassword)) {
-                //connect has timeout set by mMqttClient.setOptions()
+                // connect has timeout set by mMqttClient.setOptions()
 
                 attempts++;
                 if (attempts >= 60) {
@@ -82,11 +86,10 @@ bool ConnectivityManager::checkMqttConnection() {
     return true;
 }
 
-bool ConnectivityManager::initMqtt(const char* address, int port, const char* user, const char* password, const char* clientID) {
-
-    mWifiClientSecure.setCACert((char*) ca_crt_start);
-    mWifiClientSecure.setCertificate((char*) client_crt_start);
-    mWifiClientSecure.setPrivateKey((char*) client_key_start);
+bool ConnectivityManager::initMqtt(
+        const char* address, int port,
+        const char* user, const char* password,
+        const char* clientID) {
 
     this->mMqttUser = user;
     this->mMqttPassword = password;
