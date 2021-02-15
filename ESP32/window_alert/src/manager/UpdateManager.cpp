@@ -9,13 +9,9 @@
 #include "WiFi.h"
 #include "WiFiClientSecure.h"
 
-void UpdateManager::begin(const char* host, const char* filename, const char* user, const char* password, const char* deviceID) 
-{
+void UpdateManager::begin(const char* host, const char* filename) {
     this->mHost = host;
     this->mFilename = filename;
-    this->mUser = user;
-    this->mPassword = password;
-    this->mDeviceID = deviceID;
 }
 
 int UpdateManager::checkForOTAUpdate() {
@@ -38,7 +34,6 @@ int UpdateManager::checkForOTAUpdate() {
         return -UPDATE_ERROR_ABORT;
     }
 
-    mHttpClient.setAuthorization(this->mUser, this->mPassword);
     int httpCode = mHttpClient.GET();
     if (httpCode != HTTP_CODE_OK) {
 

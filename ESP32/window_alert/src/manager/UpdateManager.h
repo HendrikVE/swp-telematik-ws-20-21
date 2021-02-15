@@ -9,7 +9,7 @@ class UpdateManager {
 
 public:
 
-    void begin(const char* host, const char* filename, const char* user, const char* password, const char* deviceID);
+    void begin(const char* host, const char* filename);
 
     int checkForOTAUpdate();
 
@@ -19,9 +19,6 @@ private:
 
     const char* mHost;
     const char* mFilename;
-    const char* mUser;
-    const char* mPassword;
-    const char* mDeviceID;
 };
 
 #endif /*UPDATE_MANAGER_H*/
