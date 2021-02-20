@@ -467,6 +467,42 @@ void setup() {
     connectivityManager.initMqtt(CONFIG_MQTT_SERVER_IP, CONFIG_MQTT_SERVER_PORT, CONFIG_MQTT_USER, CONFIG_MQTT_PASSWORD, CONFIG_DEVICE_ID);
     mqttClient = *connectivityManager.getMqttClient();
 
+    if (strcmp(CONFIG_DEVICE_ID, "esp32-1") == 0) {
+        char topicLocation[128];
+        buildTopic(topicLocation, CONFIG_DEVICE_ID, "location");
+        mqttClient.publish(topicLocation, "Basement", false, 2);
+
+        char topicProtection[128];
+        buildTopic(topicProtection, CONFIG_DEVICE_ID, "protection");
+        mqttClient.publish(topicProtection, "Protected", false, 2);
+
+        char topicBattery[128];
+        buildTopic(topicBattery, CONFIG_DEVICE_ID, "battery");
+        mqttClient.publish(topicBattery, "76", false, 2);
+    }
+    else if (strcmp(CONFIG_DEVICE_ID, "esp32-2") == 0) {
+        char topicLocation[128];
+        buildTopic(topicLocation, CONFIG_DEVICE_ID, "location");
+        mqttClient.publish(topicLocation, "Groundfloor", false, 2);
+
+        char topicProtection[128];
+        buildTopic(topicProtection, CONFIG_DEVICE_ID, "protection");
+        mqttClient.publish(topicProtection, "Not protected", false, 2);
+
+        char topicBattery[128];
+        buildTopic(topicBattery, CONFIG_DEVICE_ID, "battery");
+        mqttClient.publish(topicBattery, "92", false, 2);
+    }
+    else if (strcmp(CONFIG_DEVICE_ID, "esp32-3") == 0) {
+        char topicLocation[128];
+        buildTopic(topicLocation, CONFIG_DEVICE_ID, "location");
+        mqttClient.publish(topicLocation, "Firstfloor", false, 2);
+
+        char topicBattery[128];
+        buildTopic(topicBattery, CONFIG_DEVICE_ID, "battery");
+        mqttClient.publish(topicBattery, "29", false, 2);
+    }
+
     initWindowSensorSystem();
 }
 
