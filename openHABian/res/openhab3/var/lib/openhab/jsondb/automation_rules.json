@@ -10,7 +10,7 @@
           "id": "script",
           "configuration": {
             "type": "application/vnd.openhab.dsl.rule",
-            "script": "if (SecuritySystem_ActiveAlarm.state \u003d\u003d ON) {\n  executeCommandLine(\"/etc/openhab/scripts/start_alarm.sh\")\n}\nelse if (SecuritySystem_ActiveAlarm.state \u003d\u003d OFF) {\n  executeCommandLine(\"/etc/openhab/scripts/stop_alarm.sh\")\n}\n"
+            "script": "// SecuritySystem_ActiveAlarm.state:\n// 0 - idle\n// 1 - warning\n// 2 - alarm\n\n\nif (SecuritySystem_ActiveAlarm.state \u003d\u003d 2) {\n  executeCommandLine(\"/etc/openhab/scripts/start_alarm.sh\")\n}\nelse if (SecuritySystem_ActiveAlarm.state \u003d\u003d 0 \n         || SecuritySystem_ActiveAlarm.state.toString \u003d\u003d \"warning\") {\n  \n  executeCommandLine(\"/etc/openhab/scripts/stop_alarm.sh\")\n    \n    if (SecuritySystem_ActiveAlarm.state \u003d\u003d 0) {\n      GroupError.members.forEach[s | s.sendCommand(\"-\")]\n    }\n}\n"
           },
           "type": "script.ScriptAction"
         }
@@ -24,6 +24,49 @@
       ],
       "visibility": "VISIBLE",
       "description": ""
+    }
+  },
+  "e79df8b018": {
+    "class": "org.openhab.core.automation.dto.RuleDTO",
+    "value": {
+      "triggers": [
+        {
+          "id": "1",
+          "configuration": {
+            "itemName": "OpenHABAlarmSystem_Warning"
+          },
+          "type": "core.ItemStateUpdateTrigger"
+        }
+      ],
+      "conditions": [
+        {
+          "inputs": {},
+          "id": "3",
+          "configuration": {
+            "itemName": "SecuritySystem_ActiveAlarm",
+            "state": "1",
+            "operator": "\u003c"
+          },
+          "type": "core.ItemStateCondition"
+        }
+      ],
+      "actions": [
+        {
+          "inputs": {},
+          "id": "2",
+          "configuration": {
+            "itemName": "SecuritySystem_ActiveAlarm",
+            "state": "1"
+          },
+          "type": "core.ItemStateUpdateAction"
+        }
+      ],
+      "configuration": {},
+      "configDescriptions": [],
+      "uid": "e79df8b018",
+      "name": "Security System: Warning",
+      "tags": [],
+      "visibility": "VISIBLE"
     }
   },
   "ca75cb7d3f": {
@@ -91,7 +134,7 @@
           "id": "2",
           "configuration": {
             "itemName": "SecuritySystem_ActiveAlarm",
-            "state": "ON"
+            "state": "2"
           },
           "type": "core.ItemStateUpdateAction"
         }

@@ -9,7 +9,7 @@
           "lwtQos": 0,
           "publickeypin": true,
           "keepAlive": 60,
-          "clientid": "95e2addd-749e-4bf7-9345-ba262e02a162",
+          "clientid": "436d4575-61ba-4eaf-ae90-6f46f9af5256",
           "secure": false,
           "certificatepin": true,
           "password": "openhabian",
@@ -167,6 +167,35 @@
           "properties": {},
           "defaultTags": [],
           "autoUpdatePolicy": "DEFAULT"
+        },
+        {
+          "acceptedItemType": "String",
+          "kind": "STATE",
+          "uid": {
+            "segments": [
+              "mqtt",
+              "topic",
+              "eeb76e85d3",
+              "ESP32-3_Error"
+            ],
+            "uid": "mqtt:topic:eeb76e85d3:ESP32-3_Error"
+          },
+          "channelTypeUID": {
+            "segments": [
+              "mqtt",
+              "string"
+            ],
+            "uid": "mqtt:string"
+          },
+          "label": "ESP32-3 Error",
+          "configuration": {
+            "properties": {
+              "stateTopic": "myhome/esp32-3/error"
+            }
+          },
+          "properties": {},
+          "defaultTags": [],
+          "autoUpdatePolicy": "DEFAULT"
         }
       ],
       "configuration": {
@@ -213,9 +242,9 @@
               "topic",
               "ca04ade4c4",
               "d93e3638c2",
-              "ESP32-1_WindowSensor1"
+              "WindowSensor1"
             ],
-            "uid": "mqtt:topic:ca04ade4c4:d93e3638c2:ESP32-1_WindowSensor1"
+            "uid": "mqtt:topic:ca04ade4c4:d93e3638c2:WindowSensor1"
           },
           "channelTypeUID": {
             "segments": [
@@ -224,7 +253,7 @@
             ],
             "uid": "mqtt:contact"
           },
-          "label": "ESP32-1 WindowSensor1",
+          "label": "WindowSensor1",
           "configuration": {
             "properties": {
               "stateTopic": "myhome/esp32-1/window-sensor-1"
@@ -243,9 +272,9 @@
               "topic",
               "ca04ade4c4",
               "d93e3638c2",
-              "ESP32-1_Version"
+              "Version"
             ],
-            "uid": "mqtt:topic:ca04ade4c4:d93e3638c2:ESP32-1_Version"
+            "uid": "mqtt:topic:ca04ade4c4:d93e3638c2:Version"
           },
           "channelTypeUID": {
             "segments": [
@@ -254,7 +283,7 @@
             ],
             "uid": "mqtt:string"
           },
-          "label": "ESP32-1 Version",
+          "label": "Version",
           "configuration": {
             "properties": {
               "stateTopic": "myhome/esp32-1/version"
@@ -273,9 +302,9 @@
               "topic",
               "ca04ade4c4",
               "d93e3638c2",
-              "ESP32-1_Location"
+              "Location"
             ],
-            "uid": "mqtt:topic:ca04ade4c4:d93e3638c2:ESP32-1_Location"
+            "uid": "mqtt:topic:ca04ade4c4:d93e3638c2:Location"
           },
           "channelTypeUID": {
             "segments": [
@@ -284,7 +313,7 @@
             ],
             "uid": "mqtt:string"
           },
-          "label": "ESP32-1 Location",
+          "label": "Location",
           "configuration": {
             "properties": {
               "stateTopic": "myhome/esp32-1/location"
@@ -295,7 +324,7 @@
           "autoUpdatePolicy": "DEFAULT"
         },
         {
-          "acceptedItemType": "String",
+          "acceptedItemType": "Number",
           "kind": "STATE",
           "uid": {
             "segments": [
@@ -303,9 +332,9 @@
               "topic",
               "ca04ade4c4",
               "d93e3638c2",
-              "ESP32-1_Battery"
+              "Battery"
             ],
-            "uid": "mqtt:topic:ca04ade4c4:d93e3638c2:ESP32-1_Battery"
+            "uid": "mqtt:topic:ca04ade4c4:d93e3638c2:Battery"
           },
           "channelTypeUID": {
             "segments": [
@@ -314,7 +343,7 @@
             ],
             "uid": "mqtt:number"
           },
-          "label": "ESP32-1 Battery",
+          "label": "Battery",
           "configuration": {
             "properties": {
               "stateTopic": "myhome/esp32-1/battery"
@@ -333,9 +362,9 @@
               "topic",
               "ca04ade4c4",
               "d93e3638c2",
-              "ESP32-1_Protection"
+              "Protection"
             ],
-            "uid": "mqtt:topic:ca04ade4c4:d93e3638c2:ESP32-1_Protection"
+            "uid": "mqtt:topic:ca04ade4c4:d93e3638c2:Protection"
           },
           "channelTypeUID": {
             "segments": [
@@ -344,10 +373,40 @@
             ],
             "uid": "mqtt:string"
           },
-          "label": "ESP32-1 Protection",
+          "label": "Protection",
           "configuration": {
             "properties": {
               "stateTopic": "myhome/esp32-1/protection"
+            }
+          },
+          "properties": {},
+          "defaultTags": [],
+          "autoUpdatePolicy": "DEFAULT"
+        },
+        {
+          "acceptedItemType": "String",
+          "kind": "STATE",
+          "uid": {
+            "segments": [
+              "mqtt",
+              "topic",
+              "ca04ade4c4",
+              "d93e3638c2",
+              "Error"
+            ],
+            "uid": "mqtt:topic:ca04ade4c4:d93e3638c2:Error"
+          },
+          "channelTypeUID": {
+            "segments": [
+              "mqtt",
+              "string"
+            ],
+            "uid": "mqtt:string"
+          },
+          "label": "Error",
+          "configuration": {
+            "properties": {
+              "stateTopic": "myhome/esp32-1/error"
             }
           },
           "properties": {},
@@ -540,6 +599,37 @@
           "properties": {},
           "defaultTags": [],
           "autoUpdatePolicy": "DEFAULT"
+        },
+        {
+          "acceptedItemType": "String",
+          "kind": "STATE",
+          "uid": {
+            "segments": [
+              "mqtt",
+              "topic",
+              "ca04ade4c4",
+              "e5c45b67bd",
+              "ESP32-2_Error"
+            ],
+            "uid": "mqtt:topic:ca04ade4c4:e5c45b67bd:ESP32-2_Error"
+          },
+          "channelTypeUID": {
+            "segments": [
+              "mqtt",
+              "string"
+            ],
+            "uid": "mqtt:string"
+          },
+          "label": "ESP32-2 Error",
+          "description": "",
+          "configuration": {
+            "properties": {
+              "stateTopic": "myhome/esp32-2/error"
+            }
+          },
+          "properties": {},
+          "defaultTags": [],
+          "autoUpdatePolicy": "DEFAULT"
         }
       ],
       "configuration": {
@@ -563,6 +653,71 @@
         "uid": "mqtt:topic"
       },
       "location": "Groundfloor"
+    }
+  },
+  "mqtt:topic:812a4d33b3": {
+    "class": "org.openhab.core.thing.internal.ThingImpl",
+    "value": {
+      "label": "OpenHAB Alarm System",
+      "bridgeUID": {
+        "segments": [
+          "mqtt",
+          "broker",
+          "ca04ade4c4"
+        ],
+        "uid": "mqtt:broker:ca04ade4c4"
+      },
+      "channels": [
+        {
+          "acceptedItemType": "String",
+          "kind": "STATE",
+          "uid": {
+            "segments": [
+              "mqtt",
+              "topic",
+              "812a4d33b3",
+              "warning"
+            ],
+            "uid": "mqtt:topic:812a4d33b3:warning"
+          },
+          "channelTypeUID": {
+            "segments": [
+              "mqtt",
+              "string"
+            ],
+            "uid": "mqtt:string"
+          },
+          "label": "Warning",
+          "description": "",
+          "configuration": {
+            "properties": {
+              "stateTopic": "openhab/alarm/warning"
+            }
+          },
+          "properties": {},
+          "defaultTags": [],
+          "autoUpdatePolicy": "DEFAULT"
+        }
+      ],
+      "configuration": {
+        "properties": {}
+      },
+      "properties": {},
+      "uid": {
+        "segments": [
+          "mqtt",
+          "topic",
+          "812a4d33b3"
+        ],
+        "uid": "mqtt:topic:812a4d33b3"
+      },
+      "thingTypeUID": {
+        "segments": [
+          "mqtt",
+          "topic"
+        ],
+        "uid": "mqtt:topic"
+      }
     }
   }
 }

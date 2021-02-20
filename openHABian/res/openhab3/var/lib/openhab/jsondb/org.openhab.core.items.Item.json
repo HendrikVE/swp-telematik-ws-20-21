@@ -23,18 +23,6 @@
       "category": "keyring"
     }
   },
-  "ESP32_2_Version": {
-    "class": "org.openhab.core.items.ManagedItemProvider$PersistedItem",
-    "value": {
-      "groupNames": [],
-      "itemType": "String",
-      "tags": [
-        "Point"
-      ],
-      "label": "ESP32-2 Version",
-      "category": "keyring"
-    }
-  },
   "ESP32_1_Version": {
     "class": "org.openhab.core.items.ManagedItemProvider$PersistedItem",
     "value": {
@@ -44,6 +32,120 @@
         "Point"
       ],
       "label": "ESP32-1 Version",
+      "category": "keyring"
+    }
+  },
+  "ESP32_1_Battery": {
+    "class": "org.openhab.core.items.ManagedItemProvider$PersistedItem",
+    "value": {
+      "groupNames": [],
+      "itemType": "Number",
+      "tags": [
+        "Point"
+      ],
+      "label": "ESP32-1 Battery",
+      "category": "batterylevel"
+    }
+  },
+  "ESP32_2_Error": {
+    "class": "org.openhab.core.items.ManagedItemProvider$PersistedItem",
+    "value": {
+      "groupNames": [
+        "GroupError"
+      ],
+      "itemType": "String",
+      "tags": [
+        "Point"
+      ],
+      "label": "ESP32-2 Error",
+      "category": "error"
+    }
+  },
+  "ESP32_3_Battery": {
+    "class": "org.openhab.core.items.ManagedItemProvider$PersistedItem",
+    "value": {
+      "groupNames": [],
+      "itemType": "Number",
+      "tags": [
+        "Point"
+      ],
+      "label": "ESP32-3 Battery",
+      "category": "batterylevel"
+    }
+  },
+  "ESP32_3_Last_Contact": {
+    "class": "org.openhab.core.items.ManagedItemProvider$PersistedItem",
+    "value": {
+      "groupNames": [],
+      "itemType": "DateTime",
+      "tags": [
+        "Point"
+      ],
+      "label": "ESP32-3 Last Contact",
+      "category": ""
+    }
+  },
+  "ESP32_3_Error": {
+    "class": "org.openhab.core.items.ManagedItemProvider$PersistedItem",
+    "value": {
+      "groupNames": [
+        "GroupError"
+      ],
+      "itemType": "String",
+      "tags": [
+        "Point"
+      ],
+      "label": "ESP32-3 Error",
+      "category": "error"
+    }
+  },
+  "ESP32_3_WindowSensor1": {
+    "class": "org.openhab.core.items.ManagedItemProvider$PersistedItem",
+    "value": {
+      "groupNames": [
+        "GroupWindow"
+      ],
+      "itemType": "Contact",
+      "tags": [
+        "Point"
+      ],
+      "label": "ESP32-3 WindowSensor1",
+      "category": "contact"
+    }
+  },
+  "GroupError": {
+    "class": "org.openhab.core.items.ManagedItemProvider$PersistedItem",
+    "value": {
+      "groupNames": [],
+      "itemType": "Group",
+      "tags": [],
+      "label": "Group Error",
+      "category": "error"
+    }
+  },
+  "ESP32_1_Error": {
+    "class": "org.openhab.core.items.ManagedItemProvider$PersistedItem",
+    "value": {
+      "groupNames": [
+        "GroupError"
+      ],
+      "itemType": "String",
+      "tags": [
+        "Point"
+      ],
+      "label": "ESP32-1 Error",
+      "category": "error"
+    }
+  },
+  "ESP32_2_Version": {
+    "class": "org.openhab.core.items.ManagedItemProvider$PersistedItem",
+    "value": {
+      "groupNames": [],
+      "itemType": "String",
+      "tags": [
+        "Point"
+      ],
+      "label": "ESP32-2 Version",
       "category": "keyring"
     }
   },
@@ -77,18 +179,6 @@
       "category": "contact"
     }
   },
-  "ESP32_1_Battery": {
-    "class": "org.openhab.core.items.ManagedItemProvider$PersistedItem",
-    "value": {
-      "groupNames": [],
-      "itemType": "Number",
-      "tags": [
-        "Point"
-      ],
-      "label": "ESP32-1 Battery",
-      "category": "batterylevel"
-    }
-  },
   "ESP32_2_Location": {
     "class": "org.openhab.core.items.ManagedItemProvider$PersistedItem",
     "value": {
@@ -113,16 +203,16 @@
       "category": "batterylevel"
     }
   },
-  "ESP32_3_Battery": {
+  "OpenHABAlarmSystem_Warning": {
     "class": "org.openhab.core.items.ManagedItemProvider$PersistedItem",
     "value": {
       "groupNames": [],
-      "itemType": "Number",
+      "itemType": "String",
       "tags": [
         "Point"
       ],
-      "label": "ESP32-3 Battery",
-      "category": "batterylevel"
+      "label": "Warning",
+      "category": ""
     }
   },
   "SecuritySystem": {
@@ -145,18 +235,6 @@
       ],
       "label": "ESP32-1 Protection",
       "category": "shield-1"
-    }
-  },
-  "ESP32_3_Last_Contact": {
-    "class": "org.openhab.core.items.ManagedItemProvider$PersistedItem",
-    "value": {
-      "groupNames": [],
-      "itemType": "DateTime",
-      "tags": [
-        "Point"
-      ],
-      "label": "ESP32-3 Last Contact",
-      "category": ""
     }
   },
   "ESP32_1_WindowSensor1": {
@@ -197,25 +275,11 @@
       "category": "shield-0"
     }
   },
-  "ESP32_3_WindowSensor1": {
-    "class": "org.openhab.core.items.ManagedItemProvider$PersistedItem",
-    "value": {
-      "groupNames": [
-        "GroupWindow"
-      ],
-      "itemType": "Contact",
-      "tags": [
-        "Point"
-      ],
-      "label": "ESP32-3 WindowSensor1",
-      "category": "contact"
-    }
-  },
   "SecuritySystem_ActiveAlarm": {
     "class": "org.openhab.core.items.ManagedItemProvider$PersistedItem",
     "value": {
       "groupNames": [],
-      "itemType": "Switch",
+      "itemType": "Number",
       "tags": [],
       "label": "Security System Active Alarm",
       "category": ""

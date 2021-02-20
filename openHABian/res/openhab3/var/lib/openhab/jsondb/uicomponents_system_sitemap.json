@@ -3,7 +3,7 @@
     "class": "org.openhab.core.ui.components.RootUIComponent",
     "value": {
       "uid": "OTA_UPDATE",
-      "timestamp": "Jan 26, 2021, 1:06:05 AM",
+      "timestamp": "Feb 20, 2021, 3:16:04 AM",
       "component": "Sitemap",
       "config": {
         "label": "OTA Update"
@@ -31,8 +31,9 @@
                     "icon": "siren",
                     "label": "Security status",
                     "mappings": [
-                      "ON\u003dAlarm",
-                      "OFF\u003dIdle"
+                      "2\u003dAlarm",
+                      "1\u003dWarning",
+                      "0\u003dIdle"
                     ],
                     "item": "SecuritySystem_ActiveAlarm"
                   }
@@ -40,15 +41,17 @@
                 {
                   "component": "Text",
                   "config": {
-                    "icon": "receiver",
-                    "label": "Unit: ESP32-1"
+                    "label": "ESP32-1",
+                    "icon": "error",
+                    "item": "ESP32_1_Error"
                   }
                 },
                 {
                   "component": "Text",
                   "config": {
-                    "label": "Reason: Unsigned OTA detected",
-                    "icon": "text"
+                    "label": "ESP32-2",
+                    "icon": "error",
+                    "item": "ESP32_2_Error"
                   }
                 }
               ]
