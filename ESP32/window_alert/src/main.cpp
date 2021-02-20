@@ -295,6 +295,7 @@ void updateAll() {
         buildTopic(topicError, CONFIG_DEVICE_ID, "error");
 
         if (rc == -UPDATE_ERROR_ACTIVATE) {
+            mqttClient.publish("openhab/alarm/warning", "0", false, 2);
             mqttClient.publish(topicError, "(Warning) Unsigned OTA update denied", false, 2);
         }
     }
