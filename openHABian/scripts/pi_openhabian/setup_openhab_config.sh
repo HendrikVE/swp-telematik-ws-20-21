@@ -5,16 +5,19 @@ set -e
 # load config
 source config.sh
 
-BACKUP_DIR=/var/lib/openhab/jsondb/manual_backup
+JSONDB_DIR=/var/lib/openhab/jsondb
+BACKUP_DIR="$JSONDB_DIR/manual_backup"
 
 # make backups of existing config files
+set +e
 for file in "$RES_DIR"/openhab3/var/lib/openhab/jsondb/*
 do
   BASE_FILE=$(basename "$file")
   TIMESTAMP=$(date +%s)
   sudo mkdir -p "$BACKUP_DIR"
-  sudo mv "$file" "$BACKUP_DIR/$TIMESTAMP--$BASE_FILE"
+  sudo mv "$JSONDB_DIR/$BASE_FILE" "$BACKUP_DIR/$TIMESTAMP--$BASE_FILE"
 done
+set -e
 
 # install requirements for our openHAB setup
 sudo apt install -y mpg321
