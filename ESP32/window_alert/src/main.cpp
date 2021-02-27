@@ -462,6 +462,10 @@ void setup() {
         Log.setSuffix(printNewline);
     }
 
+    char macAddress[128];
+    sprintf(macAddress, "This is my MAC: %s", WiFi.macAddress().c_str());
+    Log.notice(macAddress);
+
     connectivityManager.begin();
     connectivityManager.initWifi(CONFIG_ESP_WIFI_SSID, CONFIG_ESP_WIFI_PASSWORD);
     connectivityManager.initMqtt(CONFIG_MQTT_SERVER_IP, CONFIG_MQTT_SERVER_PORT, CONFIG_MQTT_USER, CONFIG_MQTT_PASSWORD, CONFIG_DEVICE_ID);
