@@ -165,7 +165,7 @@
     "class": "org.openhab.core.ui.components.RootUIComponent",
     "value": {
       "uid": "WIFI_ATTACK",
-      "timestamp": "Jan 19, 2021, 2:12:00 AM",
+      "timestamp": "Feb 27, 2021, 1:00:55 PM",
       "component": "Sitemap",
       "config": {
         "label": "Wifi Attack"
@@ -188,24 +188,16 @@
                   }
                 },
                 {
-                  "component": "Text",
+                  "component": "Switch",
                   "config": {
                     "icon": "siren",
-                    "label": "Status: ALERT"
-                  }
-                },
-                {
-                  "component": "Text",
-                  "config": {
-                    "icon": "receiver",
-                    "label": "Unit: ESP32-3"
-                  }
-                },
-                {
-                  "component": "Text",
-                  "config": {
-                    "label": "Reason: Unsigned OTA detected",
-                    "icon": "text"
+                    "label": "Security status",
+                    "mappings": [
+                      "2\u003dAlarm",
+                      "1\u003dWarning",
+                      "0\u003dIdle"
+                    ],
+                    "item": "SecuritySystem_ActiveAlarm"
                   }
                 }
               ]
@@ -214,8 +206,7 @@
           {
             "component": "Frame",
             "config": {
-              "label": "ESP32-3",
-              "icon": ""
+              "label": "ESP32-3"
             },
             "slots": {
               "widgets": [
