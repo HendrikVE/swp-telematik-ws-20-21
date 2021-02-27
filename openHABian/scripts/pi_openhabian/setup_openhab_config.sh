@@ -5,6 +5,8 @@ set -e
 # load config
 source config.sh
 
+sudo systemctl stop openhab
+
 JSONDB_DIR=/var/lib/openhab/jsondb
 BACKUP_DIR="$JSONDB_DIR/manual_backup"
 
@@ -29,3 +31,5 @@ sudo chmod +x /etc/openhab/scripts/stop_alarm.sh
 
 sudo cp -r "$RES_DIR/openhab3/etc/openhab/sounds/." /etc/openhab/sounds
 sudo cp -r "$RES_DIR/openhab3/var/lib/openhab/jsondb/." /var/lib/openhab/jsondb
+
+sudo systemctl start openhab
