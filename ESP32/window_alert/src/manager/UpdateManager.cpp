@@ -26,7 +26,7 @@ int UpdateManager::checkForOTAUpdate() {
     char request[256];
     //the APP_VERSION_CODE is from Manifest.h so that the ESP doesnt update itself forever, always looks
     //for code in folder one version higher 
-    sprintf(request, "https://%s:4443/%s/%s", this->mHost, String(APP_VERSION_CODE+1).c_str(), this->mFilename);
+    sprintf(request, "https://%s:4443/%s/%s/%s", this->mHost, CONFIG_DEVICE_ID, String(APP_VERSION_CODE+1).c_str(), this->mFilename);
 
     if(!mHttpClient.begin(client, request)) {
         Log.notice("Unable to connect");
