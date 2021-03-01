@@ -9,7 +9,7 @@
           "lwtQos": 0,
           "publickeypin": true,
           "keepAlive": 60,
-          "clientid": "436d4575-61ba-4eaf-ae90-6f46f9af5256",
+          "clientid": "7535dbd4-eccd-4868-931a-595c1ef70571",
           "secure": false,
           "certificatepin": true,
           "password": "openhabian",
@@ -60,9 +60,9 @@
               "mqtt",
               "topic",
               "eeb76e85d3",
-              "ESP32-3_WindowSensor1"
+              "WindowSensor1"
             ],
-            "uid": "mqtt:topic:eeb76e85d3:ESP32-3_WindowSensor1"
+            "uid": "mqtt:topic:eeb76e85d3:WindowSensor1"
           },
           "channelTypeUID": {
             "segments": [
@@ -71,7 +71,7 @@
             ],
             "uid": "mqtt:contact"
           },
-          "label": "ESP32-3 WindowSensor1",
+          "label": "WindowSensor1",
           "configuration": {
             "properties": {
               "stateTopic": "myhome/esp32-3/window-sensor-1"
@@ -89,9 +89,9 @@
               "mqtt",
               "topic",
               "eeb76e85d3",
-              "ESP32-3_Version"
+              "Version"
             ],
-            "uid": "mqtt:topic:eeb76e85d3:ESP32-3_Version"
+            "uid": "mqtt:topic:eeb76e85d3:Version"
           },
           "channelTypeUID": {
             "segments": [
@@ -100,7 +100,7 @@
             ],
             "uid": "mqtt:string"
           },
-          "label": "ESP32-3 Version",
+          "label": "Version",
           "configuration": {
             "properties": {
               "stateTopic": "myhome/esp32-3/version"
@@ -118,9 +118,9 @@
               "mqtt",
               "topic",
               "eeb76e85d3",
-              "ESP32-3_Location"
+              "Location"
             ],
-            "uid": "mqtt:topic:eeb76e85d3:ESP32-3_Location"
+            "uid": "mqtt:topic:eeb76e85d3:Location"
           },
           "channelTypeUID": {
             "segments": [
@@ -129,7 +129,7 @@
             ],
             "uid": "mqtt:string"
           },
-          "label": "ESP32-3 Location",
+          "label": "Location",
           "configuration": {
             "properties": {
               "stateTopic": "myhome/esp32-3/location"
@@ -147,9 +147,9 @@
               "mqtt",
               "topic",
               "eeb76e85d3",
-              "ESP32-3_Battery"
+              "Battery"
             ],
-            "uid": "mqtt:topic:eeb76e85d3:ESP32-3_Battery"
+            "uid": "mqtt:topic:eeb76e85d3:Battery"
           },
           "channelTypeUID": {
             "segments": [
@@ -158,7 +158,7 @@
             ],
             "uid": "mqtt:number"
           },
-          "label": "ESP32-3 Battery",
+          "label": "Battery",
           "configuration": {
             "properties": {
               "stateTopic": "myhome/esp32-3/battery"
@@ -176,9 +176,9 @@
               "mqtt",
               "topic",
               "eeb76e85d3",
-              "ESP32-3_Error"
+              "Error"
             ],
-            "uid": "mqtt:topic:eeb76e85d3:ESP32-3_Error"
+            "uid": "mqtt:topic:eeb76e85d3:Error"
           },
           "channelTypeUID": {
             "segments": [
@@ -187,7 +187,7 @@
             ],
             "uid": "mqtt:string"
           },
-          "label": "ESP32-3 Error",
+          "label": "Error",
           "configuration": {
             "properties": {
               "stateTopic": "myhome/esp32-3/error"
@@ -459,9 +459,9 @@
               "topic",
               "ca04ade4c4",
               "e5c45b67bd",
-              "ESP32-2_WindowSensor1"
+              "WindowSensor1"
             ],
-            "uid": "mqtt:topic:ca04ade4c4:e5c45b67bd:ESP32-2_WindowSensor1"
+            "uid": "mqtt:topic:ca04ade4c4:e5c45b67bd:WindowSensor1"
           },
           "channelTypeUID": {
             "segments": [
@@ -470,7 +470,7 @@
             ],
             "uid": "mqtt:contact"
           },
-          "label": "ESP32-2 WindowSensor1",
+          "label": "WindowSensor1",
           "configuration": {
             "properties": {
               "stateTopic": "myhome/esp32-2/window-sensor-1"
@@ -489,9 +489,9 @@
               "topic",
               "ca04ade4c4",
               "e5c45b67bd",
-              "ESP32-2_Version"
+              "Version"
             ],
-            "uid": "mqtt:topic:ca04ade4c4:e5c45b67bd:ESP32-2_Version"
+            "uid": "mqtt:topic:ca04ade4c4:e5c45b67bd:Version"
           },
           "channelTypeUID": {
             "segments": [
@@ -500,7 +500,7 @@
             ],
             "uid": "mqtt:string"
           },
-          "label": "ESP32-2 Version",
+          "label": "Version",
           "configuration": {
             "properties": {
               "stateTopic": "myhome/esp32-2/version"
@@ -519,9 +519,9 @@
               "topic",
               "ca04ade4c4",
               "e5c45b67bd",
-              "ESP32-2_Location"
+              "Location"
             ],
-            "uid": "mqtt:topic:ca04ade4c4:e5c45b67bd:ESP32-2_Location"
+            "uid": "mqtt:topic:ca04ade4c4:e5c45b67bd:Location"
           },
           "channelTypeUID": {
             "segments": [
@@ -530,7 +530,7 @@
             ],
             "uid": "mqtt:string"
           },
-          "label": "ESP32-2 Location",
+          "label": "Location",
           "configuration": {
             "properties": {
               "stateTopic": "myhome/esp32-2/location"
@@ -549,9 +549,9 @@
               "topic",
               "ca04ade4c4",
               "e5c45b67bd",
-              "ESP32-2_Battery"
+              "Battery"
             ],
-            "uid": "mqtt:topic:ca04ade4c4:e5c45b67bd:ESP32-2_Battery"
+            "uid": "mqtt:topic:ca04ade4c4:e5c45b67bd:Battery"
           },
           "channelTypeUID": {
             "segments": [
@@ -560,7 +560,7 @@
             ],
             "uid": "mqtt:number"
           },
-          "label": "ESP32-2 Battery",
+          "label": "Battery",
           "configuration": {
             "properties": {
               "stateTopic": "myhome/esp32-2/battery"
@@ -579,9 +579,9 @@
               "topic",
               "ca04ade4c4",
               "e5c45b67bd",
-              "ESP32-2_Protection"
+              "Protection"
             ],
-            "uid": "mqtt:topic:ca04ade4c4:e5c45b67bd:ESP32-2_Protection"
+            "uid": "mqtt:topic:ca04ade4c4:e5c45b67bd:Protection"
           },
           "channelTypeUID": {
             "segments": [
@@ -590,7 +590,7 @@
             ],
             "uid": "mqtt:string"
           },
-          "label": "ESP32-2 Protection",
+          "label": "Protection",
           "configuration": {
             "properties": {
               "stateTopic": "myhome/esp32-2/protection"
@@ -609,9 +609,9 @@
               "topic",
               "ca04ade4c4",
               "e5c45b67bd",
-              "ESP32-2_Error"
+              "Error"
             ],
-            "uid": "mqtt:topic:ca04ade4c4:e5c45b67bd:ESP32-2_Error"
+            "uid": "mqtt:topic:ca04ade4c4:e5c45b67bd:Error"
           },
           "channelTypeUID": {
             "segments": [
@@ -620,8 +620,7 @@
             ],
             "uid": "mqtt:string"
           },
-          "label": "ESP32-2 Error",
-          "description": "",
+          "label": "Error",
           "configuration": {
             "properties": {
               "stateTopic": "myhome/esp32-2/error"
