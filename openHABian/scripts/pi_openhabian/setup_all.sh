@@ -13,6 +13,3 @@ source setup_mosquitto.sh
 
 printf "\nsetup OTA server\n"
 source setup_ota_server.sh
-
-printf "\nsetup lets encrypt\n"
-# source setup_lets_encrypt.sh

@@ -1,17 +1,25 @@
-# Usage
+There are two directories. Scripts in *local_machine* or meant for the
+system where you are want to compile the esp32 project on. Scripts in
+*pi_openhabian* are meant for the e.g. Raspberry Pi running with
+openHABian.
 
-1. copy config_EXAMPLE.py and rename the copy to config.py
-2. replace placeholder in config.py with your data
-3. install fabric
-    - create virtual environment
-        - `python3 -m venv env`
-        - `source ./env/bin/activate`
-    - `pip install --upgrade pip`
-    - `pip install --upgrade virtualenv`
-    - `pip install -r requirements.txt`
-4. run **"fab -f setup_openhab_pi.py setup"** to configure a Raspberry Pi which is already running openHABian
+To install openHABian on an SD card, please refer to the official
+[documentation of openHAB][1] for instructions. After inserting the
+SD card to the device and booting the system, you should modify the
+configuration for SSH afterwards. Therefore you have to wait until the
+setup process of openhHABian is finished and shut down the system. Then
+plug in the SD card on your machine
 
-# Things to keep in mind
-- the command `setup_ssl_for_mosquitto` (also executed in `setup_mosquitto:ssl=true`) downloads the certificates required for flashing the esp32 in to the project directory of the esp32 application
-- if you dont run the aggregated `setup` command, please change the value "SSH_USERNAME" to your new user name you created with `add_sudo_user` as the user "openhab" does not work
-    - this is especially important when executing `setup_ssl_for_mosquitto`
+- mount the SD card on a Linux system and open the partition *rootfs*.
+- All following paths are related to *rootfs* on the SD card.
+  - add your public key to /home/openhabian/.ssh/authorized_keys
+  - open /etc/ssh/sshd_config and modify the following lines
+    - change **#PermitRootLogin prohibit-password** to **PermitRootLogin no**
+    - change **#PasswordAuthentication yes** to **PasswordAuthentication no**
+    - change **#PermitEmptyPasswords no** to **PermitEmptyPasswords no**
+  - save your changes and put the SD card back in to the Raspberry Pi to
+    boot it
+- now you can run *remote_setup_pi_openhabian.sh* to start the setup
+  process for this project
+
+[1]: https://www.openhab.org/docs/installation/openhabian.html#raspberry-pi-prepackaged-sd-card-image
