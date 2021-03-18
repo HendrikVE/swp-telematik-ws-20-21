@@ -1,19 +1,23 @@
 # SETUP
 
-0. Clone this repository with **"git clone --recurse-submodules https://github.com/HendrikVE/smarthome2"**
-1. Setup build environment. If you are using Ubuntu you can run **./setup_esp32_environment.sh**
-2. run **make menuconfig**
-    1. exchange placeholder (e.g. network name and password) with your data
-    2. Serial flasher config -> Flash size (adjust value to your board)
-    3. Serial flasher config -> Default baud rate -> 921600 baud (for faster flashing)
-    4. Compiler options -> Enable C++ exceptions (make a tick here)
-    5. Arduino Configuration -> Autostart Arduino setup and loop on boot (make a tick here)
-    6. Partition Table -> Partition Table -> Factory app, two OTA definitions
-    7. Component config -> ESP32-specific -> CPU frequency (set it to 240 MHz for low latency of the system)
-3. Hardware
+1. Setup build environment.  Run **./tools/setup_esp32_environment.sh** and then **./tools/init_project.sh**
+2. Refer to the wiki **Getting Started** for next steps of setup, below are optional configurations
+
+# Technical stuff
+
+These should already be defaults.
+
+1. run **make menuconfig**
+    1. Serial flasher config -> Flash size (adjust value to your board)
+    2. Serial flasher config -> Default baud rate -> 921600 baud (for faster flashing)
+    3. Compiler options -> Enable C++ exceptions (make a tick here)
+    4. Arduino Configuration -> Autostart Arduino setup and loop on boot (make a tick here)
+    5. Partition Table -> Partition Table -> Factory app, two OTA definitions
+    6. Component config -> ESP32-specific -> CPU frequency (set it to 240 MHz for low latency of the system)
+2. Hardware
     1. Dont use the 5V pin when using battery, this pin is only powered when connected to USB
 
-# Config
+# Optional Configurations
 Within **make menuconfig** do the following (optional) configurations:
 1. To save energy
     - enable **Component config -> FreeRTOS -> Run FreeRTOS only on first core**
