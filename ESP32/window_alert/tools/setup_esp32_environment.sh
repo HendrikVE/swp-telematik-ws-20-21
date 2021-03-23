@@ -31,7 +31,7 @@ git -C esp-idf submodule update --init --recursive
 printf "\nupdate ~/.profile\n"
 file_profile="$HOME/.profile"
 {
-  printf "\n# ESP32"
+  printf "\n# ESP32\n"
   echo "export PATH=\"\$PATH:\$HOME/$toolchain_dir_name/xtensa-esp32-elf/bin\""
   echo "export IDF_PATH=\"\$HOME/$toolchain_dir_name/esp-idf\""
 } >> "$file_profile"
